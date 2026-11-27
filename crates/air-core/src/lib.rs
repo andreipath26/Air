@@ -1,4 +1,5 @@
-//! Bootstrap contracts; no intelligence implementation yet.
+//! Research prototype; no general intelligence implementation yet.
+pub mod store;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Representation { Fact, Concept, Procedure, Pattern, StateMachine, Neural }
 #[derive(Debug, Clone, Copy)]

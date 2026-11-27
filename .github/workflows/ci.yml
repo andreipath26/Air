@@ -11,3 +11,7 @@ jobs:
       - run: cargo test --workspace
       - run: cargo run -p air-cli -- doctor
       - run: cargo run --release -p air-bench -- 100000
+      - run: |
+          cargo run -p air-cli -- import knowledge/examples/demo.tsv /tmp/demo.air
+          cargo run -p air-cli -- lookup /tmp/demo.air France capital | grep Paris
+          cargo run -p air-cli -- category /tmp/demo.air automotive | grep Combustion
