@@ -70,3 +70,6 @@ Operator reviews and skill approvals are separate from untrusted model output. S
 
 ## Bounded plans and additional representations
 `plan DB MEMORY POLICY PLAN.json` executes explicit steps through the coordinator; `evaluate DB MEMORY POLICY CASES.json` records fixture accuracy, latency and model calls. `compact-put` / `compact-get` provide random-access compressed blocks; `temporal-record` / `temporal-at` preserve time-bounded claims. See [prototype 07](docs/architecture/prototype-07.md).
+
+## Resident runtime and typed composition
+`air-cli serve DB MEMORY POLICY` accepts one JSON request per line on stdin and returns one JSON response per line. Example: `{"kind":"ask","question":"calculate 5 * 7"}`. `dataflow DB MEMORY POLICY PROGRAM.json` composes typed intermediate results. See [prototype 08](docs/architecture/prototype-08.md).

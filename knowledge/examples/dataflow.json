@@ -1,0 +1,1 @@
+{"nodes":[{"op":"add","a":{"kind":"integer","value":7},"b":{"kind":"integer","value":5}},{"op":"multiply","a":{"kind":"previous","index":0},"b":{"kind":"integer","value":3}}]}

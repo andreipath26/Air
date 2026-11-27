@@ -49,3 +49,6 @@ jobs:
           cargo run -p air-cli -- temporal-record /tmp/air-time.db a state old 0 10 fixture
           cargo run -p air-cli -- temporal-record /tmp/air-time.db a state new 10 none fixture
           cargo run -p air-cli -- temporal-at /tmp/air-time.db a state 10 | grep new
+      - run: |
+          cargo run -p air-cli -- dataflow /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db knowledge/examples/dataflow.json | grep '"values":\[12,36\]'
+          printf '%s\n' '{"kind":"health"}' '{"kind":"ask","question":"calculate 5 * 7"}' | cargo run -q -p air-cli -- serve /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db | python3 -c 'import sys,json; a,b=map(json.loads,sys.stdin); assert a["result"]["status"]=="ready" and b["result"]["text"]=="35"'

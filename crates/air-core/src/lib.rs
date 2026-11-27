@@ -36,3 +36,8 @@ pub mod temporal;
 pub mod compact;
 pub mod verification;
 pub mod evaluation;
+
+pub mod dataflow;
+pub mod prediction;
+pub mod weightless;
+pub mod runtime;

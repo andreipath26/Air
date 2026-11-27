@@ -938,7 +938,7 @@
       "acceptance_gate": "Each memory type independently usable",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-07.md."
+        "No phase gate passed; see docs/architecture/prototype-08.md."
       ]
     },
     {
@@ -1120,7 +1120,7 @@
       "acceptance_gate": "Meaningful learned capability beats optimised neural baseline at comparable quality or record negative result",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-04.md."
+        "No phase gate passed; see docs/architecture/prototype-08.md."
       ]
     },
     {
@@ -1146,7 +1146,7 @@
       "acceptance_gate": "Cross-domain composition with inspectable evidence where applicable",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-07.md."
+        "No phase gate passed; see docs/architecture/prototype-08.md."
       ]
     },
     {
@@ -1185,7 +1185,7 @@
       "acceptance_gate": "Respect explicit RAM/time/compute budgets at specified quality",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-07.md."
+        "No phase gate passed; see docs/architecture/prototype-08.md."
       ]
     },
     {
@@ -1263,7 +1263,7 @@
       "acceptance_gate": "Adaptive mixed-workload execution beats static baseline",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-07.md."
+        "No phase gate passed; see docs/architecture/prototype-08.md."
       ]
     },
     {
@@ -1289,7 +1289,7 @@
       "acceptance_gate": "Portable heterogeneous operations with measured CPU/memory efficiency",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-07.md."
+        "No phase gate passed; see docs/architecture/prototype-08.md."
       ]
     },
     {
@@ -1412,7 +1412,7 @@
     {
       "id": "P22",
       "name": "Production deployment",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1430,7 +1430,10 @@
         }
       ],
       "acceptance_gate": "All required gates pass; no deployment claim on code completion alone",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-08.md."
+      ]
     }
   ]
 }
