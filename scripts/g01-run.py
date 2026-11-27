@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 """One-command sequential G01 observation runner; no fabricated gate measurements."""
 import argparse,hashlib,json,os,pathlib,subprocess,sys,time,urllib.request
+import importlib.util
+from pathlib import Path
+_answer_spec=importlib.util.spec_from_file_location('g01_answer',Path(__file__).with_name('g01-answer.py'))
+answer_contract=importlib.util.module_from_spec(_answer_spec);_answer_spec.loader.exec_module(answer_contract)
 ROOT=pathlib.Path(__file__).resolve().parent.parent
 def sha(p):
     with open(p,"rb") as f:return hashlib.file_digest(f,"sha256").hexdigest()
@@ -49,7 +53,7 @@ def main():
     for name in ["reference_retrieval","air","quantized_teacher"]:
         path=out/name/"observations.json"
         if path.exists():
-            obs=json.loads(path.read_text());correct=sum(norm(obs["answers"][c["id"]])==norm(c["answer"]) for c in cases if c["id"] not in obs["errors"])
+            obs=json.loads(path.read_text());correct=sum(answer_contract.matches(obs["answers"][c["id"]],c["answer"],c["group"]) for c in cases if c["id"] not in obs["errors"])
             summary[name]={"correct":correct,"total":len(cases),"observation_sha256":sha(path),"wall_seconds":obs["wall_seconds"]}
     (out/"summary.json").write_text(json.dumps({"systems":summary,"gate_eligible":False,"note":"Independent review and whole-system energy evidence remain required."},indent=2))
 if __name__=="__main__":main()

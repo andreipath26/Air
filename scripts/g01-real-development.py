@@ -1,6 +1,10 @@
 """Execute draft real-fact workload using a resident FP32 teacher; not a quantized G01 gate."""
 import json,subprocess,sys,time,hashlib,urllib.request
 from pathlib import Path
+import importlib.util
+from pathlib import Path
+_answer_spec=importlib.util.spec_from_file_location('g01_answer',Path(__file__).with_name('g01-answer.py'))
+answer_contract=importlib.util.module_from_spec(_answer_spec);_answer_spec.loader.exec_module(answer_contract)
 def run(out,port,teacher_id,weights):
     root=Path("knowledge/development")
     corpus=root/"g01-corpus.json";dataset=root/"g01-dataset.json";router=root/"g01-router.json"
@@ -19,7 +23,8 @@ def run(out,port,teacher_id,weights):
             try:
                 req=urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions",data=json.dumps({"messages":[{"role":"system","content":"Give only the short factual answer, or unknown if uncertain."},{"role":"user","content":c["question"]}],"temperature":0,"max_tokens":64}).encode(),headers={"Content-Type":"application/json"})
                 with urllib.request.urlopen(req,timeout=120) as r:raw=json.loads(r.read(65537))["choices"][0]["message"]["content"].strip()
-                answer=None if raw.lower().rstrip(".") in ("unknown","null","i don't know") else raw.rstrip(".")
+                answer,status=answer_contract.extract(raw)
+                if status=="malformed":errors[c["id"]]="malformed"
             except Exception as e:errors[c["id"]]=type(e).__name__
             answers[c["id"]]=answer;trace.write(json.dumps({"id":c["id"],"answer":answer,"error":errors.get(c["id"])})+"\n")
     systems={"fp32_teacher":{"answers":answers,"errors":errors,"wall_seconds":time.monotonic()-started}}
@@ -29,7 +34,7 @@ def run(out,port,teacher_id,weights):
         groups={}
         for c in cases:
             actual=s["answers"][c["id"]];expected=c["answer"];group=c["group"]
-            norm=lambda x: None if x is None else " ".join(x.split()) if group in ("science","engineering") else " ".join(x.casefold().split())
+            norm=lambda x:answer_contract.normalize(x,group)
             correct=c["id"] not in s["errors"] and norm(actual)==norm(expected)
             row=groups.setdefault(group,{"correct":0,"total":0});row["correct"]+=int(correct);row["total"]+=1
         summary[name]={"correct":sum(x["correct"] for x in groups.values()),"total":len(cases),"groups":groups,"wall_seconds":s["wall_seconds"],"errors":len(s["errors"])}

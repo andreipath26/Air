@@ -5,6 +5,10 @@ Process RSS and CPU package RAPL are diagnostics, not whole-system gate measurem
 import argparse, hashlib, json, pathlib, subprocess, time, urllib.request, os, threading, importlib.util, select
 spec=importlib.util.spec_from_file_location('g01_resource',pathlib.Path(__file__).with_name('g01-resource.py'))
 resource=importlib.util.module_from_spec(spec);spec.loader.exec_module(resource)
+import importlib.util
+from pathlib import Path
+_answer_spec=importlib.util.spec_from_file_location('g01_answer',Path(__file__).with_name('g01-answer.py'))
+answer_contract=importlib.util.module_from_spec(_answer_spec);_answer_spec.loader.exec_module(answer_contract)
 def read(path, cap=8*1024*1024):
     with open(path,"rb") as f: raw=f.read(cap+1)
     if len(raw)>cap: raise ValueError("input limit")
@@ -75,7 +79,8 @@ def main():
                         with urllib.request.urlopen(req,timeout=120) as r:response=json.loads(r.read(65537))
                         text=response["choices"][0]["message"]["content"].strip()
                         if not text:raise ValueError("empty teacher output")
-                        answer=None if text.casefold().rstrip(".") in ("unknown","null","i don't know") else text.rstrip(".")
+                        answer,status=answer_contract.extract(text)
+                        if status=="malformed":raise ValueError("malformed teacher answer")
                     else:
                         proc.stdin.write(json.dumps(c["question"])+"\n");proc.stdin.flush()
                         if not select.select([proc.stdout],[],[],120)[0]:raise TimeoutError('AIR response timeout')

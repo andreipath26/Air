@@ -1484,12 +1484,13 @@
           "dependencies": [
             "P23.02"
           ],
-          "implementation": "crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/discovery.rs; crates/air-core/src/prefetch.rs; scripts/amt-structural.py; crates/air-core/src/engine.rs",
+          "implementation": "crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/discovery.rs; crates/air-core/src/prefetch.rs; scripts/amt-structural.py; crates/air-core/src/engine.rs; scripts/g01-answer.py; scripts/g01-review.py; .github/workflows/g01-quantized.yml; docs/architecture/g01-consolidated.md",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [
             "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim.",
-            "Exploratory discovery, coordinate ablation and opt-in fallback; independent validation pending."
+            "Exploratory discovery, coordinate ablation and opt-in fallback; independent validation pending.",
+            "Consolidated G01 changes pending CI; draft workload and independent review outstanding."
           ],
           "blocking_issues": [],
           "deployment_ready": false
@@ -1522,12 +1523,13 @@
           "dependencies": [
             "P23.04"
           ],
-          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; scripts/g01-corpus.py; scripts/g01-resource.py; scripts/g01-assemble.py",
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; scripts/g01-corpus.py; scripts/g01-resource.py; scripts/g01-assemble.py; scripts/g01-answer.py; scripts/g01-review.py; .github/workflows/g01-quantized.yml; docs/architecture/g01-consolidated.md",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [
             "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim.",
-            "Independent corpus, workload and external whole-system measurements pending."
+            "Independent corpus, workload and external whole-system measurements pending.",
+            "Consolidated G01 changes pending CI; draft workload and independent review outstanding."
           ],
           "blocking_issues": [],
           "deployment_ready": false
@@ -1614,7 +1616,7 @@
           "dependencies": [
             "P23.07"
           ],
-          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/classifier_package.rs; crates/air-core/src/lexical.rs; crates/air-core/src/representation_selection.rs; crates/air-core/src/discovery.rs; crates/air-core/src/prefetch.rs; scripts/amt-structural.py; crates/air-core/src/engine.rs; research/evidence-gate-01.json; scripts/evidence-gate.py; docs/architecture/evidence-gate-01.md; crates/air-core/src/factual.rs; scripts/g01-benchmark.py; docs/architecture/g01-execution.md; scripts/g01-corpus.py; scripts/g01-resource.py; scripts/g01-assemble.py",
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/classifier_package.rs; crates/air-core/src/lexical.rs; crates/air-core/src/representation_selection.rs; crates/air-core/src/discovery.rs; crates/air-core/src/prefetch.rs; scripts/amt-structural.py; crates/air-core/src/engine.rs; research/evidence-gate-01.json; scripts/evidence-gate.py; docs/architecture/evidence-gate-01.md; crates/air-core/src/factual.rs; scripts/g01-benchmark.py; docs/architecture/g01-execution.md; scripts/g01-corpus.py; scripts/g01-resource.py; scripts/g01-assemble.py; scripts/g01-answer.py; scripts/g01-review.py; .github/workflows/g01-quantized.yml; docs/architecture/g01-consolidated.md",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [
@@ -1623,7 +1625,8 @@
             "Exploratory discovery, coordinate ablation and opt-in fallback; independent validation pending.",
             "Numerical evaluator is not evidence authentication; gate not passed.",
             "Template-based router, smoke fixture only; no whole-system RAM or energy measurements.",
-            "Independent corpus, workload and external whole-system measurements pending."
+            "Independent corpus, workload and external whole-system measurements pending.",
+            "Consolidated G01 changes pending CI; draft workload and independent review outstanding."
           ],
           "blocking_issues": [],
           "deployment_ready": false
@@ -1655,13 +1658,14 @@
           "dependencies": [
             "P23.11"
           ],
-          "implementation": "research/evidence-gate-01.json; scripts/evidence-gate.py; docs/architecture/evidence-gate-01.md; crates/air-core/src/factual.rs; scripts/g01-benchmark.py; docs/architecture/g01-execution.md; scripts/g01-corpus.py; scripts/g01-resource.py; scripts/g01-assemble.py",
+          "implementation": "research/evidence-gate-01.json; scripts/evidence-gate.py; docs/architecture/evidence-gate-01.md; crates/air-core/src/factual.rs; scripts/g01-benchmark.py; docs/architecture/g01-execution.md; scripts/g01-corpus.py; scripts/g01-resource.py; scripts/g01-assemble.py; scripts/g01-answer.py; scripts/g01-review.py; .github/workflows/g01-quantized.yml; docs/architecture/g01-consolidated.md",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [
             "Numerical evaluator is not evidence authentication; gate not passed.",
             "Template-based router, smoke fixture only; no whole-system RAM or energy measurements.",
-            "Independent corpus, workload and external whole-system measurements pending."
+            "Independent corpus, workload and external whole-system measurements pending.",
+            "Consolidated G01 changes pending CI; draft workload and independent review outstanding."
           ],
           "blocking_issues": [],
           "deployment_ready": false

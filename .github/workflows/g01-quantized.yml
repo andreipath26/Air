@@ -1,0 +1,48 @@
+name: G01 quantized development comparison
+on:
+  workflow_dispatch:
+    inputs:
+      llama_revision:
+        description: 'Exact llama.cpp commit SHA (40 hex)'
+        required: true
+      model_revision:
+        description: 'Exact Hugging Face GGUF repository commit SHA (40 hex)'
+        required: true
+      model_sha256:
+        description: 'Expected Q4_K_M GGUF SHA-256'
+        required: true
+permissions:
+  contents: read
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      LLAMA_REV: ${{ inputs.llama_revision }}
+      MODEL_REV: ${{ inputs.model_revision }}
+      MODEL_SHA: ${{ inputs.model_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo build --release -p air-cli
+      - name: Build pinned CPU llama.cpp and fetch pinned checkpoint
+        run: |
+          [[ "$LLAMA_REV" =~ ^[0-9a-f]{40}$ && "$MODEL_REV" =~ ^[0-9a-f]{40}$ && "$MODEL_SHA" =~ ^[0-9a-f]{64}$ ]]
+          git init /tmp/llama
+          git -C /tmp/llama remote add origin https://github.com/ggml-org/llama.cpp.git
+          git -C /tmp/llama fetch --depth=1 origin "$LLAMA_REV"
+          git -C /tmp/llama checkout --detach FETCH_HEAD
+          test "$(git -C /tmp/llama rev-parse HEAD)" = "$LLAMA_REV"
+          cmake -S /tmp/llama -B /tmp/llama/build -DGGML_CUDA=OFF -DLLAMA_CURL=OFF -DBUILD_SHARED_LIBS=OFF -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/llama/build --target llama-server -j 4
+          curl --fail --location --retry 3 "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/$MODEL_REV/qwen2.5-1.5b-instruct-q4_k_m.gguf" -o /tmp/teacher.gguf
+          echo "$MODEL_SHA  /tmp/teacher.gguf" | sha256sum -c -
+      - name: Execute all three systems sequentially
+        run: |
+          python3 scripts/g01-run.py knowledge/development/g01-corpus.json knowledge/development/g01-dataset.json knowledge/development/g01-router.json g01-quantized-results --llama-server /tmp/llama/build/bin/llama-server --gguf /tmp/teacher.gguf --model-sha "$MODEL_SHA" --server-sha "$(sha256sum /tmp/llama/build/bin/llama-server | cut -d ' ' -f 1)" --teacher-id "Qwen/Qwen2.5-1.5B-Instruct-GGUF@$MODEL_REV:Q4_K_M"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g01-quantized-development-results
+          path: g01-quantized-results/
+          if-no-files-found: warn

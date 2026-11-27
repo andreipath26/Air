@@ -44,15 +44,20 @@ def inspect_activations(model, tokenizer, output):
             effects=[]
             ranked=a.abs().argsort(descending=True)
             near=torch.tensor([j for j in ranked.tolist() if j not in excluded][:count],dtype=torch.long)
-            for name,coords in [("largest_absolute_activation",selected),("fixed_disjoint_control",control),("nearest_disjoint_magnitude_control",near)]:
+            for name,coords in [("largest_absolute_activation",selected),("fixed_disjoint_control",control),("nearest_disjoint_magnitude_control",near),("equal_l2_disjoint_perturbation",near)]:
                 def mask_hook(module,inputs,value):
                     hidden=value[0] if isinstance(value,tuple) else value
-                    changed=hidden.clone(); changed[:,-1,coords]=0
+                    changed=hidden.clone()
+                    if name=="equal_l2_disjoint_perturbation":
+                        current=hidden[:,-1,coords].float()
+                        scale=a[selected].norm()/current.norm().clamp_min(1e-12)
+                        changed[:,-1,coords]=(current-current*scale).to(hidden.dtype)
+                    else: changed[:,-1,coords]=0
                     return (changed,)+value[1:] if isinstance(value,tuple) else changed
                 handle=layers[i].register_forward_hook(mask_hook)
                 try: changed=model(**inputs,use_cache=False).logits[0,-1].float()
                 finally: handle.remove()
                 q=changed.log_softmax(-1)
-                effects.append({"kind":name,"coordinates":coords.tolist(),"removed_l2":a[coords].norm().item(),"relative_removed_l2":a[coords].norm().item()/max(a[selected].norm().item(),1e-12),"kl":(p.exp()*(p-q)).sum().item(),"top1_changed":bool(logits.argmax()!=changed.argmax())})
+                effects.append({"kind":name,"coordinates":coords.tolist(),"removed_l2":a[selected].norm().item() if name=="equal_l2_disjoint_perturbation" else a[coords].norm().item(),"relative_removed_l2":1.0 if name=="equal_l2_disjoint_perturbation" else a[coords].norm().item()/max(a[selected].norm().item(),1e-12),"kl":(p.exp()*(p-q)).sum().item(),"top1_changed":bool(logits.argmax()!=changed.argmax())})
             feature_records.append({"prompt":prompt,"layer":i,"effects":effects})
-    output.write_text(json.dumps({"coordinate_ablation":feature_records,"scope":"exploratory layer-output ablation, not feature decoding; nearest disjoint magnitudes are not necessarily matched","records":records},indent=2))
+    output.write_text(json.dumps({"coordinate_ablation":feature_records,"scope":"exploratory layer-output ablation, not feature decoding; equal-L2 disjoint perturbation matches intervention norm, not individual coordinate magnitudes","records":records},indent=2))

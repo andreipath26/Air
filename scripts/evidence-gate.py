@@ -6,6 +6,10 @@ import json
 import math
 from pathlib import Path
 
+import importlib.util
+from pathlib import Path
+_answer_spec=importlib.util.spec_from_file_location('g01_answer',Path(__file__).with_name('g01-answer.py'))
+answer_contract=importlib.util.module_from_spec(_answer_spec);_answer_spec.loader.exec_module(answer_contract)
 def read(path, cap=8*1024*1024):
     with Path(path).open("rb") as f:
         raw=f.read(cap+1)
@@ -53,7 +57,7 @@ def evaluate(policy, dataset_raw, dataset, evidence):
             raise ValueError("invalid answer type")
         def norm(x):
             return None if x is None else " ".join(x.casefold().split())
-        scores={k:norm(answers[k])==norm(c["answer"]) for k,c in ids.items()}
+        scores={k:answer_contract.matches(answers[k],c["answer"],c["group"]) for k,c in ids.items()}
         correct=sum(scores.values())
         if not all(positive(s.get(k)) for k in ("wall_seconds","peak_ram_bytes","energy_joules")):
             raise ValueError("missing or invalid resource measurement")

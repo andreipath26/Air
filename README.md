@@ -115,3 +115,6 @@ See [runner protocol](docs/architecture/g01-runner.md). scripts/g01-development.
 
 ## Real-fact development workload
 See [draft corpus](knowledge/development/README.md). The AMT workflow now runs 200 real-fact conversions and 240 evaluation questions per teacher. This is not independent G01 evidence; the teacher is FP32 and resident during AIR diagnostic runs. Structural interventions include nearest-disjoint-magnitude controls with actual removed activation norms; matching is not guaranteed.
+
+## Consolidated G01 protocol
+See [consolidated G01](docs/architecture/g01-consolidated.md). Scientific symbols are case-sensitive, teacher response status is explicit, and a conservative lexical fallback handles reordered phrasing. The manually dispatched G01 quantized workflow requires pinned model and executable source identities. The review template is intentionally incomplete; independent review is required.

@@ -14,6 +14,8 @@ jobs:
       - run: python3 scripts/test-evidence-gate.py
       - run: python3 -m py_compile scripts/g01-benchmark.py scripts/g01-corpus.py scripts/g01-resource.py scripts/g01-assemble.py
       - run: python3 scripts/test-g01-pipeline.py
+      - run: python3 scripts/test-g01-answer.py
+      - run: python3 -m py_compile scripts/g01-review.py
       - run: python3 -m py_compile scripts/g01-development.py scripts/g01-run.py scripts/g01-real-development.py
       - run: cargo run -p air-cli -- doctor
       - run: cargo test -p air-core representation_selection

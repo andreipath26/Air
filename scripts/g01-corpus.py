@@ -3,6 +3,10 @@
 Never reads final evaluation questions. Teacher errors never become reviewed knowledge.
 """
 import argparse, hashlib, json, pathlib, subprocess, time, urllib.request
+import importlib.util
+from pathlib import Path
+_answer_spec=importlib.util.spec_from_file_location('g01_answer',Path(__file__).with_name('g01-answer.py'))
+answer_contract=importlib.util.module_from_spec(_answer_spec);_answer_spec.loader.exec_module(answer_contract)
 def read(path,limit=8*1024*1024):
     with open(path,"rb") as f:raw=f.read(limit+1)
     if len(raw)>limit:raise ValueError("input limit")
@@ -27,13 +31,16 @@ def build(corpus,out,binary,teacher=None):
     started=time.monotonic()
     with trace.open("w") as log:
         for f in corpus:
-            reply=None;error=None;value=f["answer"] if teacher is None else None
+            reply=None;error=None;status='reference';value=f["answer"] if teacher is None else None
             if teacher is not None:
                 try:
                     reply=teacher(f["question"])
-                    if isinstance(reply,str) and field(reply) and normalize(reply.rstrip("."))==normalize(f["answer"]):value=reply.rstrip(".").strip()
-                except Exception as exc:error=type(exc).__name__
-            log.write(json.dumps({"subject":f["subject"],"relation":f["relation"],"teacher_raw":reply,"accepted":value is not None,"error":error})+"\n")
+                    candidate,status=answer_contract.extract(reply)
+                    if status=="extracted":
+                        if answer_contract.matches(candidate,f["answer"],f["group"]):value=f["answer"];status="reference_match"
+                        else:status="incorrect"
+                except Exception as exc:error=type(exc).__name__;status="transport_error"
+            log.write(json.dumps({"subject":f["subject"],"relation":f["relation"],"teacher_raw":reply,"status":status,"accepted":value is not None,"error":error})+"\n")
             if value is not None:accepted.append((f,value))
     with tsv.open("w") as f:
         for item,value in accepted:

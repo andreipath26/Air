@@ -1,0 +1,15 @@
+{
+  "reviewer": "",
+  "date": "",
+  "method": "",
+  "input_hashes": {
+    "corpus": "",
+    "dataset": "",
+    "router": ""
+  },
+  "independent_authorship": false,
+  "source_verification": false,
+  "license_review": false,
+  "no_test_tuning": false,
+  "domain_diversity": false
+}
