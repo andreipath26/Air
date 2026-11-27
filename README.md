@@ -100,3 +100,6 @@ The AMT pilot compares weightless and lexical baselines. Use classifier-package 
 
 ## Capability discovery and optional hybrid execution
 Use amt-discover SPEC REPORT to record bounded capability probes. AIR_PREDICTIVE=1 enables experimental resident category page warming. AIR_RESIDUAL=1 enables clearly labelled unverified local neural fallback. Both are disabled by default. See [prototype 12](docs/architecture/prototype-12.md).
+
+## Evidence-driven acceptance
+See [G01 factual capability transfer](docs/architecture/evidence-gate-01.md) and [gate policy](research/evidence-gate-01.json). Run python3 scripts/evidence-gate.py DATASET.json EVIDENCE.json to evaluate submitted numerical evidence. Independent review is mandatory; a numerical pass is not certification.

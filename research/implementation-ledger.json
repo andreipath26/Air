@@ -1613,13 +1613,14 @@
           "dependencies": [
             "P23.07"
           ],
-          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/classifier_package.rs; crates/air-core/src/lexical.rs; crates/air-core/src/representation_selection.rs; crates/air-core/src/discovery.rs; crates/air-core/src/prefetch.rs; scripts/amt-structural.py; crates/air-core/src/engine.rs",
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/classifier_package.rs; crates/air-core/src/lexical.rs; crates/air-core/src/representation_selection.rs; crates/air-core/src/discovery.rs; crates/air-core/src/prefetch.rs; scripts/amt-structural.py; crates/air-core/src/engine.rs; research/evidence-gate-01.json; scripts/evidence-gate.py; docs/architecture/evidence-gate-01.md",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [
             "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim.",
             "Preliminary fixture thresholds; independent validation pending.",
-            "Exploratory discovery, coordinate ablation and opt-in fallback; independent validation pending."
+            "Exploratory discovery, coordinate ablation and opt-in fallback; independent validation pending.",
+            "Numerical evaluator is not evidence authentication; gate not passed."
           ],
           "blocking_issues": [],
           "deployment_ready": false
@@ -1646,15 +1647,17 @@
           "id": "P23.12",
           "name": "Lifecycle economics and scaling",
           "description": "Measure conversion time, GPU/CPU energy, peak RAM, storage, inference energy and latency per correct task; report amortisation and break-even.",
-          "status": "planned",
+          "status": "prototype_partial",
           "completion_percent": 0,
           "dependencies": [
             "P23.11"
           ],
-          "implementation": null,
+          "implementation": "research/evidence-gate-01.json; scripts/evidence-gate.py; docs/architecture/evidence-gate-01.md",
           "acceptance_tests": [],
           "benchmark_evidence": [],
-          "known_limitations": [],
+          "known_limitations": [
+            "Numerical evaluator is not evidence authentication; gate not passed."
+          ],
           "blocking_issues": [],
           "deployment_ready": false
         },
@@ -1662,15 +1665,17 @@
           "id": "P23.13",
           "name": "Safety, negative results and release gates",
           "description": "Test poisoning, memorised sensitive material, prompt injection, unsafe outputs, model compatibility, license compliance, rollback and reproducibility; publish failures.",
-          "status": "planned",
+          "status": "prototype_partial",
           "completion_percent": 0,
           "dependencies": [
             "P23.12"
           ],
-          "implementation": null,
+          "implementation": "research/evidence-gate-01.json; scripts/evidence-gate.py; docs/architecture/evidence-gate-01.md",
           "acceptance_tests": [],
           "benchmark_evidence": [],
-          "known_limitations": [],
+          "known_limitations": [
+            "Numerical evaluator is not evidence authentication; gate not passed."
+          ],
           "blocking_issues": [],
           "deployment_ready": false
         }
@@ -1678,7 +1683,7 @@
       "acceptance_gate": "Demonstrate reproducible conversion of at least one selected pretrained-model capability into a cheaper AIR-native representation, with independently validated held-out quality, full lifecycle accounting, explicit fallback and rollback. General model conversion and removal of neural residuals require separate stronger evidence.",
       "deployment_ready": false,
       "known_limitations": [
-        "Initial real-model run completed; small public fixtures and no complete-system resource or independent acceptance evidence. Post-pilot experiments pending."
+        "Run 45974698319: 1.5B factual extraction and canonical retrieval 6/6; no arithmetic candidate; reference-trained lexical classifier 6/6 vs weightless 5/6. Public pilot fixtures only. G01 independent workload and target-hardware measurements pending."
       ]
     }
   ]

@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "id": "G01",
+  "status": "not_passed",
+  "capability": "closed-world factual retrieval with paraphrase routing and explicit abstention",
+  "hardware": {
+    "model": "Dell Latitude 7490",
+    "cpu": "i7-8650U",
+    "ram_gib": 16,
+    "gpu": false
+  },
+  "workload": {
+    "design": "independently authored and reviewed before execution; freeze bytes and SHA-256; no tuning on final test",
+    "minimum_cases": 240,
+    "minimum_groups": 4,
+    "minimum_per_group": 40,
+    "minimum_unknown_cases": 40,
+    "groups": [
+      "geography",
+      "science",
+      "engineering",
+      "general_reference"
+    ],
+    "unknown_group": "unknown",
+    "disjoint_question_paraphrases": true,
+    "reference_provenance_required": true
+  },
+  "baselines": [
+    "pinned quantized llama.cpp teacher",
+    "direct reference-fed indexed retrieval",
+    "teacher-fed indexed retrieval"
+  ],
+  "thresholds": {
+    "absolute_accuracy_percent": 90,
+    "relative_teacher_accuracy_percent": 95,
+    "min_group_accuracy_percent": 80,
+    "unknown_abstention_percent": 95,
+    "throughput_ratio": 2,
+    "peak_ram_reduction_percent": 50,
+    "energy_per_correct_reduction_percent": 50
+  },
+  "requirements": [
+    "same fixed task identifiers and reference answers for every system",
+    "evaluate complete question-to-answer pipeline not canonical key lookup alone",
+    "include storage and conversion cost; report amortization and break-even",
+    "measure whole-system peak RAM consistently; energy with documented meter boundary",
+    "record warm/cold runs and raw outputs",
+    "all model revisions, binary hashes, quantization and flags recorded",
+    "operator review of dataset independence and evidence provenance",
+    "no fallback hidden from measurements"
+  ],
+  "evidence": {
+    "prior_run": 45974698319,
+    "artifacts": [
+      15186138697,
+      15186458003
+    ],
+    "limitations": "Six factual fixtures only; no independent gate workload, quantized baseline or target-hardware energy evidence."
+  }
+}

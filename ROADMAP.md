@@ -1,5 +1,5 @@
 # AIR — Adaptive Intelligence Representation
-## Master research and development roadmap v0.4
+## Master research and development roadmap v0.5
 
 Status: proposed research programme; no performance or general-intelligence claims. This repository version captures the roadmap's substantive requirements; chat diagrams are expressed as text. All targets are hypotheses, not results.
 
@@ -22,6 +22,14 @@ Six concurrent development lanes govern implementation. All prior hypotheses, ph
 | W6 Validation | Independent larger datasets, conventional lexical and neural baselines, quality-adjusted latency/throughput, whole-system RAM, energy and conversion amortisation | Reproducible target-laptop CPU-only evidence |
 
 Immediate sequence within lanes: repair and instrument communication; compare teachers; evaluate candidate representations; integrate validated capabilities; measure full-system costs. Structural work proceeds independently. Initial research targets remain >=95% teacher accuracy on meaningful independent workloads, >=2x quality-adjusted throughput, >=50% RAM and energy-per-correct-task reductions. Report absolute accuracy, coverage, per-domain regressions and negative results. Weak teachers and trivial tasks do not establish general capability preservation.
+
+## Evidence-driven execution priority (v0.5)
+
+The master research programme is preserved. W1 and W6 are prerequisites for interpreting behavioural transfer results; W2, W4 and W5 concentrate on the next falsifiable capability gate. W3 remains an independent exploratory lane with bounded experiments and appropriate controls. Technology inventory is a research backlog, not a requirement to integrate every system.
+
+**G01 — factual capability transfer:** Freeze an independently reviewed question workload of at least 240 cases, including four substantive domains and at least 40 unknown/unsupported cases. Compare pinned quantized llama.cpp inference, direct reference-fed indexed retrieval and teacher-fed AIR retrieval, end-to-end from natural language with held-out paraphrases. Require >=90% absolute accuracy, >=95% relative teacher accuracy, >=80% per-domain accuracy, >=95% correct abstention on unknown cases, >=2x correct-answer throughput and >=50% reductions in measured RAM and energy per correct task on the mandatory Dell. Record conversion costs and break-even. These proposed gate-specific thresholds supplement, not replace, existing phase gates. See research/evidence-gate-01.json.
+
+Latest pilot run 45974698319: 0.5B facts 3/6, 1.5B facts 6/6; weightless classifier 3/6 and 5/6, reference-trained lexical baseline 6/6 for both; no arithmetic candidate. Coordinate ablation changed top predictions on 5/6 and 4/6 prompts, respectively; fixed disjoint controls 0/6, but not magnitude-matched. No scientific acceptance gate passed. Prioritize factual extraction with real natural-language routing and a direct reference-fed retrieval comparator. Retain weightless and procedural work as hypotheses, not presumed winners. Preserve all negative results.
 
 ## Hypotheses
 - H01 **Generative intelligence encoding:** Compact reusable instructions may replace independently stored numerical relationships. Foundations: Genetics, linguistics, program synthesis.
