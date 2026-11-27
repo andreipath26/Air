@@ -464,6 +464,53 @@
           "interpretation": "Corrected post-merge development run. The 0.5B teacher job passed with one malformed answer and zero request exceptions. Teacher-fed AIR accuracy was 65.4%; this remains below the 90% G01 absolute accuracy threshold. Same-author dataset/router/paraphrases, synthetic unknown cases, oracle-style reference retrieval and resident FP32 teacher during AIR timing make this diagnostic only. No G01 gate passed; the 1.5B job and reconciliation were still running at the time recorded.",
           "gate_eligible": false,
           "artifact_url": "https://github.com/andreipath26/Air/actions/runs/45982358534"
+        },
+        {
+          "date": "2026-11-27",
+          "run_id": 45982358534,
+          "teacher_artifact_id": 15190766881,
+          "ensemble_artifact_id": 15191510844,
+          "commit": "bedde731e7468dfaa9fb6ac175a00dab4a818dcc",
+          "teachers": [
+            {
+              "model": "Qwen/Qwen2.5-0.5B-Instruct",
+              "revision": "7ae557604adf67be50417f59c2c2f167def9a775",
+              "accepted_facts": 117
+            },
+            {
+              "model": "Qwen/Qwen2.5-1.5B-Instruct",
+              "revision": "989aa7980e4cf806f80c7fef2b1adb7bc71aa306",
+              "weights_sha256": "dd924a11b4c220f385b51ffa522daea7c9f3d850e31b162bb5661df483c6d3ee",
+              "accepted_facts": 190
+            }
+          ],
+          "metrics": {
+            "validated_union_facts": 192,
+            "draft_facts_total": 200,
+            "teacher_fed_air_correct": 230,
+            "two_teacher_union_air_correct": 232,
+            "fp32_teacher_correct": 186,
+            "reference_fed_retrieval_correct": 240,
+            "evaluation_questions": 240,
+            "union_air_group_correct": {
+              "geography": "48/50",
+              "science": "50/50",
+              "engineering": "49/50",
+              "general_reference": "45/50",
+              "unknown": "40/40"
+            },
+            "fp32_teacher_group_correct": {
+              "geography": "47/50",
+              "science": "46/50",
+              "engineering": "50/50",
+              "general_reference": "43/50",
+              "unknown": "0/40"
+            }
+          },
+          "reconciliation": "success; exact reference validation, no majority voting",
+          "interpretation": "Accuracy thresholds were met on this same-author development workload, including 96.7% union AIR accuracy. Not G01-eligible: question/corpus author overlap, synthetic unsupported cases, oracle-style reference retrieval, same-family teachers, supplied reviewer assertions are unauthenticated, FP32 teacher remained resident during AIR timing, and target-machine whole-system memory/energy measurements are absent. No scientific acceptance gate passed.",
+          "gate_eligible": false,
+          "artifact_url": "https://github.com/andreipath26/Air/actions/runs/45982358534"
         }
       ]
     },
