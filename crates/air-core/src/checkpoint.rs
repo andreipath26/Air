@@ -16,3 +16,12 @@ pub fn inspect(path:&Path)->Result<Inventory>{
  tensors.sort_by_key(|t|(t.offset[0],t.offset[1]));let mut end=0;for t in &tensors{if t.offset[0]!=end{return Err("gap or overlap".into())}end=t.offset[1];}if end!=bytes-8-n{return Err("unaccounted tensor data".into())}
  f.seek(SeekFrom::Start(0))?;let mut h=Sha256::new();let mut b=[0;65536];loop{let n=f.read(&mut b)?;if n==0{break}h.update(&b[..n]);}Ok(Inventory{bytes,sha256:format!("{:x}",h.finalize()),tensors})
 }
+
+#[derive(Debug,Serialize)]pub struct Statistics{pub name:String,pub dtype:String,pub elements:u64,pub finite:u64,pub zeros:u64,pub nonfinite:u64,pub min:Option<f64>,pub max:Option<f64>,pub mean:Option<f64>,pub rms:Option<f64>}
+pub fn statistics(path:&Path,inventory:&Inventory)->Result<Vec<Statistics>>{
+ let mut f=File::open(path)?;if f.metadata()?.len()!=inventory.bytes{return Err("checkpoint size changed".into())}let mut n=[0;8];f.read_exact(&mut n)?;let base=8+u64::from_le_bytes(n);let mut out=vec![];
+ for t in &inventory.tensors{let width=match t.dtype.as_str(){"F32"=>4,"BF16"|"F16"=>2,_=>continue};let elements=(t.offset[1]-t.offset[0])/width;f.seek(SeekFrom::Start(base+t.offset[0]))?;let(mut left,mut finite,mut zeros,mut nonfinite)=(elements,0u64,0u64,0u64);let(mut min,mut max,mut sum,mut sq)=(f64::INFINITY,f64::NEG_INFINITY,0.0,0.0);let mut buf=[0u8;65536];
+ while left>0{let count=left.min((buf.len() as u64)/width);let len=(count*width)as usize;f.read_exact(&mut buf[..len])?;for b in buf[..len].chunks_exact(width as usize){let x=match t.dtype.as_str(){"F32"=>f32::from_le_bytes(b.try_into().unwrap())as f64,"BF16"=>f32::from_bits((u16::from_le_bytes(b.try_into().unwrap())as u32)<<16)as f64,_=>{let v=u16::from_le_bytes(b.try_into().unwrap());let sign=if v&0x8000==0{1.0}else{-1.0};let e=(v>>10)&31;let m=v&1023;if e==31{if m==0{sign*f64::INFINITY}else{f64::NAN}}else if e==0{sign*(m as f64)*2f64.powi(-24)}else{sign*(1.0+m as f64/1024.0)*2f64.powi(e as i32-15)}}};if x.is_finite(){finite+=1;if x==0.0{zeros+=1;}min=min.min(x);max=max.max(x);sum+=x;sq+=x*x;}else{nonfinite+=1;}}left-=count;}
+ out.push(Statistics{name:t.name.clone(),dtype:t.dtype.clone(),elements,finite,zeros,nonfinite,min:(finite>0).then_some(min),max:(finite>0).then_some(max),mean:(finite>0).then(||sum/finite as f64),rms:(finite>0).then(||(sq/finite as f64).sqrt())});}
+ Ok(out)
+}

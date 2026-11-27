@@ -1466,7 +1466,7 @@
           "dependencies": [
             "P23.01"
           ],
-          "implementation": "crates/air-core/src/amt.rs; crates/air-core/src/checkpoint.rs; docs/architecture/amt-pilot.md",
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [],
@@ -1498,7 +1498,7 @@
           "dependencies": [
             "P09.01"
           ],
-          "implementation": "crates/air-core/src/amt.rs; crates/air-core/src/checkpoint.rs; docs/architecture/amt-pilot.md",
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [],
@@ -1509,12 +1509,12 @@
           "id": "P23.05",
           "name": "Teacher-to-AIR knowledge transfer",
           "description": "Convert candidate claims into curated canonical knowledge with evidence, conflict detection and independent validation; never treat teacher output as truth.",
-          "status": "planned",
+          "status": "prototype_partial",
           "completion_percent": 0,
           "dependencies": [
             "P23.04"
           ],
-          "implementation": null,
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [],
@@ -1530,7 +1530,7 @@
           "dependencies": [
             "P23.04"
           ],
-          "implementation": "crates/air-core/src/amt.rs; crates/air-core/src/checkpoint.rs; docs/architecture/amt-pilot.md",
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [],
@@ -1573,12 +1573,12 @@
           "id": "P23.09",
           "name": "Conversion orchestration and checkpoints",
           "description": "Resumable offline pipeline, deterministic manifests, shard streaming, bounded resources, reproducible experiment metadata, candidate quarantine and rollback.",
-          "status": "planned",
+          "status": "prototype_partial",
           "completion_percent": 0,
           "dependencies": [
             "P23.01"
           ],
-          "implementation": null,
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [],
@@ -1594,7 +1594,7 @@
           "dependencies": [
             "P23.07"
           ],
-          "implementation": "crates/air-core/src/amt.rs; crates/air-core/src/checkpoint.rs; docs/architecture/amt-pilot.md",
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [],
@@ -1653,7 +1653,7 @@
       "acceptance_gate": "Demonstrate reproducible conversion of at least one selected pretrained-model capability into a cheaper AIR-native representation, with independently validated held-out quality, full lifecycle accounting, explicit fallback and rollback. General model conversion and removal of neural residuals require separate stronger evidence.",
       "deployment_ready": false,
       "known_limitations": [
-        "Restricted behavioural pilot and SafeTensors inspection; no real-model or hardware evidence."
+        "Real-model workflow added; execution results and target hardware validation pending. No full conversion."
       ]
     }
   ]

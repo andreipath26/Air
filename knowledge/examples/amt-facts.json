@@ -1,0 +1,59 @@
+{
+  "teacher_id": "replace with pinned teacher",
+  "cases": [
+    {
+      "subject": "France",
+      "relation": "capital",
+      "expected": "Paris",
+      "category": "geography",
+      "reference": "operator-authored capital reference fixture; independent source audit pending",
+      "question": "What is the capital of France?",
+      "paraphrase": "Name the city that serves as France's national capital."
+    },
+    {
+      "subject": "Italy",
+      "relation": "capital",
+      "expected": "Rome",
+      "category": "geography",
+      "reference": "operator-authored capital reference fixture; independent source audit pending",
+      "question": "What is the capital of Italy?",
+      "paraphrase": "Name the city that serves as Italy's national capital."
+    },
+    {
+      "subject": "Japan",
+      "relation": "capital",
+      "expected": "Tokyo",
+      "category": "geography",
+      "reference": "operator-authored capital reference fixture; independent source audit pending",
+      "question": "What is the capital of Japan?",
+      "paraphrase": "Name the city that serves as Japan's national capital."
+    },
+    {
+      "subject": "Portugal",
+      "relation": "capital",
+      "expected": "Lisbon",
+      "category": "geography",
+      "reference": "operator-authored capital reference fixture; independent source audit pending",
+      "question": "What is the capital of Portugal?",
+      "paraphrase": "Name the city that serves as Portugal's national capital."
+    },
+    {
+      "subject": "Canada",
+      "relation": "capital",
+      "expected": "Ottawa",
+      "category": "geography",
+      "reference": "operator-authored capital reference fixture; independent source audit pending",
+      "question": "What is the capital of Canada?",
+      "paraphrase": "Name the city that serves as Canada's national capital."
+    },
+    {
+      "subject": "Egypt",
+      "relation": "capital",
+      "expected": "Cairo",
+      "category": "geography",
+      "reference": "operator-authored capital reference fixture; independent source audit pending",
+      "question": "What is the capital of Egypt?",
+      "paraphrase": "Name the city that serves as Egypt's national capital."
+    }
+  ]
+}

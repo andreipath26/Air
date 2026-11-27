@@ -82,3 +82,6 @@ Reuse existing pretrained models by extracting selected capabilities through beh
 
 ## AMT pilot
 `amt-inspect model.safetensors` inventories a checkpoint and computes its SHA-256. With a CPU-only local model server running, edit the teacher identification and license in `knowledge/examples/amt-pilot.json`, then run `bash scripts/amt-pilot.sh SPEC.json NEW_REPORT.json`. `amt-import REPORT.json MEMORY` imports an unapproved candidate into procedural memory. See [pilot limitations](docs/architecture/amt-pilot.md).
+
+## AMT real-model experiment
+The [AMT experiment workflow](.github/workflows/amt-experiment.yml) runs a small CPU-only pretrained teacher and produces weight inventories, numerical statistics, procedure, fact and classification reports. See [pilot 02](docs/architecture/amt-pilot-02.md). Results must be inspected before claiming capability transfer.

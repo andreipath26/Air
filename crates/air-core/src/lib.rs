@@ -48,3 +48,6 @@ pub mod diagnostics;
 
 pub mod amt;
 pub mod checkpoint;
+
+pub mod amt_knowledge;
+pub mod amt_classification;

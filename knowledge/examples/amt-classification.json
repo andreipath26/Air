@@ -1,0 +1,59 @@
+{
+  "teacher_id": "replace with pinned teacher",
+  "labels": [
+    "automotive",
+    "mathematics"
+  ],
+  "train": [
+    {
+      "text": "diesel engine fuel injection",
+      "label": "automotive"
+    },
+    {
+      "text": "brake pads wheel suspension",
+      "label": "automotive"
+    },
+    {
+      "text": "engine oil pressure turbo",
+      "label": "automotive"
+    },
+    {
+      "text": "integer equation algebra",
+      "label": "mathematics"
+    },
+    {
+      "text": "prime number multiplication",
+      "label": "mathematics"
+    },
+    {
+      "text": "geometry triangle angle",
+      "label": "mathematics"
+    }
+  ],
+  "test": [
+    {
+      "text": "diesel engine smoke",
+      "label": "automotive"
+    },
+    {
+      "text": "brake wheel noise",
+      "label": "automotive"
+    },
+    {
+      "text": "turbo oil leak",
+      "label": "automotive"
+    },
+    {
+      "text": "integer multiplication equation",
+      "label": "mathematics"
+    },
+    {
+      "text": "prime number factor",
+      "label": "mathematics"
+    },
+    {
+      "text": "triangle geometry area",
+      "label": "mathematics"
+    }
+  ]
+}
