@@ -13,6 +13,7 @@ def main():
     ap.add_argument("--revision",default="main")
     ap.add_argument("--model",default="Qwen/Qwen2.5-0.5B-Instruct")
     ap.add_argument("--structural",action="store_true")
+    ap.add_argument("--g01-development",action="store_true")
     args=ap.parse_args()
     out=pathlib.Path(args.out); out.mkdir(parents=True,exist_ok=False)
     info=HfApi().model_info(args.model,revision=args.revision)
@@ -84,6 +85,10 @@ def main():
                     result=subprocess.run(["target/release/air-cli","amt-package",str(report),digest,str(out/"procedure-package.json")])
                     if result.returncode: failures.append("procedure-package")
             except subprocess.TimeoutExpired: failures.append(name)
+        if args.g01_development:
+            spec=spec_from_file_location("g01_real",pathlib.Path(__file__).with_name("g01-real-development.py"))
+            module=module_from_spec(spec);spec.loader.exec_module(module)
+            module.run(out/"g01-development",server.server_port,args.model+"@"+revision,identity["weights"])
     finally:
         server.shutdown();server.server_close()
     (out/"execution.json").write_text(json.dumps({"failed_tracks":failures,"note":"CPU float32 teacher; public fixtures, no full-system energy measurement"},indent=2))

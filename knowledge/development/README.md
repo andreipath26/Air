@@ -1,0 +1,3 @@
+# G01 factual development fixtures
+
+200 real-world factual mappings and 40 deliberately unsupported synthetic entities. Draft reference pointers are not independently audited. The general_reference group is a periodic-table reference lookup, not a broad general-knowledge domain. The science and general_reference groups are related; this limits domain diversity. No source text was copied. The same author generated the router and test paraphrases, so this is not a blind evaluation. No G01 acceptance claim. Case-sensitive symbols (SI and chemical) require exact comparison. Independently sourced and authored test questions remain required.

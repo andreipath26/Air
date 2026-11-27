@@ -1,0 +1,2002 @@
+[
+  {
+    "subject": "France",
+    "relation": "capital",
+    "answer": "Paris",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of France?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Italy",
+    "relation": "capital",
+    "answer": "Rome",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Italy?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Japan",
+    "relation": "capital",
+    "answer": "Tokyo",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Japan?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Portugal",
+    "relation": "capital",
+    "answer": "Lisbon",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Portugal?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Canada",
+    "relation": "capital",
+    "answer": "Ottawa",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Canada?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Egypt",
+    "relation": "capital",
+    "answer": "Cairo",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Egypt?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Germany",
+    "relation": "capital",
+    "answer": "Berlin",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Germany?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Spain",
+    "relation": "capital",
+    "answer": "Madrid",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Spain?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Poland",
+    "relation": "capital",
+    "answer": "Warsaw",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Poland?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Romania",
+    "relation": "capital",
+    "answer": "Bucharest",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Romania?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Greece",
+    "relation": "capital",
+    "answer": "Athens",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Greece?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Norway",
+    "relation": "capital",
+    "answer": "Oslo",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Norway?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Sweden",
+    "relation": "capital",
+    "answer": "Stockholm",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Sweden?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Finland",
+    "relation": "capital",
+    "answer": "Helsinki",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Finland?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Denmark",
+    "relation": "capital",
+    "answer": "Copenhagen",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Denmark?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Austria",
+    "relation": "capital",
+    "answer": "Vienna",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Austria?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Belgium",
+    "relation": "capital",
+    "answer": "Brussels",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Belgium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Ireland",
+    "relation": "capital",
+    "answer": "Dublin",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Ireland?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Iceland",
+    "relation": "capital",
+    "answer": "Reykjavik",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Iceland?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Czechia",
+    "relation": "capital",
+    "answer": "Prague",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Czechia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Hungary",
+    "relation": "capital",
+    "answer": "Budapest",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Hungary?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Slovakia",
+    "relation": "capital",
+    "answer": "Bratislava",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Slovakia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Slovenia",
+    "relation": "capital",
+    "answer": "Ljubljana",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Slovenia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Croatia",
+    "relation": "capital",
+    "answer": "Zagreb",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Croatia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Serbia",
+    "relation": "capital",
+    "answer": "Belgrade",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Serbia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Albania",
+    "relation": "capital",
+    "answer": "Tirana",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Albania?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Bulgaria",
+    "relation": "capital",
+    "answer": "Sofia",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Bulgaria?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Estonia",
+    "relation": "capital",
+    "answer": "Tallinn",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Estonia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Latvia",
+    "relation": "capital",
+    "answer": "Riga",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Latvia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Lithuania",
+    "relation": "capital",
+    "answer": "Vilnius",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Lithuania?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Ukraine",
+    "relation": "capital",
+    "answer": "Kyiv",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Ukraine?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Moldova",
+    "relation": "capital",
+    "answer": "Chisinau",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Moldova?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Georgia",
+    "relation": "capital",
+    "answer": "Tbilisi",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Georgia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Armenia",
+    "relation": "capital",
+    "answer": "Yerevan",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Armenia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Azerbaijan",
+    "relation": "capital",
+    "answer": "Baku",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Azerbaijan?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Turkey",
+    "relation": "capital",
+    "answer": "Ankara",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Turkey?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Australia",
+    "relation": "capital",
+    "answer": "Canberra",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Australia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "New Zealand",
+    "relation": "capital",
+    "answer": "Wellington",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of New Zealand?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "India",
+    "relation": "capital",
+    "answer": "New Delhi",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of India?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "China",
+    "relation": "capital",
+    "answer": "Beijing",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of China?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "South Korea",
+    "relation": "capital",
+    "answer": "Seoul",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of South Korea?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Thailand",
+    "relation": "capital",
+    "answer": "Bangkok",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Thailand?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Vietnam",
+    "relation": "capital",
+    "answer": "Hanoi",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Vietnam?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Nepal",
+    "relation": "capital",
+    "answer": "Kathmandu",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Nepal?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Mongolia",
+    "relation": "capital",
+    "answer": "Ulaanbaatar",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Mongolia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Peru",
+    "relation": "capital",
+    "answer": "Lima",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Peru?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Chile",
+    "relation": "capital",
+    "answer": "Santiago",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Chile?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Argentina",
+    "relation": "capital",
+    "answer": "Buenos Aires",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Argentina?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Uruguay",
+    "relation": "capital",
+    "answer": "Montevideo",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Uruguay?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Colombia",
+    "relation": "capital",
+    "answer": "Bogota",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/ [reference pointer; not independently audited]",
+    "question": "What is the capital of Colombia?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Hydrogen",
+    "relation": "chemical symbol",
+    "answer": "H",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Hydrogen?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Helium",
+    "relation": "chemical symbol",
+    "answer": "He",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Helium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Lithium",
+    "relation": "chemical symbol",
+    "answer": "Li",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Lithium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Beryllium",
+    "relation": "chemical symbol",
+    "answer": "Be",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Beryllium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Boron",
+    "relation": "chemical symbol",
+    "answer": "B",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Boron?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Carbon",
+    "relation": "chemical symbol",
+    "answer": "C",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Carbon?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Nitrogen",
+    "relation": "chemical symbol",
+    "answer": "N",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Nitrogen?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Oxygen",
+    "relation": "chemical symbol",
+    "answer": "O",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Oxygen?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Fluorine",
+    "relation": "chemical symbol",
+    "answer": "F",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Fluorine?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Neon",
+    "relation": "chemical symbol",
+    "answer": "Ne",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Neon?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Sodium",
+    "relation": "chemical symbol",
+    "answer": "Na",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Sodium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Magnesium",
+    "relation": "chemical symbol",
+    "answer": "Mg",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Magnesium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Aluminium",
+    "relation": "chemical symbol",
+    "answer": "Al",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Aluminium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Silicon",
+    "relation": "chemical symbol",
+    "answer": "Si",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Silicon?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Phosphorus",
+    "relation": "chemical symbol",
+    "answer": "P",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Phosphorus?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Sulfur",
+    "relation": "chemical symbol",
+    "answer": "S",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Sulfur?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Chlorine",
+    "relation": "chemical symbol",
+    "answer": "Cl",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Chlorine?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Argon",
+    "relation": "chemical symbol",
+    "answer": "Ar",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Argon?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Potassium",
+    "relation": "chemical symbol",
+    "answer": "K",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Potassium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Calcium",
+    "relation": "chemical symbol",
+    "answer": "Ca",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Calcium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Scandium",
+    "relation": "chemical symbol",
+    "answer": "Sc",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Scandium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Titanium",
+    "relation": "chemical symbol",
+    "answer": "Ti",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Titanium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Vanadium",
+    "relation": "chemical symbol",
+    "answer": "V",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Vanadium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Chromium",
+    "relation": "chemical symbol",
+    "answer": "Cr",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Chromium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Manganese",
+    "relation": "chemical symbol",
+    "answer": "Mn",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Manganese?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Iron",
+    "relation": "chemical symbol",
+    "answer": "Fe",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Iron?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Cobalt",
+    "relation": "chemical symbol",
+    "answer": "Co",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Cobalt?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Nickel",
+    "relation": "chemical symbol",
+    "answer": "Ni",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Nickel?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Copper",
+    "relation": "chemical symbol",
+    "answer": "Cu",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Copper?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Zinc",
+    "relation": "chemical symbol",
+    "answer": "Zn",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Zinc?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Gallium",
+    "relation": "chemical symbol",
+    "answer": "Ga",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Gallium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Germanium",
+    "relation": "chemical symbol",
+    "answer": "Ge",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Germanium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Arsenic",
+    "relation": "chemical symbol",
+    "answer": "As",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Arsenic?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Selenium",
+    "relation": "chemical symbol",
+    "answer": "Se",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Selenium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Bromine",
+    "relation": "chemical symbol",
+    "answer": "Br",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Bromine?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Krypton",
+    "relation": "chemical symbol",
+    "answer": "Kr",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Krypton?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Rubidium",
+    "relation": "chemical symbol",
+    "answer": "Rb",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Rubidium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Strontium",
+    "relation": "chemical symbol",
+    "answer": "Sr",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Strontium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Yttrium",
+    "relation": "chemical symbol",
+    "answer": "Y",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Yttrium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Zirconium",
+    "relation": "chemical symbol",
+    "answer": "Zr",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Zirconium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Niobium",
+    "relation": "chemical symbol",
+    "answer": "Nb",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Niobium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Molybdenum",
+    "relation": "chemical symbol",
+    "answer": "Mo",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Molybdenum?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Technetium",
+    "relation": "chemical symbol",
+    "answer": "Tc",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Technetium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Ruthenium",
+    "relation": "chemical symbol",
+    "answer": "Ru",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Ruthenium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Rhodium",
+    "relation": "chemical symbol",
+    "answer": "Rh",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Rhodium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Palladium",
+    "relation": "chemical symbol",
+    "answer": "Pd",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Palladium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Silver",
+    "relation": "chemical symbol",
+    "answer": "Ag",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Silver?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Cadmium",
+    "relation": "chemical symbol",
+    "answer": "Cd",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Cadmium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Indium",
+    "relation": "chemical symbol",
+    "answer": "In",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Indium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Tin",
+    "relation": "chemical symbol",
+    "answer": "Sn",
+    "group": "science",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the chemical symbol of Tin?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "metre",
+    "relation": "SI unit symbol",
+    "answer": "m",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for metre.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "kilogram",
+    "relation": "SI unit symbol",
+    "answer": "kg",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for kilogram.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "second",
+    "relation": "SI unit symbol",
+    "answer": "s",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for second.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "ampere",
+    "relation": "SI unit symbol",
+    "answer": "A",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for ampere.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "kelvin",
+    "relation": "SI unit symbol",
+    "answer": "K",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for kelvin.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "mole",
+    "relation": "SI unit symbol",
+    "answer": "mol",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for mole.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "candela",
+    "relation": "SI unit symbol",
+    "answer": "cd",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for candela.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "radian",
+    "relation": "SI unit symbol",
+    "answer": "rad",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for radian.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "steradian",
+    "relation": "SI unit symbol",
+    "answer": "sr",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for steradian.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "hertz",
+    "relation": "SI unit symbol",
+    "answer": "Hz",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for hertz.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "newton",
+    "relation": "SI unit symbol",
+    "answer": "N",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for newton.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "pascal",
+    "relation": "SI unit symbol",
+    "answer": "Pa",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for pascal.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "joule",
+    "relation": "SI unit symbol",
+    "answer": "J",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for joule.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "watt",
+    "relation": "SI unit symbol",
+    "answer": "W",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for watt.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "coulomb",
+    "relation": "SI unit symbol",
+    "answer": "C",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for coulomb.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "volt",
+    "relation": "SI unit symbol",
+    "answer": "V",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for volt.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "farad",
+    "relation": "SI unit symbol",
+    "answer": "F",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for farad.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "ohm",
+    "relation": "SI unit symbol",
+    "answer": "Ω",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for ohm.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "siemens",
+    "relation": "SI unit symbol",
+    "answer": "S",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for siemens.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "weber",
+    "relation": "SI unit symbol",
+    "answer": "Wb",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for weber.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "tesla",
+    "relation": "SI unit symbol",
+    "answer": "T",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for tesla.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "henry",
+    "relation": "SI unit symbol",
+    "answer": "H",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for henry.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "degree Celsius",
+    "relation": "SI unit symbol",
+    "answer": "°C",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for degree Celsius.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "lumen",
+    "relation": "SI unit symbol",
+    "answer": "lm",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for lumen.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "lux",
+    "relation": "SI unit symbol",
+    "answer": "lx",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for lux.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "becquerel",
+    "relation": "SI unit symbol",
+    "answer": "Bq",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for becquerel.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "gray",
+    "relation": "SI unit symbol",
+    "answer": "Gy",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for gray.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "sievert",
+    "relation": "SI unit symbol",
+    "answer": "Sv",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for sievert.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "katal",
+    "relation": "SI unit symbol",
+    "answer": "kat",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for katal.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "millimetre",
+    "relation": "SI unit symbol",
+    "answer": "mm",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for millimetre.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "centimetre",
+    "relation": "SI unit symbol",
+    "answer": "cm",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for centimetre.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "kilometre",
+    "relation": "SI unit symbol",
+    "answer": "km",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for kilometre.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "microsecond",
+    "relation": "SI unit symbol",
+    "answer": "µs",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for microsecond.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "millisecond",
+    "relation": "SI unit symbol",
+    "answer": "ms",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for millisecond.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "nanosecond",
+    "relation": "SI unit symbol",
+    "answer": "ns",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for nanosecond.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "megahertz",
+    "relation": "SI unit symbol",
+    "answer": "MHz",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for megahertz.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "kilohertz",
+    "relation": "SI unit symbol",
+    "answer": "kHz",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for kilohertz.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "gigahertz",
+    "relation": "SI unit symbol",
+    "answer": "GHz",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for gigahertz.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "kilowatt",
+    "relation": "SI unit symbol",
+    "answer": "kW",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for kilowatt.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "megawatt",
+    "relation": "SI unit symbol",
+    "answer": "MW",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for megawatt.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "kilopascal",
+    "relation": "SI unit symbol",
+    "answer": "kPa",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for kilopascal.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "megapascal",
+    "relation": "SI unit symbol",
+    "answer": "MPa",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for megapascal.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "millivolt",
+    "relation": "SI unit symbol",
+    "answer": "mV",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for millivolt.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "kilovolt",
+    "relation": "SI unit symbol",
+    "answer": "kV",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for kilovolt.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "microfarad",
+    "relation": "SI unit symbol",
+    "answer": "µF",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for microfarad.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "nanofarad",
+    "relation": "SI unit symbol",
+    "answer": "nF",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for nanofarad.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "picofarad",
+    "relation": "SI unit symbol",
+    "answer": "pF",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for picofarad.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "milliampere",
+    "relation": "SI unit symbol",
+    "answer": "mA",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for milliampere.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "millinewton",
+    "relation": "SI unit symbol",
+    "answer": "mN",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for millinewton.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "kilojoule",
+    "relation": "SI unit symbol",
+    "answer": "kJ",
+    "group": "engineering",
+    "source": "https://www.bipm.org/en/publications/si-brochure [reference pointer; not independently audited]",
+    "question": "Give the SI unit symbol for kilojoule.",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Antimony",
+    "relation": "atomic number",
+    "answer": "51",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Antimony?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Tellurium",
+    "relation": "atomic number",
+    "answer": "52",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Tellurium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Iodine",
+    "relation": "atomic number",
+    "answer": "53",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Iodine?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Xenon",
+    "relation": "atomic number",
+    "answer": "54",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Xenon?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Caesium",
+    "relation": "atomic number",
+    "answer": "55",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Caesium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Barium",
+    "relation": "atomic number",
+    "answer": "56",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Barium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Lanthanum",
+    "relation": "atomic number",
+    "answer": "57",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Lanthanum?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Cerium",
+    "relation": "atomic number",
+    "answer": "58",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Cerium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Praseodymium",
+    "relation": "atomic number",
+    "answer": "59",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Praseodymium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Neodymium",
+    "relation": "atomic number",
+    "answer": "60",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Neodymium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Promethium",
+    "relation": "atomic number",
+    "answer": "61",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Promethium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Samarium",
+    "relation": "atomic number",
+    "answer": "62",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Samarium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Europium",
+    "relation": "atomic number",
+    "answer": "63",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Europium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Gadolinium",
+    "relation": "atomic number",
+    "answer": "64",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Gadolinium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Terbium",
+    "relation": "atomic number",
+    "answer": "65",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Terbium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Dysprosium",
+    "relation": "atomic number",
+    "answer": "66",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Dysprosium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Holmium",
+    "relation": "atomic number",
+    "answer": "67",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Holmium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Erbium",
+    "relation": "atomic number",
+    "answer": "68",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Erbium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Thulium",
+    "relation": "atomic number",
+    "answer": "69",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Thulium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Ytterbium",
+    "relation": "atomic number",
+    "answer": "70",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Ytterbium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Lutetium",
+    "relation": "atomic number",
+    "answer": "71",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Lutetium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Hafnium",
+    "relation": "atomic number",
+    "answer": "72",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Hafnium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Tantalum",
+    "relation": "atomic number",
+    "answer": "73",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Tantalum?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Tungsten",
+    "relation": "atomic number",
+    "answer": "74",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Tungsten?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Rhenium",
+    "relation": "atomic number",
+    "answer": "75",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Rhenium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Osmium",
+    "relation": "atomic number",
+    "answer": "76",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Osmium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Iridium",
+    "relation": "atomic number",
+    "answer": "77",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Iridium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Platinum",
+    "relation": "atomic number",
+    "answer": "78",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Platinum?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Gold",
+    "relation": "atomic number",
+    "answer": "79",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Gold?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Mercury",
+    "relation": "atomic number",
+    "answer": "80",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Mercury?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Thallium",
+    "relation": "atomic number",
+    "answer": "81",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Thallium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Lead",
+    "relation": "atomic number",
+    "answer": "82",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Lead?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Bismuth",
+    "relation": "atomic number",
+    "answer": "83",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Bismuth?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Polonium",
+    "relation": "atomic number",
+    "answer": "84",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Polonium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Astatine",
+    "relation": "atomic number",
+    "answer": "85",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Astatine?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Radon",
+    "relation": "atomic number",
+    "answer": "86",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Radon?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Francium",
+    "relation": "atomic number",
+    "answer": "87",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Francium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Radium",
+    "relation": "atomic number",
+    "answer": "88",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Radium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Actinium",
+    "relation": "atomic number",
+    "answer": "89",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Actinium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Thorium",
+    "relation": "atomic number",
+    "answer": "90",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Thorium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Protactinium",
+    "relation": "atomic number",
+    "answer": "91",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Protactinium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Uranium",
+    "relation": "atomic number",
+    "answer": "92",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Uranium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Neptunium",
+    "relation": "atomic number",
+    "answer": "93",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Neptunium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Plutonium",
+    "relation": "atomic number",
+    "answer": "94",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Plutonium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Americium",
+    "relation": "atomic number",
+    "answer": "95",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Americium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Curium",
+    "relation": "atomic number",
+    "answer": "96",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Curium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Berkelium",
+    "relation": "atomic number",
+    "answer": "97",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Berkelium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Californium",
+    "relation": "atomic number",
+    "answer": "98",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Californium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Einsteinium",
+    "relation": "atomic number",
+    "answer": "99",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Einsteinium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  },
+  {
+    "subject": "Fermium",
+    "relation": "atomic number",
+    "answer": "100",
+    "group": "general_reference",
+    "source": "https://iupac.org/what-we-do/periodic-table-of-elements/ [reference pointer; not independently audited]",
+    "question": "What is the atomic number of Fermium?",
+    "reviewer": "development fixture author",
+    "review_rationale": "Draft factual fixture; independent source and answer review required before acceptance"
+  }
+]

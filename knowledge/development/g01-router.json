@@ -1,0 +1,835 @@
+{
+  "entities": [
+    {
+      "canonical": "France",
+      "aliases": []
+    },
+    {
+      "canonical": "Italy",
+      "aliases": []
+    },
+    {
+      "canonical": "Japan",
+      "aliases": []
+    },
+    {
+      "canonical": "Portugal",
+      "aliases": []
+    },
+    {
+      "canonical": "Canada",
+      "aliases": []
+    },
+    {
+      "canonical": "Egypt",
+      "aliases": []
+    },
+    {
+      "canonical": "Germany",
+      "aliases": []
+    },
+    {
+      "canonical": "Spain",
+      "aliases": []
+    },
+    {
+      "canonical": "Poland",
+      "aliases": []
+    },
+    {
+      "canonical": "Romania",
+      "aliases": []
+    },
+    {
+      "canonical": "Greece",
+      "aliases": []
+    },
+    {
+      "canonical": "Norway",
+      "aliases": []
+    },
+    {
+      "canonical": "Sweden",
+      "aliases": []
+    },
+    {
+      "canonical": "Finland",
+      "aliases": []
+    },
+    {
+      "canonical": "Denmark",
+      "aliases": []
+    },
+    {
+      "canonical": "Austria",
+      "aliases": []
+    },
+    {
+      "canonical": "Belgium",
+      "aliases": []
+    },
+    {
+      "canonical": "Ireland",
+      "aliases": []
+    },
+    {
+      "canonical": "Iceland",
+      "aliases": []
+    },
+    {
+      "canonical": "Czechia",
+      "aliases": []
+    },
+    {
+      "canonical": "Hungary",
+      "aliases": []
+    },
+    {
+      "canonical": "Slovakia",
+      "aliases": []
+    },
+    {
+      "canonical": "Slovenia",
+      "aliases": []
+    },
+    {
+      "canonical": "Croatia",
+      "aliases": []
+    },
+    {
+      "canonical": "Serbia",
+      "aliases": []
+    },
+    {
+      "canonical": "Albania",
+      "aliases": []
+    },
+    {
+      "canonical": "Bulgaria",
+      "aliases": []
+    },
+    {
+      "canonical": "Estonia",
+      "aliases": []
+    },
+    {
+      "canonical": "Latvia",
+      "aliases": []
+    },
+    {
+      "canonical": "Lithuania",
+      "aliases": []
+    },
+    {
+      "canonical": "Ukraine",
+      "aliases": []
+    },
+    {
+      "canonical": "Moldova",
+      "aliases": []
+    },
+    {
+      "canonical": "Georgia",
+      "aliases": []
+    },
+    {
+      "canonical": "Armenia",
+      "aliases": []
+    },
+    {
+      "canonical": "Azerbaijan",
+      "aliases": []
+    },
+    {
+      "canonical": "Turkey",
+      "aliases": []
+    },
+    {
+      "canonical": "Australia",
+      "aliases": []
+    },
+    {
+      "canonical": "New Zealand",
+      "aliases": []
+    },
+    {
+      "canonical": "India",
+      "aliases": []
+    },
+    {
+      "canonical": "China",
+      "aliases": []
+    },
+    {
+      "canonical": "South Korea",
+      "aliases": []
+    },
+    {
+      "canonical": "Thailand",
+      "aliases": []
+    },
+    {
+      "canonical": "Vietnam",
+      "aliases": []
+    },
+    {
+      "canonical": "Nepal",
+      "aliases": []
+    },
+    {
+      "canonical": "Mongolia",
+      "aliases": []
+    },
+    {
+      "canonical": "Peru",
+      "aliases": []
+    },
+    {
+      "canonical": "Chile",
+      "aliases": []
+    },
+    {
+      "canonical": "Argentina",
+      "aliases": []
+    },
+    {
+      "canonical": "Uruguay",
+      "aliases": []
+    },
+    {
+      "canonical": "Colombia",
+      "aliases": []
+    },
+    {
+      "canonical": "Hydrogen",
+      "aliases": []
+    },
+    {
+      "canonical": "Helium",
+      "aliases": []
+    },
+    {
+      "canonical": "Lithium",
+      "aliases": []
+    },
+    {
+      "canonical": "Beryllium",
+      "aliases": []
+    },
+    {
+      "canonical": "Boron",
+      "aliases": []
+    },
+    {
+      "canonical": "Carbon",
+      "aliases": []
+    },
+    {
+      "canonical": "Nitrogen",
+      "aliases": []
+    },
+    {
+      "canonical": "Oxygen",
+      "aliases": []
+    },
+    {
+      "canonical": "Fluorine",
+      "aliases": []
+    },
+    {
+      "canonical": "Neon",
+      "aliases": []
+    },
+    {
+      "canonical": "Sodium",
+      "aliases": []
+    },
+    {
+      "canonical": "Magnesium",
+      "aliases": []
+    },
+    {
+      "canonical": "Aluminium",
+      "aliases": []
+    },
+    {
+      "canonical": "Silicon",
+      "aliases": []
+    },
+    {
+      "canonical": "Phosphorus",
+      "aliases": []
+    },
+    {
+      "canonical": "Sulfur",
+      "aliases": []
+    },
+    {
+      "canonical": "Chlorine",
+      "aliases": []
+    },
+    {
+      "canonical": "Argon",
+      "aliases": []
+    },
+    {
+      "canonical": "Potassium",
+      "aliases": []
+    },
+    {
+      "canonical": "Calcium",
+      "aliases": []
+    },
+    {
+      "canonical": "Scandium",
+      "aliases": []
+    },
+    {
+      "canonical": "Titanium",
+      "aliases": []
+    },
+    {
+      "canonical": "Vanadium",
+      "aliases": []
+    },
+    {
+      "canonical": "Chromium",
+      "aliases": []
+    },
+    {
+      "canonical": "Manganese",
+      "aliases": []
+    },
+    {
+      "canonical": "Iron",
+      "aliases": []
+    },
+    {
+      "canonical": "Cobalt",
+      "aliases": []
+    },
+    {
+      "canonical": "Nickel",
+      "aliases": []
+    },
+    {
+      "canonical": "Copper",
+      "aliases": []
+    },
+    {
+      "canonical": "Zinc",
+      "aliases": []
+    },
+    {
+      "canonical": "Gallium",
+      "aliases": []
+    },
+    {
+      "canonical": "Germanium",
+      "aliases": []
+    },
+    {
+      "canonical": "Arsenic",
+      "aliases": []
+    },
+    {
+      "canonical": "Selenium",
+      "aliases": []
+    },
+    {
+      "canonical": "Bromine",
+      "aliases": []
+    },
+    {
+      "canonical": "Krypton",
+      "aliases": []
+    },
+    {
+      "canonical": "Rubidium",
+      "aliases": []
+    },
+    {
+      "canonical": "Strontium",
+      "aliases": []
+    },
+    {
+      "canonical": "Yttrium",
+      "aliases": []
+    },
+    {
+      "canonical": "Zirconium",
+      "aliases": []
+    },
+    {
+      "canonical": "Niobium",
+      "aliases": []
+    },
+    {
+      "canonical": "Molybdenum",
+      "aliases": []
+    },
+    {
+      "canonical": "Technetium",
+      "aliases": []
+    },
+    {
+      "canonical": "Ruthenium",
+      "aliases": []
+    },
+    {
+      "canonical": "Rhodium",
+      "aliases": []
+    },
+    {
+      "canonical": "Palladium",
+      "aliases": []
+    },
+    {
+      "canonical": "Silver",
+      "aliases": []
+    },
+    {
+      "canonical": "Cadmium",
+      "aliases": []
+    },
+    {
+      "canonical": "Indium",
+      "aliases": []
+    },
+    {
+      "canonical": "Tin",
+      "aliases": []
+    },
+    {
+      "canonical": "metre",
+      "aliases": []
+    },
+    {
+      "canonical": "kilogram",
+      "aliases": []
+    },
+    {
+      "canonical": "second",
+      "aliases": []
+    },
+    {
+      "canonical": "ampere",
+      "aliases": []
+    },
+    {
+      "canonical": "kelvin",
+      "aliases": []
+    },
+    {
+      "canonical": "mole",
+      "aliases": []
+    },
+    {
+      "canonical": "candela",
+      "aliases": []
+    },
+    {
+      "canonical": "radian",
+      "aliases": []
+    },
+    {
+      "canonical": "steradian",
+      "aliases": []
+    },
+    {
+      "canonical": "hertz",
+      "aliases": []
+    },
+    {
+      "canonical": "newton",
+      "aliases": []
+    },
+    {
+      "canonical": "pascal",
+      "aliases": []
+    },
+    {
+      "canonical": "joule",
+      "aliases": []
+    },
+    {
+      "canonical": "watt",
+      "aliases": []
+    },
+    {
+      "canonical": "coulomb",
+      "aliases": []
+    },
+    {
+      "canonical": "volt",
+      "aliases": []
+    },
+    {
+      "canonical": "farad",
+      "aliases": []
+    },
+    {
+      "canonical": "ohm",
+      "aliases": []
+    },
+    {
+      "canonical": "siemens",
+      "aliases": []
+    },
+    {
+      "canonical": "weber",
+      "aliases": []
+    },
+    {
+      "canonical": "tesla",
+      "aliases": []
+    },
+    {
+      "canonical": "henry",
+      "aliases": []
+    },
+    {
+      "canonical": "degree Celsius",
+      "aliases": []
+    },
+    {
+      "canonical": "lumen",
+      "aliases": []
+    },
+    {
+      "canonical": "lux",
+      "aliases": []
+    },
+    {
+      "canonical": "becquerel",
+      "aliases": []
+    },
+    {
+      "canonical": "gray",
+      "aliases": []
+    },
+    {
+      "canonical": "sievert",
+      "aliases": []
+    },
+    {
+      "canonical": "katal",
+      "aliases": []
+    },
+    {
+      "canonical": "millimetre",
+      "aliases": []
+    },
+    {
+      "canonical": "centimetre",
+      "aliases": []
+    },
+    {
+      "canonical": "kilometre",
+      "aliases": []
+    },
+    {
+      "canonical": "microsecond",
+      "aliases": []
+    },
+    {
+      "canonical": "millisecond",
+      "aliases": []
+    },
+    {
+      "canonical": "nanosecond",
+      "aliases": []
+    },
+    {
+      "canonical": "megahertz",
+      "aliases": []
+    },
+    {
+      "canonical": "kilohertz",
+      "aliases": []
+    },
+    {
+      "canonical": "gigahertz",
+      "aliases": []
+    },
+    {
+      "canonical": "kilowatt",
+      "aliases": []
+    },
+    {
+      "canonical": "megawatt",
+      "aliases": []
+    },
+    {
+      "canonical": "kilopascal",
+      "aliases": []
+    },
+    {
+      "canonical": "megapascal",
+      "aliases": []
+    },
+    {
+      "canonical": "millivolt",
+      "aliases": []
+    },
+    {
+      "canonical": "kilovolt",
+      "aliases": []
+    },
+    {
+      "canonical": "microfarad",
+      "aliases": []
+    },
+    {
+      "canonical": "nanofarad",
+      "aliases": []
+    },
+    {
+      "canonical": "picofarad",
+      "aliases": []
+    },
+    {
+      "canonical": "milliampere",
+      "aliases": []
+    },
+    {
+      "canonical": "millinewton",
+      "aliases": []
+    },
+    {
+      "canonical": "kilojoule",
+      "aliases": []
+    },
+    {
+      "canonical": "Antimony",
+      "aliases": []
+    },
+    {
+      "canonical": "Tellurium",
+      "aliases": []
+    },
+    {
+      "canonical": "Iodine",
+      "aliases": []
+    },
+    {
+      "canonical": "Xenon",
+      "aliases": []
+    },
+    {
+      "canonical": "Caesium",
+      "aliases": []
+    },
+    {
+      "canonical": "Barium",
+      "aliases": []
+    },
+    {
+      "canonical": "Lanthanum",
+      "aliases": []
+    },
+    {
+      "canonical": "Cerium",
+      "aliases": []
+    },
+    {
+      "canonical": "Praseodymium",
+      "aliases": []
+    },
+    {
+      "canonical": "Neodymium",
+      "aliases": []
+    },
+    {
+      "canonical": "Promethium",
+      "aliases": []
+    },
+    {
+      "canonical": "Samarium",
+      "aliases": []
+    },
+    {
+      "canonical": "Europium",
+      "aliases": []
+    },
+    {
+      "canonical": "Gadolinium",
+      "aliases": []
+    },
+    {
+      "canonical": "Terbium",
+      "aliases": []
+    },
+    {
+      "canonical": "Dysprosium",
+      "aliases": []
+    },
+    {
+      "canonical": "Holmium",
+      "aliases": []
+    },
+    {
+      "canonical": "Erbium",
+      "aliases": []
+    },
+    {
+      "canonical": "Thulium",
+      "aliases": []
+    },
+    {
+      "canonical": "Ytterbium",
+      "aliases": []
+    },
+    {
+      "canonical": "Lutetium",
+      "aliases": []
+    },
+    {
+      "canonical": "Hafnium",
+      "aliases": []
+    },
+    {
+      "canonical": "Tantalum",
+      "aliases": []
+    },
+    {
+      "canonical": "Tungsten",
+      "aliases": []
+    },
+    {
+      "canonical": "Rhenium",
+      "aliases": []
+    },
+    {
+      "canonical": "Osmium",
+      "aliases": []
+    },
+    {
+      "canonical": "Iridium",
+      "aliases": []
+    },
+    {
+      "canonical": "Platinum",
+      "aliases": []
+    },
+    {
+      "canonical": "Gold",
+      "aliases": []
+    },
+    {
+      "canonical": "Mercury",
+      "aliases": []
+    },
+    {
+      "canonical": "Thallium",
+      "aliases": []
+    },
+    {
+      "canonical": "Lead",
+      "aliases": []
+    },
+    {
+      "canonical": "Bismuth",
+      "aliases": []
+    },
+    {
+      "canonical": "Polonium",
+      "aliases": []
+    },
+    {
+      "canonical": "Astatine",
+      "aliases": []
+    },
+    {
+      "canonical": "Radon",
+      "aliases": []
+    },
+    {
+      "canonical": "Francium",
+      "aliases": []
+    },
+    {
+      "canonical": "Radium",
+      "aliases": []
+    },
+    {
+      "canonical": "Actinium",
+      "aliases": []
+    },
+    {
+      "canonical": "Thorium",
+      "aliases": []
+    },
+    {
+      "canonical": "Protactinium",
+      "aliases": []
+    },
+    {
+      "canonical": "Uranium",
+      "aliases": []
+    },
+    {
+      "canonical": "Neptunium",
+      "aliases": []
+    },
+    {
+      "canonical": "Plutonium",
+      "aliases": []
+    },
+    {
+      "canonical": "Americium",
+      "aliases": []
+    },
+    {
+      "canonical": "Curium",
+      "aliases": []
+    },
+    {
+      "canonical": "Berkelium",
+      "aliases": []
+    },
+    {
+      "canonical": "Californium",
+      "aliases": []
+    },
+    {
+      "canonical": "Einsteinium",
+      "aliases": []
+    },
+    {
+      "canonical": "Fermium",
+      "aliases": []
+    }
+  ],
+  "relations": [
+    {
+      "canonical": "capital",
+      "patterns": [
+        "What is the capital of {entity}?",
+        "Which city is the capital of {entity}?",
+        "Name the capital of {entity}."
+      ]
+    },
+    {
+      "canonical": "chemical symbol",
+      "patterns": [
+        "What is the chemical symbol of {entity}?",
+        "Give the chemical symbol for {entity}."
+      ]
+    },
+    {
+      "canonical": "SI unit symbol",
+      "patterns": [
+        "Give the SI unit symbol for {entity}.",
+        "What is the SI unit symbol of {entity}?"
+      ]
+    },
+    {
+      "canonical": "atomic number",
+      "patterns": [
+        "What is the atomic number of {entity}?",
+        "Give the atomic number for {entity}."
+      ]
+    }
+  ]
+}

@@ -42,7 +42,9 @@ def inspect_activations(model, tokenizer, output):
             excluded=set(selected.tolist())
             control=torch.tensor([j for j in range(a.numel()) if j not in excluded][:count],dtype=torch.long)
             effects=[]
-            for name,coords in [("largest_absolute_activation",selected),("fixed_disjoint_control",control)]:
+            ranked=a.abs().argsort(descending=True)
+            near=torch.tensor([j for j in ranked.tolist() if j not in excluded][:count],dtype=torch.long)
+            for name,coords in [("largest_absolute_activation",selected),("fixed_disjoint_control",control),("nearest_disjoint_magnitude_control",near)]:
                 def mask_hook(module,inputs,value):
                     hidden=value[0] if isinstance(value,tuple) else value
                     changed=hidden.clone(); changed[:,-1,coords]=0
@@ -51,6 +53,6 @@ def inspect_activations(model, tokenizer, output):
                 try: changed=model(**inputs,use_cache=False).logits[0,-1].float()
                 finally: handle.remove()
                 q=changed.log_softmax(-1)
-                effects.append({"kind":name,"coordinates":coords.tolist(),"kl":(p.exp()*(p-q)).sum().item(),"top1_changed":bool(logits.argmax()!=changed.argmax())})
+                effects.append({"kind":name,"coordinates":coords.tolist(),"removed_l2":a[coords].norm().item(),"relative_removed_l2":a[coords].norm().item()/max(a[selected].norm().item(),1e-12),"kl":(p.exp()*(p-q)).sum().item(),"top1_changed":bool(logits.argmax()!=changed.argmax())})
             feature_records.append({"prompt":prompt,"layer":i,"effects":effects})
-    output.write_text(json.dumps({"coordinate_ablation":feature_records,"scope":"exploratory layer-output ablation, not feature decoding","records":records},indent=2))
+    output.write_text(json.dumps({"coordinate_ablation":feature_records,"scope":"exploratory layer-output ablation, not feature decoding; nearest disjoint magnitudes are not necessarily matched","records":records},indent=2))

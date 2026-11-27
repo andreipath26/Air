@@ -112,3 +112,6 @@ Use scripts/g01-corpus.py CORPUS OUTPUT --mode reference or --mode teacher with 
 
 ## One-command G01 runner
 See [runner protocol](docs/architecture/g01-runner.md). scripts/g01-development.py generates 240 synthetic integration cases; scripts/g01-run.py orchestrates conversion and the three systems with pinned local teacher files. The synthetic workload is not acceptance evidence.
+
+## Real-fact development workload
+See [draft corpus](knowledge/development/README.md). The AMT workflow now runs 200 real-fact conversions and 240 evaluation questions per teacher. This is not independent G01 evidence; the teacher is FP32 and resident during AIR diagnostic runs. Structural interventions include nearest-disjoint-magnitude controls with actual removed activation norms; matching is not guaranteed.
