@@ -824,7 +824,7 @@
       "acceptance_gate": "High routing recall on unseen/interdisciplinary questions, measured overhead and recovery",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-05.md."
+        "No phase gate passed; see docs/architecture/prototype-09.md."
       ]
     },
     {
@@ -938,7 +938,7 @@
       "acceptance_gate": "Each memory type independently usable",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-08.md."
+        "No phase gate passed; see docs/architecture/prototype-09.md."
       ]
     },
     {
@@ -1120,7 +1120,7 @@
       "acceptance_gate": "Meaningful learned capability beats optimised neural baseline at comparable quality or record negative result",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-08.md."
+        "No phase gate passed; see docs/architecture/prototype-09.md."
       ]
     },
     {
@@ -1185,7 +1185,7 @@
       "acceptance_gate": "Respect explicit RAM/time/compute budgets at specified quality",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-08.md."
+        "No phase gate passed; see docs/architecture/prototype-09.md."
       ]
     },
     {
@@ -1315,7 +1315,7 @@
       "acceptance_gate": "Improve selected capabilities without corrupting knowledge or full retraining",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-06.md."
+        "No phase gate passed; see docs/architecture/prototype-09.md."
       ]
     },
     {
@@ -1341,7 +1341,7 @@
       "acceptance_gate": "Adversarial and recovery tests before unrestricted acquisition/execution",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-06.md."
+        "No phase gate passed; see docs/architecture/prototype-09.md."
       ]
     },
     {

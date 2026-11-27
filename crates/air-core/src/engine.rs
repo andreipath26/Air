@@ -13,10 +13,15 @@ impl Engine<'_>{
  let mut route=self.canonical(router::choose(q,None)?)?;let mut answer=router::execute(self.knowledge,q,route.clone())?;
  let missing=matches!(&answer,Answer::Unknown{..})||matches!(&answer,Answer::Claims(r) if r.facts.is_empty()&&!r.truncated);
  let mut called=false;if missing{if let Some(m)=self.model{called=true;route=self.canonical(router::validate(m.route(q)?)?)?;answer=router::execute(self.knowledge,q,route)?;}}
+ // Optional learned category suggestions never claim to resolve a specific question.
+ if matches!(&answer,Answer::Unknown{..}) && self.policy.path != std::path::Path::new(":memory:"){
+ let t=crate::learned_router::Training::open(&self.policy.path)?;let learner=crate::learned_router::Learned{classifier:t.classifier()?};
+ if let Route::Category{category}=learner.route(q)?{let category=self.policy.canonical("category",&category)?;if self.knowledge.has_category(&category)?{let r=self.knowledge.category(&category)?;let text=format!("Suggested category {:?}; related claims, not a verified answer:\n{}",category,self.render_claims(r)?);work.push(text.clone())?;return Ok(Response{text,path:"learned_category",model_called:called,complete:false});}}}
+
  let (text,path,complete)=match answer{
  Answer::Claims(r)=>{let complete=!r.truncated&&!r.facts.is_empty()&&r.facts.iter().all(|f|self.policy.assessment(f).ok().flatten().map(|r|r.verdict)==Some(Verdict::Accepted));(self.render_claims(r)?,"knowledge",complete)},
  Answer::Number(n)=>(n.to_string(),"arithmetic",true),
- Answer::Paths(p)=>{let mut t=String::from("Unverified evidence paths:");for x in p.paths{t.push_str(&format!("\n{:?} -> {:?}",x.first,x.second));}(t,"relationship",false)},
+ Answer::Paths(p)=>{let mut t=String::from("Unverified evidence paths:");for x in p.paths{if self.policy.assessment(&x.first)?.map(|r|r.verdict)==Some(Verdict::Rejected)||self.policy.assessment(&x.second)?.map(|r|r.verdict)==Some(Verdict::Rejected){continue}t.push_str(&format!("\n{:?} -> {:?}",x.first,x.second));}(t,"relationship",false)},
  Answer::Unknown{suggested_categories}=>(format!("Unsupported question; suggested categories: {suggested_categories:?}"),"abstain",false)};
  work.push(text.clone())?;Ok(Response{text,path,model_called:called,complete})
  }

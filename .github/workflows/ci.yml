@@ -52,3 +52,13 @@ jobs:
       - run: |
           cargo run -p air-cli -- dataflow /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db knowledge/examples/dataflow.json | grep '"values":\[12,36\]'
           printf '%s\n' '{"kind":"health"}' '{"kind":"ask","question":"calculate 5 * 7"}' | cargo run -q -p air-cli -- serve /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db | python3 -c 'import sys,json; a,b=map(json.loads,sys.stdin); assert a["result"]["status"]=="ready" and b["result"]["text"]=="35"'
+      - run: |
+          cargo run -p air-cli -- teach-route /tmp/air-policy.db automotive "diesel engine smoke combustion injection"
+          cargo run -p air-cli -- teach-route /tmp/air-policy.db geography "country capital city continent"
+          cargo run -p air-cli -- session /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db "diesel engine smoke combustion injection" | grep "Suggested category"
+          cargo run -p air-cli -- observe /tmp/air-predict.db a b
+          cargo run -p air-cli -- predict /tmp/air-predict.db a | grep "1 | b"
+          cargo run -p air-cli -- revision-put /tmp/air-rev.db demo knowledge/examples/demo.tsv
+          cargo run -p air-cli -- revision-put /tmp/air-rev.db demo knowledge/examples/compound.json
+          cargo run -p air-cli -- revision-rollback /tmp/air-rev.db demo 1
+          cargo run -q -p air-cli -- revision-get /tmp/air-rev.db demo | cmp - knowledge/examples/demo.tsv

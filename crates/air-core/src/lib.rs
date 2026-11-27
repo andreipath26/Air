@@ -41,3 +41,7 @@ pub mod dataflow;
 pub mod prediction;
 pub mod weightless;
 pub mod runtime;
+
+pub mod learned_router;
+pub mod revision;
+pub mod diagnostics;

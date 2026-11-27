@@ -73,3 +73,6 @@ Operator reviews and skill approvals are separate from untrusted model output. S
 
 ## Resident runtime and typed composition
 `air-cli serve DB MEMORY POLICY` accepts one JSON request per line on stdin and returns one JSON response per line. Example: `{"kind":"ask","question":"calculate 5 * 7"}`. `dataflow DB MEMORY POLICY PROGRAM.json` composes typed intermediate results. See [prototype 08](docs/architecture/prototype-08.md).
+
+## Learned routing and reversible objects
+`teach-route POLICY CATEGORY PHRASE` adds operator-provided category examples. Integrated sessions may return a clearly marked category suggestion when other routing abstains. `observe` / `predict` record and retrieve transition counts. `revision-put`, `revision-get`, and `revision-rollback` operate on content-addressed objects. See [prototype 09](docs/architecture/prototype-09.md).
