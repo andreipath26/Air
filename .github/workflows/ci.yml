@@ -12,7 +12,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --workspace
       - run: python3 scripts/test-evidence-gate.py
-      - run: python3 -m py_compile scripts/g01-benchmark.py
+      - run: python3 -m py_compile scripts/g01-benchmark.py scripts/g01-corpus.py scripts/g01-resource.py scripts/g01-assemble.py
+      - run: python3 scripts/test-g01-pipeline.py
       - run: cargo run -p air-cli -- doctor
       - run: cargo test -p air-core representation_selection
       - run: cargo test -p air-core lexical
@@ -139,8 +140,7 @@ jobs:
       - run: cargo run --release -p air-bench -- retrieval 10000 /tmp/air-scale.db
       - run: |
           cargo build --release -p air-cli
-          target/release/air-cli index-import knowledge/examples/demo.tsv /tmp/g01.db
-          target/release/air-cli review /tmp/g01-policy.db France capital Paris accept fixture "smoke only"
-          python3 scripts/g01-benchmark.py knowledge/examples/g01-smoke.json /tmp/g01-observations --system air --db /tmp/g01.db --policy /tmp/g01-policy.db --router knowledge/examples/g01-router.json
+          python3 scripts/g01-corpus.py knowledge/examples/g01-corpus-smoke.json /tmp/g01-corpus --mode reference
+          python3 scripts/g01-benchmark.py knowledge/examples/g01-smoke.json /tmp/g01-observations --system air --db /tmp/g01-corpus/knowledge.db --policy /tmp/g01-corpus/policy.db --router knowledge/examples/g01-router.json
           python3 -c 'import json; x=json.load(open("/tmp/g01-observations/observations.json")); assert x["answers"]=={"fixture-1":"Paris","fixture-2":None} and not x["gate_eligible"]'
 

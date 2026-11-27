@@ -2,7 +2,9 @@
 """Run one closed-world system against a frozen workload; output raw observations.
 Process RSS and CPU package RAPL are diagnostics, not whole-system gate measurements.
 """
-import argparse, hashlib, json, pathlib, subprocess, time, urllib.request, os, threading
+import argparse, hashlib, json, pathlib, subprocess, time, urllib.request, os, threading, importlib.util, select
+spec=importlib.util.spec_from_file_location('g01_resource',pathlib.Path(__file__).with_name('g01-resource.py'))
+resource=importlib.util.module_from_spec(spec);spec.loader.exec_module(resource)
 def read(path, cap=8*1024*1024):
     with open(path,"rb") as f: raw=f.read(cap+1)
     if len(raw)>cap: raise ValueError("input limit")
@@ -37,6 +39,7 @@ def main():
         cmd=[args.air_bin,"factual-serve",args.db,args.policy,args.router]
         identity={k:sha(v) for k,v in [("binary_sha256",args.air_bin),("database_sha256",args.db),("policy_sha256",args.policy),("router_sha256",args.router)]}
     answers={};errors={};peak=0;stop=threading.Event()
+    meter=resource.Meter()
     started=time.monotonic()
     with (out/"stderr.log").open("w") as log,(out/"responses.jsonl").open("w") as trace:
         proc=subprocess.Popen(cmd,stdin=subprocess.PIPE,stdout=subprocess.PIPE if args.system!="quantized_teacher" else log,stderr=log,text=True,bufsize=1)
@@ -47,6 +50,7 @@ def main():
                     for line in pathlib.Path(f"/proc/{proc.pid}/status").read_text().splitlines():
                         if line.startswith("VmRSS:"):peak=max(peak,int(line.split()[1])*1024)
                 except OSError:pass
+                meter.sample()
                 stop.wait(.02)
         monitor=threading.Thread(target=sample,daemon=True);monitor.start()
         try:
@@ -73,6 +77,7 @@ def main():
                         answer=None if text.casefold().rstrip(".") in ("unknown","null","i don't know") else text.rstrip(".")
                     else:
                         proc.stdin.write(json.dumps(c["question"])+"\n");proc.stdin.flush()
+                        if not select.select([proc.stdout],[],[],120)[0]:raise TimeoutError('AIR response timeout')
                         response=json.loads(proc.stdout.readline(65537))
                         answer=response["answer"]
                 except Exception as e:
@@ -81,10 +86,10 @@ def main():
                 trace.write(json.dumps({"id":c["id"],"answer":answer,"raw":response,"error":errors.get(c["id"]),"seconds":time.monotonic()-now})+"\n");trace.flush()
             elapsed=time.monotonic()-ready
         finally:
-            stop.set();monitor.join();proc.terminate()
+            stop.set();monitor.join();meter.sample();proc.terminate()
             try:proc.wait(timeout=10)
             except subprocess.TimeoutExpired:proc.kill();proc.wait()
-    result={"system":args.system,"dataset_sha256":hashlib.sha256(raw).hexdigest(),"identity":identity,"command":cmd,"answers":answers,"errors":errors,"wall_seconds":elapsed,"startup_seconds":ready-started,"sampled_process_peak_rss_bytes":peak,"measurement_scope":"single child process RSS, not whole-system RAM; no energy measurement","gate_eligible":False}
+    result={"system":args.system,"dataset_sha256":hashlib.sha256(raw).hexdigest(),"identity":identity,"command":cmd,"answers":answers,"errors":errors,"wall_seconds":elapsed,"startup_seconds":ready-started,"sampled_process_peak_rss_bytes":peak,"measurement_scope":"sampled child RSS and system memory; optional CPU package energy; not certified whole-system electrical energy","gate_eligible":False,"resource_diagnostics":meter.report()}
     (out/"observations.json").write_text(json.dumps(result,indent=2))
     if errors:raise SystemExit(1)
 if __name__=="__main__":main()

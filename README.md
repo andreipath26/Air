@@ -106,3 +106,6 @@ See [G01 factual capability transfer](docs/architecture/evidence-gate-01.md) and
 
 ## G01 execution
 See [benchmark execution](docs/architecture/g01-execution.md). The factual-serve DB POLICY ROUTER.json command provides bounded, reviewed factual answers. scripts/g01-benchmark.py supports resident AIR and a hash-pinned CPU-only llama.cpp server. Included smoke data is not independent gate evidence; observations are gate-ineligible until complete resource measurements and review exist.
+
+## G01 corpus and measurements
+Use scripts/g01-corpus.py CORPUS OUTPUT --mode reference or --mode teacher with a pinned declared loopback teacher. Run the three benchmark systems independently. scripts/g01-assemble.py joins their observations with separately supplied whole-system measurements; CPU package RAPL and process RSS are diagnostics only. See [corpus and measurement pipeline](docs/architecture/g01-corpus-and-measurement.md).

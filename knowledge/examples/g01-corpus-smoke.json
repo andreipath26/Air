@@ -1,0 +1,12 @@
+[
+  {
+    "subject": "France",
+    "relation": "capital",
+    "answer": "Paris",
+    "group": "geography",
+    "source": "https://www.cia.gov/the-world-factbook/countries/france/",
+    "question": "Name the capital of France.",
+    "reviewer": "development fixture",
+    "review_rationale": "Smoke test only, not independent corpus review"
+  }
+]
