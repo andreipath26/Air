@@ -14,6 +14,7 @@ jobs:
       - run: python3 scripts/test-evidence-gate.py
       - run: python3 -m py_compile scripts/g01-benchmark.py scripts/g01-corpus.py scripts/g01-resource.py scripts/g01-assemble.py
       - run: python3 scripts/test-g01-pipeline.py
+      - run: python3 -m py_compile scripts/g01-development.py scripts/g01-run.py
       - run: cargo run -p air-cli -- doctor
       - run: cargo test -p air-core representation_selection
       - run: cargo test -p air-core lexical
@@ -143,4 +144,7 @@ jobs:
           python3 scripts/g01-corpus.py knowledge/examples/g01-corpus-smoke.json /tmp/g01-corpus --mode reference
           python3 scripts/g01-benchmark.py knowledge/examples/g01-smoke.json /tmp/g01-observations --system air --db /tmp/g01-corpus/knowledge.db --policy /tmp/g01-corpus/policy.db --router knowledge/examples/g01-router.json
           python3 -c 'import json; x=json.load(open("/tmp/g01-observations/observations.json")); assert x["answers"]=={"fixture-1":"Paris","fixture-2":None} and not x["gate_eligible"]'
+          python3 scripts/g01-development.py /tmp/g01-dev
+          python3 scripts/g01-run.py /tmp/g01-dev/corpus.json /tmp/g01-dev/dataset.json /tmp/g01-dev/router.json /tmp/g01-dev-run --development-reference-only
+          python3 -c 'import json; x=json.load(open("/tmp/g01-dev-run/summary.json")); assert x["systems"]["reference_retrieval"]["correct"]==240 and not x["gate_eligible"]'
 

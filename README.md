@@ -109,3 +109,6 @@ See [benchmark execution](docs/architecture/g01-execution.md). The factual-serve
 
 ## G01 corpus and measurements
 Use scripts/g01-corpus.py CORPUS OUTPUT --mode reference or --mode teacher with a pinned declared loopback teacher. Run the three benchmark systems independently. scripts/g01-assemble.py joins their observations with separately supplied whole-system measurements; CPU package RAPL and process RSS are diagnostics only. See [corpus and measurement pipeline](docs/architecture/g01-corpus-and-measurement.md).
+
+## One-command G01 runner
+See [runner protocol](docs/architecture/g01-runner.md). scripts/g01-development.py generates 240 synthetic integration cases; scripts/g01-run.py orchestrates conversion and the three systems with pinned local teacher files. The synthetic workload is not acceptance evidence.

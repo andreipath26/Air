@@ -6,3 +6,5 @@ edition.workspace = true
 air-core = { path = "../air-core" }
 
 serde_json = "1"
+
+serde = { version = "1", features = ["derive"] }

@@ -74,6 +74,7 @@ def main():
                         req=urllib.request.Request(url+"/v1/chat/completions",data=json.dumps(body).encode(),headers={"Content-Type":"application/json"})
                         with urllib.request.urlopen(req,timeout=120) as r:response=json.loads(r.read(65537))
                         text=response["choices"][0]["message"]["content"].strip()
+                        if not text:raise ValueError("empty teacher output")
                         answer=None if text.casefold().rstrip(".") in ("unknown","null","i don't know") else text.rstrip(".")
                     else:
                         proc.stdin.write(json.dumps(c["question"])+"\n");proc.stdin.flush()
@@ -82,6 +83,7 @@ def main():
                         answer=response["answer"]
                 except Exception as e:
                     errors[c["id"]]=type(e).__name__
+                    if args.system!="quantized_teacher":raise RuntimeError("resident protocol failed; stop to avoid response misalignment") from e
                 answers[c["id"]]=answer
                 trace.write(json.dumps({"id":c["id"],"answer":answer,"raw":response,"error":errors.get(c["id"]),"seconds":time.monotonic()-now})+"\n");trace.flush()
             elapsed=time.monotonic()-ready
