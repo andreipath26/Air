@@ -429,6 +429,41 @@
           "interpretation": "Development-only diagnostic. Reference-fed retrieval is an oracle-style ceiling because it receives the reference corpus. Corpus, router and questions are same-author; unsupported cases are synthetic; general_reference is a narrow periodic-table lookup; the FP32 teacher remained resident during AIR timing. One malformed answer was incorrectly counted as a transport error by the pre-fix script despite HTTP 200. No G01 gate passed.",
           "gate_eligible": false,
           "artifact_url": "https://github.com/andreipath26/Air/actions/runs/45978770516"
+        },
+        {
+          "date": "2026-11-27",
+          "run_id": 45982358534,
+          "artifact_id": 15189469633,
+          "commit": "bedde731e7468dfaa9fb6ac175a00dab4a818dcc",
+          "teacher": "Qwen/Qwen2.5-0.5B-Instruct@7ae557604adf67be50417f59c2c2f167def9a775",
+          "teacher_weights_sha256": "fdf756fa7fcbe7404d5c60e26bff1a0c8b8aa1f72ced49e7dd0210fe288fb7fe",
+          "teacher_license": "apache-2.0",
+          "metrics": {
+            "teacher_fed_air_correct": 157,
+            "fp32_teacher_correct": 121,
+            "reference_fed_retrieval_correct": 240,
+            "evaluation_questions": 240,
+            "teacher_malformed_answers": 1,
+            "teacher_abstentions": 9,
+            "teacher_transport_errors": 0,
+            "teacher_fed_air_group_correct": {
+              "geography": "42/50",
+              "science": "45/50",
+              "engineering": "28/50",
+              "general_reference": "2/50",
+              "unknown": "40/40"
+            },
+            "fp32_teacher_group_correct": {
+              "geography": "40/50",
+              "science": "41/50",
+              "engineering": "23/50",
+              "general_reference": "8/50",
+              "unknown": "9/40"
+            }
+          },
+          "interpretation": "Corrected post-merge development run. The 0.5B teacher job passed with one malformed answer and zero request exceptions. Teacher-fed AIR accuracy was 65.4%; this remains below the 90% G01 absolute accuracy threshold. Same-author dataset/router/paraphrases, synthetic unknown cases, oracle-style reference retrieval and resident FP32 teacher during AIR timing make this diagnostic only. No G01 gate passed; the 1.5B job and reconciliation were still running at the time recorded.",
+          "gate_eligible": false,
+          "artifact_url": "https://github.com/andreipath26/Air/actions/runs/45982358534"
         }
       ]
     },
