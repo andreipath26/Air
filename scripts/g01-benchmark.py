@@ -37,11 +37,12 @@ def main():
         if not all([args.llama_server,args.gguf,args.expected_model_sha,args.expected_server_sha]):raise ValueError("pinned model/server hashes required")
         if sha(args.gguf)!=args.expected_model_sha or sha(args.llama_server)!=args.expected_server_sha:raise ValueError("baseline hash mismatch")
         cmd=[args.llama_server,"-m",args.gguf,"--host","127.0.0.1","--port",str(args.port),"-ngl","0","-t",str(args.threads),"-c","2048","-np","1"]
-        identity={"model_sha256":args.expected_model_sha,"server_sha256":args.expected_server_sha}
+        identity={"model_sha256":args.expected_model_sha,"server_sha256":args.expected_server_sha,"model_size_bytes":pathlib.Path(args.gguf).stat().st_size,"server_size_bytes":pathlib.Path(args.llama_server).stat().st_size}
     else:
         if not all([args.db,args.policy,args.router]):raise ValueError("database, policy, router required")
         cmd=[args.air_bin,"factual-serve",args.db,args.policy,args.router]
         identity={k:sha(v) for k,v in [("binary_sha256",args.air_bin),("database_sha256",args.db),("policy_sha256",args.policy),("router_sha256",args.router)]}
+        identity.update({"binary_size_bytes":pathlib.Path(args.air_bin).stat().st_size,"database_size_bytes":pathlib.Path(args.db).stat().st_size,"policy_size_bytes":pathlib.Path(args.policy).stat().st_size,"router_size_bytes":pathlib.Path(args.router).stat().st_size})
     answers={};errors={};peak=0;stop=threading.Event()
     meter=resource.Meter()
     started=time.monotonic()
