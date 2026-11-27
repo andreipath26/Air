@@ -1,9 +1,9 @@
 {
   "version": 1,
   "id": "G02",
-  "status": "protocol_established_not_run",
+  "status": "harness_implemented_development_only",
   "title": "Selective model-weight replacement",
-  "question": "Can a selected model capability be represented and served by AIR with held-out quality preserved and lower lifecycle-inclusive cost, with original model weights absent for AIR-only inference?",
+  "question": "Can one selected model capability run from an AIR package with the original model unloaded while preserving held-out quality and reducing lifecycle-inclusive cost?",
   "initial_capability": "closed-world factual retrieval under G01",
   "hardware": {
     "model": "Dell Latitude 7490",
@@ -12,9 +12,9 @@
     "gpu": false
   },
   "systems": [
-    "pinned CPU-only quantized llama.cpp model",
-    "AIR-only converted capability package with teacher and neural fallback unloaded",
-    "hybrid AIR-first routing with all model fallbacks logged",
+    "pinned CPU-only quantized llama.cpp baseline",
+    "AIR-only package with teacher and neural fallback unloaded",
+    "AIR-first hybrid with every model fallback logged",
     "optional reference-fed AIR oracle ceiling, reported separately"
   ],
   "workload": {
@@ -22,15 +22,12 @@
     "minimum_substantive_domains": 4,
     "minimum_cases_per_domain": 40,
     "minimum_unknown_cases": 40,
+    "groups": ["geography", "science", "engineering", "general_reference"],
+    "unknown_group": "unknown",
     "independently_authored_and_reviewed": true,
     "frozen_before_scoring": true,
     "extraction_and_final_test_disjoint": true,
-    "includes": [
-      "held-out paraphrases",
-      "ambiguous and adversarially similar entities",
-      "conflicting or stale facts",
-      "unsupported questions"
-    ]
+    "includes": ["held-out paraphrases", "ambiguous and adversarially similar entities", "conflicting or stale facts", "unsupported questions"]
   },
   "thresholds": {
     "air_only_absolute_accuracy_percent": 90,
@@ -42,23 +39,26 @@
     "energy_per_correct_reduction_percent": 50,
     "hybrid_quality_tolerance_percentage_points": 1
   },
-  "required_reporting": [
-    "per-domain quality and uncertainty intervals",
-    "AIR direct-answer coverage and hybrid fallback rate",
-    "cold and warm latency, throughput, and end-to-end wall time",
-    "whole-system peak RAM and documented energy meter boundary",
-    "model and package storage",
-    "conversion time and energy, lifecycle-inclusive cost, and break-even query volume",
-    "raw prompts, outputs, errors, identities, hashes, and fallback decisions"
+  "requirements": [
+    "same frozen task IDs and reviewed answers for all systems",
+    "pin llama.cpp server, GGUF model, quantization, revisions, hashes and flags",
+    "run AIR-only with no teacher model or neural fallback loaded",
+    "record every AIR answer and every hybrid fallback with reason and latency",
+    "report cold startup and warm inference separately",
+    "measure whole-host used memory and CPU-package energy with boundaries stated",
+    "report conversion time, energy, storage, lifecycle cost and break-even volume",
+    "reviewer assertions bind exact corpus, dataset and router hashes",
+    "preserve raw outputs, errors, identities and measurement artifacts"
   ],
-  "pass_claims": {
-    "air_replaces_selected_capability": "AIR-only passes every AIR-only quality and resource threshold with the original model unloaded.",
-    "hybrid_reduces_cost": "Hybrid stays within the quality tolerance and lowers measured lifecycle-adjusted resource cost; this is selective routing, not weight replacement."
+  "claims": {
+    "air_replaces_selected_capability": "AIR-only meets all quality, throughput, RAM and lifecycle-energy thresholds with original weights unloaded.",
+    "hybrid_saves_cost": "Hybrid remains within one percentage point of baseline quality, has no higher measured peak memory and lower lifecycle-adjusted CPU-package energy per correct answer; this does not prove weight replacement."
   },
   "limitations": [
-    "Passing a factual retrieval gate does not establish replacement of general-purpose model weights.",
-    "The current G01 harness lacks hybrid fallback comparison and target-laptop whole-system energy measurement.",
-    "Same-author development results are not acceptance evidence."
+    "Passing factual retrieval does not establish replacement of general-purpose model weights.",
+    "The runner and evaluator do not authenticate reviewer assertions or hardware declarations.",
+    "CPU-package energy is not external whole-system wall-power measurement.",
+    "The bundled development workload is not acceptance evidence."
   ],
   "related_gate": "G01"
 }
