@@ -79,3 +79,6 @@ Operator reviews and skill approvals are separate from untrusted model output. S
 
 ## Planned: AIR Model Transcompiler (AMT)
 Reuse existing pretrained models by extracting selected capabilities through behavioural distillation and experimental weight/activation analysis, compiling them into AIR-native representations and retaining neural fallback where needed. No full-model inversion or equivalence is claimed. See [architecture and validation strategy](docs/architecture/model-transcompiler.md) and Phase 23 of the [roadmap](ROADMAP.md).
+
+## AMT pilot
+`amt-inspect model.safetensors` inventories a checkpoint and computes its SHA-256. With a CPU-only local model server running, edit the teacher identification and license in `knowledge/examples/amt-pilot.json`, then run `bash scripts/amt-pilot.sh SPEC.json NEW_REPORT.json`. `amt-import REPORT.json MEMORY` imports an unapproved candidate into procedural memory. See [pilot limitations](docs/architecture/amt-pilot.md).

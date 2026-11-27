@@ -62,3 +62,6 @@ jobs:
           cargo run -p air-cli -- revision-put /tmp/air-rev.db demo knowledge/examples/compound.json
           cargo run -p air-cli -- revision-rollback /tmp/air-rev.db demo 1
           cargo run -q -p air-cli -- revision-get /tmp/air-rev.db demo | cmp - knowledge/examples/demo.tsv
+      - run: |
+          python3 -c 'import json,struct; h=json.dumps({"weight":{"dtype":"F32","shape":[2],"data_offsets":[0,8]}}).encode(); open("/tmp/air-fixture.safetensors","wb").write(struct.pack("<Q",len(h))+h+struct.pack("<ff",1,2))'
+          cargo run -p air-cli -- amt-inspect /tmp/air-fixture.safetensors | grep sha256

@@ -45,3 +45,6 @@ pub mod runtime;
 pub mod learned_router;
 pub mod revision;
 pub mod diagnostics;
+
+pub mod amt;
+pub mod checkpoint;
