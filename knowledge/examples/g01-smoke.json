@@ -1,0 +1,16 @@
+[
+  {
+    "id": "fixture-1",
+    "group": "geography",
+    "question": "Which city serves as the capital of French Republic?",
+    "answer": "Paris",
+    "source": "public smoke fixture, not independent gate data"
+  },
+  {
+    "id": "fixture-2",
+    "group": "unknown",
+    "question": "What is the population of France?",
+    "answer": null,
+    "source": "unsupported relation fixture"
+  }
+]

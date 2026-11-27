@@ -62,3 +62,5 @@ pub mod representation_selection;
 
 pub mod discovery;
 pub mod prefetch;
+
+pub mod factual;

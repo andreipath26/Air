@@ -103,3 +103,6 @@ Use amt-discover SPEC REPORT to record bounded capability probes. AIR_PREDICTIVE
 
 ## Evidence-driven acceptance
 See [G01 factual capability transfer](docs/architecture/evidence-gate-01.md) and [gate policy](research/evidence-gate-01.json). Run python3 scripts/evidence-gate.py DATASET.json EVIDENCE.json to evaluate submitted numerical evidence. Independent review is mandatory; a numerical pass is not certification.
+
+## G01 execution
+See [benchmark execution](docs/architecture/g01-execution.md). The factual-serve DB POLICY ROUTER.json command provides bounded, reviewed factual answers. scripts/g01-benchmark.py supports resident AIR and a hash-pinned CPU-only llama.cpp server. Included smoke data is not independent gate evidence; observations are gate-ineligible until complete resource measurements and review exist.

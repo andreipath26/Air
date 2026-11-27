@@ -1,0 +1,26 @@
+{
+  "entities": [
+    {
+      "canonical": "France",
+      "aliases": [
+        "French Republic"
+      ]
+    },
+    {
+      "canonical": "Italy",
+      "aliases": [
+        "Italian Republic"
+      ]
+    }
+  ],
+  "relations": [
+    {
+      "canonical": "capital",
+      "patterns": [
+        "What is the capital of {entity}?",
+        "Which city serves as the capital of {entity}?",
+        "Name the capital of {entity}."
+      ]
+    }
+  ]
+}
