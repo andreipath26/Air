@@ -41,3 +41,11 @@ jobs:
           python3 -c 'import hashlib,json; p="knowledge/examples/demo.tsv"; print(json.dumps(dict(format=1,name="fixture",version="1",license="test fixture",sha256=hashlib.sha256(open(p,"rb").read()).hexdigest())))' > /tmp/air-manifest.json
           cargo run -p air-cli -- package-import /tmp/air-package.db /tmp/air-policy.db /tmp/air-manifest.json knowledge/examples/demo.tsv
           cargo run -p air-cli -- session /tmp/air-package.db /tmp/air-memory.db /tmp/air-policy.db "What is the capital of France?" | grep Paris
+      - run: |
+          cargo run -p air-cli -- plan /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db knowledge/examples/plan.json | grep '"stopped":null'
+          cargo run -p air-cli -- evaluate /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db knowledge/examples/evaluation.json | python3 -c 'import sys,json; x=json.load(sys.stdin); assert x["correct"]==x["total"]==4 and x["model_calls"]==0'
+          cargo run -p air-cli -- compact-put /tmp/air-compact.db demo knowledge/examples/demo.tsv
+          cargo run -q -p air-cli -- compact-get /tmp/air-compact.db demo | cmp - knowledge/examples/demo.tsv
+          cargo run -p air-cli -- temporal-record /tmp/air-time.db a state old 0 10 fixture
+          cargo run -p air-cli -- temporal-record /tmp/air-time.db a state new 10 none fixture
+          cargo run -p air-cli -- temporal-at /tmp/air-time.db a state 10 | grep new

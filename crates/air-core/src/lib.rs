@@ -30,3 +30,9 @@ pub mod consolidation;
 pub mod causal;
 pub mod probability;
 pub mod packages;
+
+pub mod plan;
+pub mod temporal;
+pub mod compact;
+pub mod verification;
+pub mod evaluation;

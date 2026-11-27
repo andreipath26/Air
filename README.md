@@ -67,3 +67,6 @@ Operator reviews and skill approvals are separate from untrusted model output. S
 
 ## Knowledge packages and explicit reasoning
 `package-import DB POLICY MANIFEST DATA.tsv` verifies a SHA-256 manifest and atomically consolidates reviewed aliases. `probability MODEL.json` evaluates an explicit finite Bayesian model. Integrated sessions support `explain causal A -> B` for operator-reviewed causal paths. See [prototype 06](docs/architecture/prototype-06.md).
+
+## Bounded plans and additional representations
+`plan DB MEMORY POLICY PLAN.json` executes explicit steps through the coordinator; `evaluate DB MEMORY POLICY CASES.json` records fixture accuracy, latency and model calls. `compact-put` / `compact-get` provide random-access compressed blocks; `temporal-record` / `temporal-at` preserve time-bounded claims. See [prototype 07](docs/architecture/prototype-07.md).

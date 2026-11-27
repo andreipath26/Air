@@ -226,7 +226,7 @@
       "acceptance_gate": "Reproducible measurements across historical, neural, symbolic and hybrid baselines",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-03.md."
+        "No phase gate passed; see docs/architecture/prototype-07.md."
       ]
     },
     {
@@ -369,7 +369,7 @@
       "acceptance_gate": "Portable validated heterogeneous directly addressable format",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-02.md."
+        "No phase gate passed; see docs/architecture/prototype-07.md."
       ]
     },
     {
@@ -590,7 +590,7 @@
       "acceptance_gate": "Automatically curate validated searchable knowledge without manually authoring each record",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-06.md."
+        "No phase gate passed; see docs/architecture/prototype-07.md."
       ]
     },
     {
@@ -668,7 +668,7 @@
       "acceptance_gate": "Store larger than RAM searchable under controlled memory budget",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-06.md."
+        "No phase gate passed; see docs/architecture/prototype-07.md."
       ]
     },
     {
@@ -938,7 +938,7 @@
       "acceptance_gate": "Each memory type independently usable",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-06.md."
+        "No phase gate passed; see docs/architecture/prototype-07.md."
       ]
     },
     {
@@ -1146,7 +1146,7 @@
       "acceptance_gate": "Cross-domain composition with inspectable evidence where applicable",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-06.md."
+        "No phase gate passed; see docs/architecture/prototype-07.md."
       ]
     },
     {
@@ -1185,7 +1185,7 @@
       "acceptance_gate": "Respect explicit RAM/time/compute budgets at specified quality",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-05.md."
+        "No phase gate passed; see docs/architecture/prototype-07.md."
       ]
     },
     {
@@ -1263,7 +1263,7 @@
       "acceptance_gate": "Adaptive mixed-workload execution beats static baseline",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-06.md."
+        "No phase gate passed; see docs/architecture/prototype-07.md."
       ]
     },
     {
@@ -1289,7 +1289,7 @@
       "acceptance_gate": "Portable heterogeneous operations with measured CPU/memory efficiency",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-03.md."
+        "No phase gate passed; see docs/architecture/prototype-07.md."
       ]
     },
     {
@@ -1347,7 +1347,7 @@
     {
       "id": "P21",
       "name": "Scientific validation and scaling",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1404,7 +1404,10 @@
         }
       ],
       "acceptance_gate": "Reproducible quality-adjusted improvements on mandatory hardware",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-07.md."
+      ]
     },
     {
       "id": "P22",
