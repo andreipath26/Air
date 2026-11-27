@@ -64,3 +64,6 @@ cargo run -p air-cli -- approve-skill policy.db memory.db compound 1
 cargo run -p air-cli -- session demo.db memory.db policy.db "skill compound 8 10"
 ```
 Operator reviews and skill approvals are separate from untrusted model output. See [prototype 05](docs/architecture/prototype-05.md).
+
+## Knowledge packages and explicit reasoning
+`package-import DB POLICY MANIFEST DATA.tsv` verifies a SHA-256 manifest and atomically consolidates reviewed aliases. `probability MODEL.json` evaluates an explicit finite Bayesian model. Integrated sessions support `explain causal A -> B` for operator-reviewed causal paths. See [prototype 06](docs/architecture/prototype-06.md).

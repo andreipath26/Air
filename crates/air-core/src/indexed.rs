@@ -16,8 +16,8 @@ impl Indexed {
  pub fn create(path:&Path,limits:Limits)->Result<Self>{check(limits)?;let conn=Connection::open(path)?;let version:i64=conn.query_row("PRAGMA user_version",[],|r|r.get(0))?;if version!=0&&version!=1{return Err("unsupported schema".into())}conn.execute_batch(SCHEMA)?;Self::configure(conn,limits)}
  pub fn open(path:&Path,limits:Limits)->Result<Self>{check(limits)?;let conn=Connection::open_with_flags(path,OpenFlags::SQLITE_OPEN_READ_ONLY)?;let version:i64=conn.query_row("PRAGMA user_version",[],|r|r.get(0))?;if version!=1{return Err("unsupported schema".into())}Self::configure(conn,limits)}
  fn configure(conn:Connection,limits:Limits)->Result<Self>{conn.busy_timeout(Duration::from_secs(2))?;conn.pragma_update(None,"cache_size",-(limits.cache_kib as i64))?;conn.pragma_update(None,"temp_store","FILE")?;conn.pragma_update(None,"foreign_keys",true)?;conn.pragma_update(None,"mmap_size",0)?;conn.set_limit(rusqlite::limits::Limit::SQLITE_LIMIT_LENGTH,1048576); let remaining=std::sync::Arc::new(std::sync::atomic::AtomicU32::new(limits.max_steps)); let budget=remaining.clone(); conn.progress_handler(100,Some(move||budget.fetch_update(std::sync::atomic::Ordering::Relaxed,std::sync::atomic::Ordering::Relaxed,|n|n.checked_sub(100)).is_err()));Ok(Self{conn,limits,remaining})}
- pub fn insert(&mut self,f:&Fact)->Result<bool>{self.remaining.store(self.limits.max_steps,std::sync::atomic::Ordering::Relaxed);for s in [&f.subject,&f.relation,&f.object].into_iter().chain(f.categories.iter()).chain(f.sources.iter()){if s.trim().is_empty()||s.len()>4096{return Err("invalid field".into())}}if f.categories.is_empty()||f.sources.is_empty()||f.categories.len()>64||f.sources.len()>64{return Err("invalid metadata".into())}
- let tx=self.conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
+ pub fn insert(&mut self,f:&Fact)->Result<bool>{Ok(self.insert_batch(std::slice::from_ref(f))?==1)}
+ pub fn insert_batch(&mut self,facts:&[Fact])->Result<usize>{if facts.len()>128{return Err("batch limit".into())}let mut inserted=0;let tx=self.conn.transaction_with_behavior(TransactionBehavior::Immediate)?;for f in facts{self.remaining.store(self.limits.max_steps,std::sync::atomic::Ordering::Relaxed);for s in [&f.subject,&f.relation,&f.object].into_iter().chain(f.categories.iter()).chain(f.sources.iter()){if s.trim().is_empty()||s.len()>4096{return Err("invalid field".into())}}if f.categories.is_empty()||f.sources.is_empty()||f.categories.len()>64||f.sources.len()>64{return Err("invalid metadata".into())}
  let (ns,nr,no)=(norm(&f.subject),norm(&f.relation),norm(&f.object));
  let n=tx.execute("INSERT OR IGNORE INTO facts(s,r,o,ns,nr,no) VALUES (?1,?2,?3,?4,?5,?6)",params![f.subject,f.relation,f.object,ns,nr,no])?;
  let id:i64=tx.query_row("SELECT id FROM facts WHERE ns=?1 AND nr=?2 AND no=?3",params![ns,nr,no],|r|r.get(0))?;
@@ -25,7 +25,7 @@ impl Indexed {
  for s in &f.sources{tx.execute("INSERT OR IGNORE INTO sources VALUES (?1,?2)",params![id,s])?;}
  let cats:i64=tx.query_row("SELECT count(*) FROM categories WHERE fact=?1",[id],|r|r.get(0))?;
  let srcs:i64=tx.query_row("SELECT count(*) FROM sources WHERE fact=?1",[id],|r|r.get(0))?;
- if cats>64||srcs>64{return Err("merged metadata limit".into())}tx.commit()?;Ok(n!=0)}
+ if cats>64||srcs>64{return Err("merged metadata limit".into())}inserted+=n;}tx.commit()?;Ok(inserted)}
  pub fn len(&self)->Result<u64>{self.remaining.store(self.limits.max_steps,std::sync::atomic::Ordering::Relaxed);Ok(self.conn.query_row("SELECT count(*) FROM facts",[],|r|r.get(0))?)}
  pub fn lookup(&self,s:&str,r:&str)->Result<Retrieved>{self.select("SELECT id,s,r,o FROM facts WHERE ns=?1 AND nr=?2 ORDER BY id LIMIT ?3",&norm(s),&norm(r))}
  pub fn category(&self,c:&str)->Result<Retrieved>{self.select("SELECT f.id,f.s,f.r,f.o FROM categories c JOIN facts f ON c.fact=f.id WHERE c.category=?1 AND ?2='' ORDER BY c.fact LIMIT ?3",&norm(c),"")}

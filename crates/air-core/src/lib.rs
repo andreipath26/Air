@@ -25,3 +25,8 @@ pub mod policy;
 pub mod engine;
 pub mod synthesis;
 pub mod deduction;
+
+pub mod consolidation;
+pub mod causal;
+pub mod probability;
+pub mod packages;

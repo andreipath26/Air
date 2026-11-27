@@ -36,3 +36,8 @@ jobs:
           cargo run -p air-cli -- approve-skill /tmp/air-policy.db /tmp/air-memory.db compound 1
           test "$(cargo run -q -p air-cli -- session /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db "skill compound 8 10")" = 81
           cargo run -p air-cli -- session /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db "recall diesel" | grep "inspect air intake"
+      - run: |
+          cargo run -p air-cli -- probability knowledge/examples/probability.json | grep probability
+          python3 -c 'import hashlib,json; p="knowledge/examples/demo.tsv"; print(json.dumps(dict(format=1,name="fixture",version="1",license="test fixture",sha256=hashlib.sha256(open(p,"rb").read()).hexdigest())))' > /tmp/air-manifest.json
+          cargo run -p air-cli -- package-import /tmp/air-package.db /tmp/air-policy.db /tmp/air-manifest.json knowledge/examples/demo.tsv
+          cargo run -p air-cli -- session /tmp/air-package.db /tmp/air-memory.db /tmp/air-policy.db "What is the capital of France?" | grep Paris

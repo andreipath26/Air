@@ -590,7 +590,7 @@
       "acceptance_gate": "Automatically curate validated searchable knowledge without manually authoring each record",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-05.md."
+        "No phase gate passed; see docs/architecture/prototype-06.md."
       ]
     },
     {
@@ -668,7 +668,7 @@
       "acceptance_gate": "Store larger than RAM searchable under controlled memory budget",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-03.md."
+        "No phase gate passed; see docs/architecture/prototype-06.md."
       ]
     },
     {
@@ -938,7 +938,7 @@
       "acceptance_gate": "Each memory type independently usable",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-05.md."
+        "No phase gate passed; see docs/architecture/prototype-06.md."
       ]
     },
     {
@@ -1146,7 +1146,7 @@
       "acceptance_gate": "Cross-domain composition with inspectable evidence where applicable",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-05.md."
+        "No phase gate passed; see docs/architecture/prototype-06.md."
       ]
     },
     {
@@ -1263,7 +1263,7 @@
       "acceptance_gate": "Adaptive mixed-workload execution beats static baseline",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-05.md."
+        "No phase gate passed; see docs/architecture/prototype-06.md."
       ]
     },
     {
@@ -1315,7 +1315,7 @@
       "acceptance_gate": "Improve selected capabilities without corrupting knowledge or full retraining",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-05.md."
+        "No phase gate passed; see docs/architecture/prototype-06.md."
       ]
     },
     {
@@ -1341,7 +1341,7 @@
       "acceptance_gate": "Adversarial and recovery tests before unrestricted acquisition/execution",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-05.md."
+        "No phase gate passed; see docs/architecture/prototype-06.md."
       ]
     },
     {
