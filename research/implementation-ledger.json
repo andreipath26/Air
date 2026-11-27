@@ -590,7 +590,7 @@
       "acceptance_gate": "Automatically curate validated searchable knowledge without manually authoring each record",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-03.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -785,7 +785,7 @@
       "acceptance_gate": "Supported queries without large-model inference and unseen paraphrases via semantic routing",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-03.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -824,7 +824,7 @@
       "acceptance_gate": "High routing recall on unseen/interdisciplinary questions, measured overhead and recovery",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-03.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -863,7 +863,7 @@
       "acceptance_gate": "Equivalent paraphrases map compatibly; ambiguity distinguished",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-03.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -938,7 +938,7 @@
       "acceptance_gate": "Each memory type independently usable",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-04.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -1055,7 +1055,7 @@
       "acceptance_gate": "Automatically discovered primitives solve unseen compositions with lower resource cost",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-04.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -1094,7 +1094,7 @@
       "acceptance_gate": "Replace selected learned behaviour with cheaper validated representations",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-04.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -1146,7 +1146,7 @@
       "acceptance_gate": "Cross-domain composition with inspectable evidence where applicable",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-04.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -1185,7 +1185,7 @@
       "acceptance_gate": "Respect explicit RAM/time/compute budgets at specified quality",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-03.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -1224,7 +1224,7 @@
       "acceptance_gate": "Structured answers without neural decoding",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-04.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -1263,7 +1263,7 @@
       "acceptance_gate": "Adaptive mixed-workload execution beats static baseline",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-03.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -1315,7 +1315,7 @@
       "acceptance_gate": "Improve selected capabilities without corrupting knowledge or full retraining",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-04.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {
@@ -1341,7 +1341,7 @@
       "acceptance_gate": "Adversarial and recovery tests before unrestricted acquisition/execution",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-04.md."
+        "No phase gate passed; see docs/architecture/prototype-05.md."
       ]
     },
     {

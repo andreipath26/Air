@@ -28,3 +28,11 @@ jobs:
           cargo run -p air-cli -- learn-skill /tmp/air-memory.db multiply knowledge/examples/multiply.json
           test "$(cargo run -q -p air-cli -- run-skill /tmp/air-memory.db multiply 11 13)" = 143
           AIR_LANGUAGE=fr cargo run -p air-cli -- ask /tmp/air-demo.db "What is the capital of France?" | grep "Paris est la capitale"
+      - run: |
+          cargo run -p air-cli -- alias /tmp/air-policy.db relation "capital city" capital
+          cargo run -p air-cli -- review /tmp/air-policy.db France capital Paris accept fixture "test evidence"
+          cargo run -p air-cli -- session /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db "What is the capital city of France?" | grep "Operator review"
+          cargo run -p air-cli -- synthesise /tmp/air-memory.db compound knowledge/examples/compound.json
+          cargo run -p air-cli -- approve-skill /tmp/air-policy.db /tmp/air-memory.db compound 1
+          test "$(cargo run -q -p air-cli -- session /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db "skill compound 8 10")" = 81
+          cargo run -p air-cli -- session /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db "recall diesel" | grep "inspect air intake"

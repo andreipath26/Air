@@ -20,3 +20,8 @@ pub mod skills;
 pub mod associative;
 pub mod evidence;
 pub mod language;
+
+pub mod policy;
+pub mod engine;
+pub mod synthesis;
+pub mod deduction;

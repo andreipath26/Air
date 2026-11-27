@@ -54,3 +54,13 @@ cargo run -p air-cli -- run-skill memory.db multiply 11 13
 AIR_LANGUAGE=fr cargo run -p air-cli -- ask demo.db "What is the capital of France?"
 ```
 Restricted integer program induction and compilation are experiments, not general-purpose learned intelligence. See [prototype 04](docs/architecture/prototype-04.md).
+
+## Integrated inference session
+```sh
+cargo run -p air-cli -- alias policy.db relation "capital city" capital
+cargo run -p air-cli -- session demo.db memory.db policy.db "What is the capital city of France?"
+cargo run -p air-cli -- synthesise memory.db compound knowledge/examples/compound.json
+cargo run -p air-cli -- approve-skill policy.db memory.db compound 1
+cargo run -p air-cli -- session demo.db memory.db policy.db "skill compound 8 10"
+```
+Operator reviews and skill approvals are separate from untrusted model output. See [prototype 05](docs/architecture/prototype-05.md).
