@@ -1,0 +1,5 @@
+# Candidate audit protocol
+
+For each candidate in the research ledger record pinned repository/release, primary literature, architecture, algorithms, language, license and dependency compatibility, maintenance, build reproducibility, capabilities, limitations, memory/SSD/CPU costs, comparable benchmark evidence, integration effort and decision (adopt, adapt, reject, defer). No candidate is approved yet.
+
+Priority source inspections: [ChatScript](https://github.com/ChatScript/ChatScript), [Hyperon](https://github.com/trueagi-io/hyperon-experimental), [MORK](https://github.com/trueagi-io/MORK), [Soar](https://soar.eecs.umich.edu/), [GF](https://www.grammaticalframework.org/), [egg](https://github.com/egraphs-good/egg), [Oxigraph](https://github.com/oxigraph/oxigraph), [Ascent](https://github.com/s-arash/ascent), [DreamCoder](https://arxiv.org/abs/2006.08381), [Infini-gram](https://arxiv.org/abs/2401.17377), [T-MAC](https://github.com/microsoft/T-MAC). Links are starting points, not completed audits.

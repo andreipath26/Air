@@ -1,0 +1,2 @@
+use std::{hint::black_box, time::Instant};
+fn main() { let n: u64 = match std::env::args().nth(1).unwrap_or_else(||"100000".into()).parse() { Ok(n) if n > 0 => n, _ => { eprintln!("Expected positive iteration count"); std::process::exit(2); } }; let start=Instant::now(); let mut x=0u64; for i in 0..n { x=black_box(x.wrapping_add(black_box(i))); } println!("{{\"kind\":\"harness_smoke\",\"iterations\":{},\"elapsed_ns\":{},\"checksum\":{}}}",n,start.elapsed().as_nanos(),x); }

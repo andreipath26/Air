@@ -1,0 +1,1 @@
+fn main() { match std::env::args().nth(1).as_deref() { Some("doctor") => println!("AIR research bootstrap; arch={} os={}; inference not implemented", std::env::consts::ARCH, std::env::consts::OS), _ => { eprintln!("Usage: air-cli doctor"); std::process::exit(2); } } }

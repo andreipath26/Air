@@ -1,0 +1,3 @@
+/target/
+/experiments/results/*.json
+/knowledge/packages/*.bin

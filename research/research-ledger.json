@@ -1,0 +1,920 @@
+{
+  "version": "0.2",
+  "hypotheses": [
+    {
+      "id": "H01",
+      "name": "Generative intelligence encoding",
+      "claim": "Compact reusable instructions may replace independently stored numerical relationships",
+      "foundations": "Genetics, linguistics, program synthesis",
+      "status": "untested"
+    },
+    {
+      "id": "H02",
+      "name": "Structural intelligence",
+      "claim": "Connectivity, topology and executable relationships may encode learned information",
+      "foundations": "Chemistry, graph theory, neuroscience",
+      "status": "untested"
+    },
+    {
+      "id": "H03",
+      "name": "Intelligence compilation",
+      "claim": "Optimal learning representation may differ from optimal inference representation",
+      "foundations": "Compiler engineering, consolidation",
+      "status": "untested"
+    },
+    {
+      "id": "H04",
+      "name": "Addressable intelligence",
+      "claim": "Much knowledge may be retrieved instead of reconstructed",
+      "foundations": "Databases, bioinformatics, associative memory",
+      "status": "untested"
+    },
+    {
+      "id": "H05",
+      "name": "Modernised A.L.I.C.E.",
+      "claim": "Modern semantic learning may overcome historical conversational architecture limitations",
+      "foundations": "AIML, ChatScript, semantic parsing",
+      "status": "untested"
+    },
+    {
+      "id": "H06",
+      "name": "Weightless intelligence",
+      "claim": "Selected capabilities may execute through logic, binary patterns and lookup",
+      "foundations": "Digital electronics, HDC, logic networks",
+      "status": "untested"
+    },
+    {
+      "id": "H07",
+      "name": "Category-based selective activation",
+      "claim": "SLM coordinates larger stores with small active working set",
+      "foundations": "Information science, cognition",
+      "status": "untested"
+    },
+    {
+      "id": "H08",
+      "name": "Task-centric inference",
+      "claim": "Compute may scale with task complexity rather than total knowledge",
+      "foundations": "Control theory, NARS, adaptive execution",
+      "status": "untested"
+    }
+  ],
+  "experiments": [
+    {
+      "id": "E01",
+      "name": "Neural weight entropy and redundancy",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E02",
+      "name": "Neural behaviour extraction",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E03",
+      "name": "Automatic abstraction discovery",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E04",
+      "name": "Predictive state consolidation",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E05",
+      "name": "Non-neural language prediction",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E06",
+      "name": "Binary associative memory",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E07",
+      "name": "Structural learning",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E08",
+      "name": "Logic compilation",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E09",
+      "name": "Automatic representation selection",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E10",
+      "name": "CPU-cache locality",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E11",
+      "name": "Heterogeneous representation integration",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E12",
+      "name": "Generalisability preservation",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E13",
+      "name": "Energy efficiency",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E14",
+      "name": "Knowledge capacity scaling",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E15",
+      "name": "Continuous consolidation",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E16",
+      "name": "Modernised ALICE architecture",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E17",
+      "name": "SLM category routing",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E18",
+      "name": "Cross-category retrieval",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E19",
+      "name": "Semantic deduplication",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E20",
+      "name": "Automated knowledge curation",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E21",
+      "name": "Teacher-to-structured-knowledge transfer",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E22",
+      "name": "Cognitive memory separation",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E23",
+      "name": "Reusable procedural memory",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E24",
+      "name": "Resource-budgeted reasoning",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E25",
+      "name": "Grammar-based response generation",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E26",
+      "name": "Adaptive neural activation",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E27",
+      "name": "SSD-backed knowledge execution",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E28",
+      "name": "Multilingual semantic representation",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E29",
+      "name": "Case-based reasoning reuse",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E30",
+      "name": "Full-system comparative evaluation",
+      "status": "planned",
+      "hypothesis": null,
+      "baseline": null,
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    }
+  ],
+  "baselines": [
+    {
+      "id": "B01",
+      "name": "Original ALICE/AIML",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B02",
+      "name": "ChatScript",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B03",
+      "name": "Expert system",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B04",
+      "name": "Cognitive architecture",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B05",
+      "name": "Conventional SLM",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B06",
+      "name": "SLM + RAG",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B07",
+      "name": "SLM + knowledge graph",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B08",
+      "name": "Modern neuro-symbolic system",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B09",
+      "name": "Quantized llama.cpp LLM",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B10",
+      "name": "KILN neural inference",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B11",
+      "name": "AIR without compilation",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B12",
+      "name": "Complete AIR",
+      "status": "not_benchmarked"
+    }
+  ],
+  "disciplines": [
+    "Genetics: generative instructions",
+    "Epigenetics: conditional expression",
+    "Developmental biology: reusable regulation",
+    "Immunology: recombination",
+    "Evolutionary biology: selection",
+    "Neuroscience: memory and consolidation",
+    "Cognitive psychology: schemas",
+    "Chemistry: structural behaviour",
+    "Crystallography: repeated structures",
+    "Materials science: structure-dependent function",
+    "Statistical physics: minimal predictive states",
+    "Thermodynamics: energy and data movement",
+    "Quantum information: correlations",
+    "Optics: distributed representations",
+    "Acoustics: harmonic decomposition",
+    "Information theory: compression limits",
+    "Algorithmic information: generating programs",
+    "Linguistics: composition",
+    "Semiotics: symbols and meaning",
+    "Category theory: transformation composition",
+    "Topology: connectivity and invariance",
+    "Automata: predictive states",
+    "Cybernetics: feedback",
+    "Control theory: budgeted decisions",
+    "Digital electronics: logic",
+    "Compiler engineering: executable representations",
+    "Databases: addressing",
+    "Bioinformatics: compressed sequences",
+    "Cryptography: content addresses",
+    "Telecommunications: error correction",
+    "Distributed systems: coordination",
+    "Signal processing: sparse representations",
+    "Complexity science: emergence",
+    "Statistical prediction: language models",
+    "Evolutionary computation: discovery",
+    "Computer architecture: cache and hierarchy"
+  ],
+  "technology_inventory": [
+    {
+      "name": "ELIZA",
+      "group": "Historical dialogue",
+      "status": "audit_pending"
+    },
+    {
+      "name": "PARRY",
+      "group": "Historical dialogue",
+      "status": "audit_pending"
+    },
+    {
+      "name": "ALICE",
+      "group": "Historical dialogue",
+      "status": "audit_pending"
+    },
+    {
+      "name": "AIML",
+      "group": "Historical dialogue",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Graphmaster",
+      "group": "Historical dialogue",
+      "status": "audit_pending"
+    },
+    {
+      "name": "ChatScript",
+      "group": "Historical dialogue",
+      "status": "audit_pending"
+    },
+    {
+      "name": "RiveScript",
+      "group": "Historical dialogue",
+      "status": "audit_pending"
+    },
+    {
+      "name": "OpenDial",
+      "group": "Historical dialogue",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Rasa",
+      "group": "Historical dialogue",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Soar",
+      "group": "Cognitive architectures",
+      "status": "audit_pending"
+    },
+    {
+      "name": "ACT-R",
+      "group": "Cognitive architectures",
+      "status": "audit_pending"
+    },
+    {
+      "name": "OpenCog Hyperon",
+      "group": "Cognitive architectures",
+      "status": "audit_pending"
+    },
+    {
+      "name": "AtomSpace",
+      "group": "Cognitive architectures",
+      "status": "audit_pending"
+    },
+    {
+      "name": "MeTTa",
+      "group": "Cognitive architectures",
+      "status": "audit_pending"
+    },
+    {
+      "name": "MORK",
+      "group": "Cognitive architectures",
+      "status": "audit_pending"
+    },
+    {
+      "name": "NARS",
+      "group": "Cognitive architectures",
+      "status": "audit_pending"
+    },
+    {
+      "name": "MicroPsi",
+      "group": "Cognitive architectures",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Copycat / Metacat",
+      "group": "Cognitive architectures",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Hierarchical Temporal Memory",
+      "group": "Cognitive architectures",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Case-Based Reasoning",
+      "group": "Cognitive architectures",
+      "status": "audit_pending"
+    },
+    {
+      "name": "DENDRAL",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "MYCIN",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "PROSPECTOR",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "XCON",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "CLIPS",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Rete",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Prolog",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Datalog",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Drools",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Cyc",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Wolfram Alpha",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Soufflé",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Ascent",
+      "group": "Expert systems",
+      "status": "audit_pending"
+    },
+    {
+      "name": "WordNet",
+      "group": "Language",
+      "status": "audit_pending"
+    },
+    {
+      "name": "FrameNet",
+      "group": "Language",
+      "status": "audit_pending"
+    },
+    {
+      "name": "ConceptNet",
+      "group": "Language",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Grammatical Framework",
+      "group": "Language",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Universal Dependencies",
+      "group": "Language",
+      "status": "audit_pending"
+    },
+    {
+      "name": "AMR",
+      "group": "Language",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Construction Grammar",
+      "group": "Language",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Finite-state transducers",
+      "group": "Language",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Infini-gram",
+      "group": "Language",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Context-tree prediction",
+      "group": "Language",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Grammar compression",
+      "group": "Language",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Engram",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "RETRO",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Memory Layers at Scale",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Product Key Memory",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "RouterRetriever",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "RAPTOR",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "FrugalGPT",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "LINC",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Logic-LM",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Scallop",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "DeepProbLog",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "AlphaGeometry",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "MemGPT",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "GraphRAG",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Knowledge Vault",
+      "group": "Hybrid AI",
+      "status": "audit_pending"
+    },
+    {
+      "name": "DreamCoder",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Stitch",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "LILO",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "MIPS",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Tracr",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Learning Transformer Programs",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "AI Feynman",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "egg",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Knowledge compilation",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Weightless neural networks",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Differentiable logic gates",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "HDC",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Vector symbolic architectures",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Probabilistic circuits",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Binary decision diagrams",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Predictive state machines",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "BitNet",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "T-MAC",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "ZipNN",
+      "group": "Compilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "FM-index",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Burrows–Wheeler transform",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Succinct data structures",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Wavelet trees",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Compressed suffix arrays",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Suffixient arrays",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "De Bruijn graphs",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Content-addressable storage",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Oxigraph",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "SQLite",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "MORK",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Memory mapping",
+      "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Dictionary encoding",
+      "group": "Storage",
+      "status": "audit_pending"
+    }
+  ]
+}
