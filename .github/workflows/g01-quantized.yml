@@ -5,6 +5,10 @@ on:
     paths:
       - '.github/workflows/g01-quantized.yml'
       - 'scripts/g01-resolve-pins.py'
+      - 'scripts/g01-run.py'
+      - 'scripts/g01-benchmark.py'
+      - 'scripts/g02-hybrid.py'
+      - 'scripts/g02-evaluate.py'
   workflow_dispatch:
     inputs:
       llama_revision:
