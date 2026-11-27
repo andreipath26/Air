@@ -15,3 +15,9 @@ jobs:
           cargo run -p air-cli -- import knowledge/examples/demo.tsv /tmp/demo.air
           cargo run -p air-cli -- lookup /tmp/demo.air France capital | grep Paris
           cargo run -p air-cli -- category /tmp/demo.air automotive | grep Combustion
+      - run: |
+          cargo run -p air-cli -- index-import knowledge/examples/demo.tsv /tmp/air-demo.db
+          cargo run -p air-cli -- ask /tmp/air-demo.db "What is the capital of France?" | grep Paris
+          cargo run -p air-cli -- ask /tmp/air-demo.db "calculate 583 * 927" | grep 540441
+          cargo run -p air-cli -- ask /tmp/air-demo.db "unknown request" '{"kind":"category","category":"automotive"}' | grep Combustion
+          cargo run --release -p air-bench -- retrieval 1000 /tmp/air-bench.db

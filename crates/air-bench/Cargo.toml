@@ -2,3 +2,6 @@
 name = "air-bench"
 version.workspace = true
 edition.workspace = true
+
+[dependencies]
+air-core = { path = "../air-core" }

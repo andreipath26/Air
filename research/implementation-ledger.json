@@ -206,7 +206,7 @@
     {
       "id": "P02",
       "name": "Benchmark and experimental infrastructure",
-      "status": "scaffolded",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -224,12 +224,15 @@
         }
       ],
       "acceptance_gate": "Reproducible measurements across historical, neural, symbolic and hybrid baselines",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-02.md."
+      ]
     },
     {
       "id": "P03",
       "name": "Universal information representation",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -364,12 +367,15 @@
         }
       ],
       "acceptance_gate": "Portable validated heterogeneous directly addressable format",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-02.md."
+      ]
     },
     {
       "id": "P04",
       "name": "Information Curation Engine",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -582,12 +588,15 @@
         }
       ],
       "acceptance_gate": "Automatically curate validated searchable knowledge without manually authoring each record",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-02.md."
+      ]
     },
     {
       "id": "P05",
       "name": "Categorised knowledge storage",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -657,12 +666,15 @@
         }
       ],
       "acceptance_gate": "Store larger than RAM searchable under controlled memory budget",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-02.md."
+      ]
     },
     {
       "id": "P06",
       "name": "Graphmaster 2.0",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -771,12 +783,15 @@
         }
       ],
       "acceptance_gate": "Supported queries without large-model inference and unseen paraphrases via semantic routing",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-02.md."
+      ]
     },
     {
       "id": "P07",
       "name": "Intelligent SLM router",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -807,12 +822,15 @@
         }
       ],
       "acceptance_gate": "High routing recall on unseen/interdisciplinary questions, measured overhead and recovery",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-02.md."
+      ]
     },
     {
       "id": "P08",
       "name": "Semantic language interpretation",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -843,7 +861,10 @@
         }
       ],
       "acceptance_gate": "Equivalent paraphrases map compatibly; ambiguity distinguished",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-02.md."
+      ]
     },
     {
       "id": "P09",
@@ -1116,7 +1137,7 @@
     {
       "id": "P15",
       "name": "Resource-aware cognitive controller",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1147,12 +1168,15 @@
         }
       ],
       "acceptance_gate": "Respect explicit RAM/time/compute budgets at specified quality",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-02.md."
+      ]
     },
     {
       "id": "P16",
       "name": "Language realisation engine",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1183,12 +1207,15 @@
         }
       ],
       "acceptance_gate": "Structured answers without neural decoding",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-02.md."
+      ]
     },
     {
       "id": "P17",
       "name": "Adaptive task-centric inference",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1219,12 +1246,15 @@
         }
       ],
       "acceptance_gate": "Adaptive mixed-workload execution beats static baseline",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-02.md."
+      ]
     },
     {
       "id": "P18",
       "name": "CPU-native execution runtime",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1242,7 +1272,10 @@
         }
       ],
       "acceptance_gate": "Portable heterogeneous operations with measured CPU/memory efficiency",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-02.md."
+      ]
     },
     {
       "id": "P19",
