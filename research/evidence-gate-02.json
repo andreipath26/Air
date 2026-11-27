@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "id": "G02",
+  "status": "protocol_established_not_run",
+  "title": "Selective model-weight replacement",
+  "question": "Can a selected model capability be represented and served by AIR with held-out quality preserved and lower lifecycle-inclusive cost, with original model weights absent for AIR-only inference?",
+  "initial_capability": "closed-world factual retrieval under G01",
+  "hardware": {
+    "model": "Dell Latitude 7490",
+    "cpu": "i7-8650U",
+    "ram_gib": 16,
+    "gpu": false
+  },
+  "systems": [
+    "pinned CPU-only quantized llama.cpp model",
+    "AIR-only converted capability package with teacher and neural fallback unloaded",
+    "hybrid AIR-first routing with all model fallbacks logged",
+    "optional reference-fed AIR oracle ceiling, reported separately"
+  ],
+  "workload": {
+    "minimum_cases": 240,
+    "minimum_substantive_domains": 4,
+    "minimum_cases_per_domain": 40,
+    "minimum_unknown_cases": 40,
+    "independently_authored_and_reviewed": true,
+    "frozen_before_scoring": true,
+    "extraction_and_final_test_disjoint": true,
+    "includes": [
+      "held-out paraphrases",
+      "ambiguous and adversarially similar entities",
+      "conflicting or stale facts",
+      "unsupported questions"
+    ]
+  },
+  "thresholds": {
+    "air_only_absolute_accuracy_percent": 90,
+    "air_only_relative_to_pinned_model_percent": 95,
+    "minimum_per_domain_accuracy_percent": 80,
+    "unknown_abstention_percent": 95,
+    "correct_answer_throughput_ratio": 2,
+    "whole_system_peak_ram_reduction_percent": 50,
+    "energy_per_correct_reduction_percent": 50,
+    "hybrid_quality_tolerance_percentage_points": 1
+  },
+  "required_reporting": [
+    "per-domain quality and uncertainty intervals",
+    "AIR direct-answer coverage and hybrid fallback rate",
+    "cold and warm latency, throughput, and end-to-end wall time",
+    "whole-system peak RAM and documented energy meter boundary",
+    "model and package storage",
+    "conversion time and energy, lifecycle-inclusive cost, and break-even query volume",
+    "raw prompts, outputs, errors, identities, hashes, and fallback decisions"
+  ],
+  "pass_claims": {
+    "air_replaces_selected_capability": "AIR-only passes every AIR-only quality and resource threshold with the original model unloaded.",
+    "hybrid_reduces_cost": "Hybrid stays within the quality tolerance and lowers measured lifecycle-adjusted resource cost; this is selective routing, not weight replacement."
+  },
+  "limitations": [
+    "Passing a factual retrieval gate does not establish replacement of general-purpose model weights.",
+    "The current G01 harness lacks hybrid fallback comparison and target-laptop whole-system energy measurement.",
+    "Same-author development results are not acceptance evidence."
+  ],
+  "related_gate": "G01"
+}
