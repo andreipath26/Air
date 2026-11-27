@@ -30,6 +30,24 @@ def extract(raw,subject=None,relation=None):
             if m:
                 text=m.group(1).strip()
                 break
+        if " ".join(relation.casefold().split()) in {"si unit symbol","chemical symbol"}:
+            # Small teachers often return a label with the symbol instead of
+            # following the short-answer instruction. Extract only the
+            # relation value; reference matching still decides acceptance.
+            candidates=[
+                rf"^{s}\s+(?:is\s+)?(?:represented|denoted|written|symboli[sz]ed)\s+(?:by\s+)?(?:the\s+)?(?:SI\s+)?(?:unit\s+)?symbol\s*(?:is\s+|:\s*)?(.+)$",
+                rf"^(?:the\s+)?(?:SI\s+)?(?:unit\s+)?symbol\s*(?:is\s+|for\s+|of\s+|:\s*)?(.+)$",
+                rf"^([A-ZµμΩ°]{{1,4}})\s+{s}$",
+            ]
+            for pattern in candidates:
+                m=re.fullmatch(pattern,text,flags=re.I)
+                if m:
+                    text=m.group(1).strip()
+                    break
+            # Accept conventional “Name (symbol)” answers, even when the
+            # model pluralizes the name or omits it entirely.
+            m=re.search(r"\(([^()]{1,16})\)\s*$",text)
+            if m:text=m.group(1).strip()
     if text.casefold() in {"unknown","null","i don't know","uncertain","n/a"}:return None,"abstained"
     if not text or len(text)>256 or len(text.split())>12 or any(ord(c)<32 or c in "{}[]?!" for c in text):return None,"malformed"
     return text,"extracted"
