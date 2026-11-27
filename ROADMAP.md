@@ -5,7 +5,7 @@ Status: active engineering and research programme; no performance or general-int
 
 # v0.6 Scope Directive
 
-The immediate deployment target is a CPU-first hybrid AI coding assistant running on the mandatory Dell Latitude 7490 (i7-8650U, 4 cores/8 threads, 16 GB DDR4, NVMe, no dedicated GPU). General-intelligence research, historical architecture recovery, and non-coding phases are preserved in this roadmap but explicitly deferred until the coding assistant reaches validated v1.0 deployment.
+The immediate deployment target is a CPU-first AIR coding system that demonstrates useful AIR-native coding capability with conventional LLM weights absent at runtime, on the mandatory Dell Latitude 7490 (i7-8650U, 4 cores/8 threads, 16 GB DDR4, NVMe, no dedicated GPU). Optional model-assisted operation is evaluated separately and cannot pass the AIR weight-replacement gate. General-intelligence research, historical architecture recovery, and non-coding phases are preserved in this roadmap but explicitly deferred until AIR coding capability reaches validated v1.0 deployment.
 
 The v0.5 research programme, hypotheses, implementation phases, technology inventory, baselines, experiments, historical results, and failure clauses remain below as preserved Track B material. Where older text describes immediate or parallel work, this v0.6 directive supersedes it: only Track A is active until its deployment gates pass. Coding-scoped portions of older phases are active only through the v1.0 crosswalk below.
 
