@@ -5,8 +5,7 @@ use std::{collections::BTreeSet,time::Instant};
 #[derive(Debug,Deserialize)]#[serde(deny_unknown_fields)]pub struct Case{pub subject:String,pub relation:String,pub expected:String,pub category:String,pub reference:String,pub question:String,pub paraphrase:String}
 #[derive(Debug,Deserialize)]#[serde(deny_unknown_fields)]pub struct Spec{pub teacher_id:String,pub cases:Vec<Case>}
 pub trait Teacher{fn answer(&self,q:&str)->Result<Option<String>>;}
-#[derive(Deserialize)]#[serde(deny_unknown_fields)]struct Reply{answer:Option<String>}
-impl Teacher for LocalModel{fn answer(&self,q:&str)->Result<Option<String>>{let raw=self.complete("Answer with a short exact name or term. Return JSON object with answer: string or null if unknown.",q)?;Ok(serde_json::from_str::<Reply>(&raw).ok().and_then(|r|r.answer))}}
+impl Teacher for LocalModel{fn answer(&self,q:&str)->Result<Option<String>>{let raw=self.complete_plain("Answer with only the short name or term, or unknown. Do not explain.",q)?;Ok(crate::elicitation::text(&raw,"answer").value)}}
 fn norm(s:&str)->String{s.split_whitespace().collect::<Vec<_>>().join(" ").to_lowercase()}
 #[derive(Debug,Serialize)]pub struct Outcome{pub subject:String,pub relation:String,pub teacher_answer:Option<String>,pub paraphrase_answer:Option<String>,pub candidate:bool,pub retrieved_correct:bool,pub teacher_paraphrase_correct:bool}
 #[derive(Debug,Serialize)]pub struct Report{pub teacher_id:String,pub spec_sha256:String,pub total:usize,pub extracted:usize,pub teacher_paraphrase_correct:usize,pub retrieved_correct:usize,pub teacher_ns:u128,pub retrieval_ns:u128,pub outcomes:Vec<Outcome>}

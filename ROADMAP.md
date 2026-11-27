@@ -1,10 +1,27 @@
 # AIR — Adaptive Intelligence Representation
-## Master research and development roadmap v0.3
+## Master research and development roadmap v0.4
 
 Status: proposed research programme; no performance or general-intelligence claims. This repository version captures the roadmap's substantive requirements; chat diagrams are expressed as text. All targets are hypotheses, not results.
 
 ## Mission and directives
 Develop CPU-first local intelligence with substantially lower quality-adjusted resource costs. Separate learning, curation, representation, retrieval, reasoning, execution and language realisation. Offline inference, no dedicated GPU, selective activation, representation independence, automatic learning, compositional reuse, continuous incremental updates, scientific validity, generalisation, reuse before rebuilding, portability, inspectability and optional KILN integration. Expensive training/compilation is permissible only with lifecycle cost accounting. Never assume transformers or weights are mandatory.
+
+## Current execution priorities — post-pilot revision (v0.4)
+
+Initial real-model experiment: GitHub Actions run 45971173610, artifact 15185626215. Small public fixtures suggest promising classification transfer; factual and procedural extraction failed. The bridge ignored JSON constraints and did not preserve raw responses. Missing model knowledge versus formatting failures cannot yet be distinguished. No acceptance gate is passed.
+
+Six concurrent development lanes govern implementation. All prior hypotheses, phases, experiments, baselines and gates remain binding.
+
+| Lane | Immediate priorities | Exit evidence |
+|---|---|---|
+| W1 Curation | Raw responses, structured and plain extraction, explicit error/abstention states, entity resolution, provenance, independent verification, conflict handling and deduplication | Independently checked claims and reproducible error classification |
+| W2 Behavioural AMT | Universal interrogation, capability inventory, paraphrases, counterexamples, 0.5B/1.5B/3B/7B and other licensed teachers, resumable orchestration | Per-capability results distinguished from communication failures |
+| W3 Structural AMT | Weight entropy/rank, activation clustering, sparse autoencoders, transcoders, activation patching and circuit tracing | Controlled causal interventions, not mere correlations |
+| W4 Compiler | Compare facts, graphs, programs, logic, decision trees, weightless classifiers, predictive states, grammar, causal and probabilistic structures, case memory and neural residuals | Held-out quality, lifecycle cost, portable artifacts and explicit approval |
+| W5 Runtime | Integrate validated capabilities, adaptive routing, selective loading, bounded memory, caching, neural fallback, verification and language realisation | End-to-end task completion and measured resource use |
+| W6 Validation | Independent larger datasets, conventional lexical and neural baselines, quality-adjusted latency/throughput, whole-system RAM, energy and conversion amortisation | Reproducible target-laptop CPU-only evidence |
+
+Immediate sequence within lanes: repair and instrument communication; compare teachers; evaluate candidate representations; integrate validated capabilities; measure full-system costs. Structural work proceeds independently. Initial research targets remain >=95% teacher accuracy on meaningful independent workloads, >=2x quality-adjusted throughput, >=50% RAM and energy-per-correct-task reductions. Report absolute accuracy, coverage, per-domain regressions and negative results. Weak teachers and trivial tasks do not establish general capability preservation.
 
 ## Hypotheses
 - H01 **Generative intelligence encoding:** Compact reusable instructions may replace independently stored numerical relationships. Foundations: Genetics, linguistics, program synthesis.
@@ -311,6 +328,6 @@ AMT (P23) starts in parallel with the existing research, teacher, curation and c
 If full weightless intelligence fails retain efficient specialised components; if general compilation fails retain selected compiled behaviours; if Genome fails at scale retain reusable libraries; if symbolic reasoning fails use neural fallback; if non-neural generation fails retain grammar fast paths; if full extraction fails retain curated knowledge; if SLM reasoning fails use selectively loaded larger modules; if tenfold gains fail report smaller measured gains; if frontier-level capability fails retain domain-specific utility. No deployment before gates.
 
 ## Status
-Nine hypotheses, 24 phases, 38 core experiments; preliminary conceptual survey only. Technology audits, experimental validation and production readiness not established. The bootstrap workspace is infrastructure, not evidence of the hypotheses. Machine-readable ledgers are authoritative for work and evidence; completion is based on validated acceptance tests, not subjective percentages.
+Nine hypotheses, 24 phases, 38 core experiments; prototype implementation and preliminary real-model experiments exist; full acceptance and production readiness not established. The bootstrap workspace is infrastructure, not evidence of the hypotheses. Machine-readable ledgers are authoritative for work and evidence; completion is based on validated acceptance tests, not subjective percentages.
 
 **Principle:** Do not store as weights what can be stored as knowledge; do not calculate what can be retrieved; do not repeatedly infer what can be compiled; do not load what is not needed; do not execute an expensive mechanism when a cheaper one is sufficient, subject to validated quality.

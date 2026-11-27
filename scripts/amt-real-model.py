@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Resolve and fingerprint a Hugging Face teacher, then run three transfer tracks."""
 import argparse, hashlib, json, os, pathlib, subprocess, sys, threading, time
+from importlib.util import spec_from_file_location, module_from_spec
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from huggingface_hub import HfApi, snapshot_download
 import torch
@@ -11,6 +12,7 @@ def main():
     ap.add_argument("--out",required=True)
     ap.add_argument("--revision",default="main")
     ap.add_argument("--model",default="Qwen/Qwen2.5-0.5B-Instruct")
+    ap.add_argument("--structural",action="store_true")
     args=ap.parse_args()
     out=pathlib.Path(args.out); out.mkdir(parents=True,exist_ok=False)
     info=HfApi().model_info(args.model,revision=args.revision)
@@ -31,6 +33,10 @@ def main():
     torch.set_num_threads(min(4,os.cpu_count() or 1))
     tokenizer=AutoTokenizer.from_pretrained(snapshot,trust_remote_code=False,local_files_only=True)
     model=AutoModelForCausalLM.from_pretrained(snapshot,trust_remote_code=False,local_files_only=True,use_safetensors=True,torch_dtype=torch.float32).eval()
+    if args.structural:
+        spec=spec_from_file_location("amt_structural",pathlib.Path(__file__).with_name("amt-structural.py"))
+        structural=module_from_spec(spec);spec.loader.exec_module(structural)
+        structural.inspect_activations(model,tokenizer,out/"structural-report.json")
     class Handler(BaseHTTPRequestHandler):
         def do_POST(self):
             try:
@@ -41,6 +47,8 @@ def main():
                 inputs=tokenizer(text,return_tensors="pt")
                 with torch.inference_mode(): tokens=model.generate(**inputs,max_new_tokens=64,do_sample=False,pad_token_id=tokenizer.eos_token_id)
                 answer=tokenizer.decode(tokens[0,inputs["input_ids"].shape[1]:],skip_special_tokens=True).strip()
+                with (out/"raw-responses.jsonl").open("a",encoding="utf-8") as trace:
+                    trace.write(json.dumps({"messages":body["messages"],"raw":answer,"requested_format":body.get("response_format"),"format_enforced":False},ensure_ascii=False)+"\n")
                 fence=chr(96)*3
                 if answer.startswith(fence) and answer.endswith(fence):
                     answer=answer.split("\n",1)[-1][:-3].strip()

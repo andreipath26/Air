@@ -6,9 +6,12 @@ use std::{io::Read,time::Duration,collections::BTreeSet};
 pub struct LocalModel{agent:ureq::Agent,url:String,model:String}
 impl LocalModel{
  pub fn new(port:u16,model:&str)->Result<Self>{if port==0||model.is_empty()||model.len()>128{return Err("invalid model configuration".into())}Ok(Self{agent:ureq::AgentBuilder::new().redirects(0).timeout_connect(Duration::from_secs(3)).timeout(Duration::from_secs(90)).build(),url:format!("http://127.0.0.1:{port}/v1/chat/completions"),model:model.into()})}
- pub fn complete(&self,system:&str,input:&str)->Result<String>{
+ pub fn complete(&self,system:&str,input:&str)->Result<String>{self.complete_mode(system,input,true)}
+ pub fn complete_plain(&self,system:&str,input:&str)->Result<String>{self.complete_mode(system,input,false)}
+ fn complete_mode(&self,system:&str,input:&str,structured:bool)->Result<String>{
  if input.len()>16384||system.len()>4096{return Err("model input limit".into())}
- let body=json!({"model":self.model,"messages":[{"role":"system","content":system},{"role":"user","content":input}],"temperature":0,"max_tokens":512,"stream":false,"response_format":{"type":"json_object"}});
+ let mut body=json!({"model":self.model,"messages":[{"role":"system","content":system},{"role":"user","content":input}],"temperature":0,"max_tokens":512,"stream":false,"response_format":{"type":"json_object"}});
+ if !structured{body.as_object_mut().ok_or("invalid request")?.remove("response_format");}
  let response=self.agent.post(&self.url).send_json(body)?;
  let mut raw=String::new();response.into_reader().take(65537).read_to_string(&mut raw)?;if raw.len()>65536{return Err("model response limit".into())}
  let v:serde_json::Value=serde_json::from_str(&raw)?;let s=v.pointer("/choices/0/message/content").and_then(|x|x.as_str()).ok_or("missing model content")?;if s.len()>16384{return Err("model content limit".into())}Ok(s.into())

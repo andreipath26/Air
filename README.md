@@ -91,3 +91,6 @@ The [AMT experiment workflow](.github/workflows/amt-experiment.yml) runs a small
 
 ## Parallel validation
 CI uses six independent validation lanes. See [parallel validation](docs/architecture/parallel-validation.md). The real-model AMT experiment runs separately.
+
+## Post-pilot priorities (v0.4)
+See [roadmap](ROADMAP.md) and [post-pilot execution plan](docs/architecture/post-pilot-priorities.md). The next experiment compares two teacher sizes using conservative plain-answer extraction, raw traces and exploratory structural ablations. All six development lanes and prior gates remain active.
