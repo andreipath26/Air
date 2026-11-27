@@ -16,27 +16,30 @@ def run(out,port,teacher_id,weights):
     script("g01-corpus.py",corpus,out/"teacher-store","--mode","teacher","--port",port,"--teacher-id",teacher_id,"--teacher-model-sha",teacher_hash)
     for name,store in [("reference_retrieval","reference-store"),("air","teacher-store")]:
         script("g01-benchmark.py",dataset,out/name,"--system",name,"--db",out/store/"knowledge.db","--policy",out/store/"policy.db","--router",router)
-    cases=json.loads(dataset.read_text());answers={};errors={};started=time.monotonic()
+    cases=json.loads(dataset.read_text());answers={};statuses={};transport_errors={};started=time.monotonic()
     with (out/"teacher-responses.jsonl").open("w") as trace:
         for c in cases:
-            answer=None
+            answer=None;raw=None;status="transport_error"
             try:
                 req=urllib.request.Request(f"http://127.0.0.1:{port}/v1/chat/completions",data=json.dumps({"messages":[{"role":"system","content":"Give only the short factual answer, or unknown if uncertain."},{"role":"user","content":c["question"]}],"temperature":0,"max_tokens":64}).encode(),headers={"Content-Type":"application/json"})
                 with urllib.request.urlopen(req,timeout=120) as r:raw=json.loads(r.read(65537))["choices"][0]["message"]["content"].strip()
                 answer,status=answer_contract.extract(raw)
-                if status=="malformed":errors[c["id"]]="malformed"
-            except Exception as e:errors[c["id"]]=type(e).__name__
-            answers[c["id"]]=answer;trace.write(json.dumps({"id":c["id"],"answer":answer,"error":errors.get(c["id"])})+"\n")
-    systems={"fp32_teacher":{"answers":answers,"errors":errors,"wall_seconds":time.monotonic()-started}}
+            except Exception as e:transport_errors[c["id"]]=type(e).__name__
+            statuses[c["id"]]=status
+            answers[c["id"]]=answer
+            trace.write(json.dumps({"id":c["id"],"teacher_raw":raw,"answer":answer,"status":status,"transport_error":transport_errors.get(c["id"])},ensure_ascii=False)+"\n")
+    systems={"fp32_teacher":{"answers":answers,"statuses":statuses,"errors":transport_errors,"wall_seconds":time.monotonic()-started}}
     for n in ["air","reference_retrieval"]:systems[n]=json.loads((out/n/"observations.json").read_text())
     summary={}
-    for name,s in systems.items():
-        groups={}
-        for c in cases:
-            actual=s["answers"][c["id"]];expected=c["answer"];group=c["group"]
-            norm=lambda x:answer_contract.normalize(x,group)
-            correct=c["id"] not in s["errors"] and norm(actual)==norm(expected)
-            row=groups.setdefault(group,{"correct":0,"total":0});row["correct"]+=int(correct);row["total"]+=1
-        summary[name]={"correct":sum(x["correct"] for x in groups.values()),"total":len(cases),"groups":groups,"wall_seconds":s["wall_seconds"],"errors":len(s["errors"])}
+    for name,s in systems.items():summary[name]=score(cases,s)
     (out/"summary.json").write_text(json.dumps({"systems":summary,"gate_eligible":False,"note":"FP32 teacher remains resident during AIR measurement; timing/resource data not comparable to standalone G01; draft shared-author workload."},indent=2))
-    if errors:raise RuntimeError("teacher transport failures")
+    if transport_errors:raise RuntimeError(f"{len(transport_errors)} teacher transport failures; see teacher-responses.jsonl")
+
+def score(cases,system):
+    groups={};statuses=system.get("statuses",{});errors=system.get("errors",{})
+    for c in cases:
+        case_id=c["id"];actual=system["answers"].get(case_id);expected=c["answer"];group=c["group"]
+        status=statuses.get(case_id)
+        correct=case_id not in errors and status!="malformed" and answer_contract.normalize(actual,group)==answer_contract.normalize(expected,group)
+        row=groups.setdefault(group,{"correct":0,"total":0});row["correct"]+=int(correct);row["total"]+=1
+    return {"correct":sum(x["correct"] for x in groups.values()),"total":len(cases),"groups":groups,"wall_seconds":system["wall_seconds"],"errors":len(errors),"malformed_outputs":sum(x=="malformed" for x in statuses.values()),"abstentions":sum(x=="abstained" for x in statuses.values())}
