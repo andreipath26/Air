@@ -12,6 +12,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --workspace
       - run: cargo run -p air-cli -- doctor
+      - run: cargo test -p air-core representation_selection
+      - run: cargo test -p air-core lexical
       - run: bash scripts/run-cpu-budgeted.sh target/debug/air-cli doctor
   storage:
     name: Knowledge and storage
@@ -119,6 +121,9 @@ jobs:
           python3 -m py_compile scripts/amt-real-model.py
       - run: cargo test -p air-core amt
       - run: cargo test -p air-core intelligence_package
+      - run: cargo test -p air-core classifier_package
+      - run: cargo test -p air-core elicitation
+      - run: python3 -m py_compile scripts/amt-structural.py
   performance:
     name: Performance and resource measurements
     runs-on: ubuntu-latest

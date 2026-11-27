@@ -73,6 +73,16 @@ def main():
                 p=subprocess.run(command,env=env,timeout=900)
                 print(name,"exit",p.returncode,"seconds",time.monotonic()-started,flush=True)
                 if p.returncode:failures.append(name)
+                elif name=="classification":
+                    data=json.loads(report.read_text())
+                    if data.get("training"):
+                        with report.open("rb") as f: digest=hashlib.file_digest(f,"sha256").hexdigest()
+                        result=subprocess.run(["target/release/air-cli","classifier-package",str(report),digest,str(out/"classifier-package.json")])
+                        if result.returncode: failures.append("classifier-package")
+                elif name=="pilot" and json.loads(report.read_text()).get("pilot_passed"):
+                    with report.open("rb") as f: digest=hashlib.file_digest(f,"sha256").hexdigest()
+                    result=subprocess.run(["target/release/air-cli","amt-package",str(report),digest,str(out/"procedure-package.json")])
+                    if result.returncode: failures.append("procedure-package")
             except subprocess.TimeoutExpired: failures.append(name)
     finally:
         server.shutdown();server.server_close()

@@ -55,3 +55,7 @@ pub mod amt_classification;
 pub mod intelligence_package;
 
 pub mod elicitation;
+
+pub mod lexical;
+pub mod classifier_package;
+pub mod representation_selection;

@@ -1556,10 +1556,12 @@
           "dependencies": [
             "P23.06"
           ],
-          "implementation": "crates/air-core/src/amt.rs; crates/air-core/src/checkpoint.rs; docs/architecture/amt-pilot.md",
+          "implementation": "crates/air-core/src/amt.rs; crates/air-core/src/checkpoint.rs; docs/architecture/amt-pilot.md; crates/air-core/src/classifier_package.rs; crates/air-core/src/lexical.rs; crates/air-core/src/representation_selection.rs",
           "acceptance_tests": [],
           "benchmark_evidence": [],
-          "known_limitations": [],
+          "known_limitations": [
+            "Preliminary fixture thresholds; independent validation pending."
+          ],
           "blocking_issues": [],
           "deployment_ready": false
         },
@@ -1606,11 +1608,12 @@
           "dependencies": [
             "P23.07"
           ],
-          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py",
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/classifier_package.rs; crates/air-core/src/lexical.rs; crates/air-core/src/representation_selection.rs",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [
-            "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim."
+            "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim.",
+            "Preliminary fixture thresholds; independent validation pending."
           ],
           "blocking_issues": [],
           "deployment_ready": false
@@ -1624,10 +1627,12 @@
           "dependencies": [
             "P23.10"
           ],
-          "implementation": "crates/air-core/src/amt.rs; crates/air-core/src/checkpoint.rs; docs/architecture/amt-pilot.md",
+          "implementation": "crates/air-core/src/amt.rs; crates/air-core/src/checkpoint.rs; docs/architecture/amt-pilot.md; crates/air-core/src/classifier_package.rs; crates/air-core/src/lexical.rs; crates/air-core/src/representation_selection.rs",
           "acceptance_tests": [],
           "benchmark_evidence": [],
-          "known_limitations": [],
+          "known_limitations": [
+            "Preliminary fixture thresholds; independent validation pending."
+          ],
           "blocking_issues": [],
           "deployment_ready": false
         },

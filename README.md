@@ -94,3 +94,6 @@ CI uses six independent validation lanes. See [parallel validation](docs/archite
 
 ## Post-pilot priorities (v0.4)
 See [roadmap](ROADMAP.md) and [post-pilot execution plan](docs/architecture/post-pilot-priorities.md). The next experiment compares two teacher sizes using conservative plain-answer extraction, raw traces and exploratory structural ablations. All six development lanes and prior gates remain active.
+
+## Portable classifier candidates
+The AMT pilot compares weightless and lexical baselines. Use classifier-package REPORT SHA256 NEW_PACKAGE to export an experimental candidate and classifier-run PACKAGE TEXT to test it offline. Explicit classifier-install POLICY PACKAGE SHA256 requires preliminary quality and coverage thresholds. Use select-representation CANDIDATES CRITERIA for quality-first validation selection. See [prototype 11](docs/architecture/prototype-11.md).

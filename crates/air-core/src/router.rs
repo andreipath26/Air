@@ -8,6 +8,8 @@ pub trait SemanticRouter {fn route(&self,question:&str)->Result<Route>;}
 pub fn deterministic(q:&str)->Route{
  let q=q.trim().trim_end_matches(['?','.']).to_lowercase();
  for prefix in ["what is the ","what's the ","tell me the "]{if let Some(x)=q.strip_prefix(prefix){if let Some((r,s))=x.split_once(" of "){if !r.is_empty()&&!s.is_empty(){return Route::Lookup{subject:s.into(),relation:r.into()}}}}}
+ if let Some(x)=q.strip_prefix("name the capital of "){if !x.is_empty(){return Route::Lookup{subject:x.into(),relation:"capital".into()}}}
+ if let Some(x)=q.strip_prefix("which city is the capital of "){if !x.is_empty(){return Route::Lookup{subject:x.into(),relation:"capital".into()}}}
  if let Some(x)=q.strip_prefix("category "){return Route::Category{category:x.into()}}
  let x=q.strip_prefix("calculate ").unwrap_or(&q);
  let tokens:Vec<_>=x.split_whitespace().collect();if tokens.len()==3 {if let (Ok(left),Ok(right))=(tokens[0].parse(),tokens[2].parse()){if ["+","-","*","×","/"].contains(&tokens[1]){return Route::Arithmetic{left,right,operator:tokens[1].into()}}}}
