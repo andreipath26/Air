@@ -88,3 +88,6 @@ The [AMT experiment workflow](.github/workflows/amt-experiment.yml) runs a small
 
 ## Capability packages and runtime safety
 `amt-package REPORT SHA256 NEW_PACKAGE` produces a bounded portable procedure artifact; `amt-package-run PACKAGE ARGS...` explicitly executes the experimental artifact. Integrated sessions require separate content-bound approval; legacy approvals must be renewed. `revoke-skill POLICY NAME VERSION` revokes approval. Resident `{"kind":"metrics"}` returns request counters. See [prototype 10](docs/architecture/prototype-10.md).
+
+## Parallel validation
+CI uses six independent validation lanes. See [parallel validation](docs/architecture/parallel-validation.md). The real-model AMT experiment runs separately.
