@@ -1,0 +1,18 @@
+//! Separate persistent episodic/procedural memory and explicit bounded working memory.
+use crate::{indexed::Result,skills::{Skill,compile,execute},associative::Signature};
+use rusqlite::{params,Connection,OptionalExtension};
+use std::path::Path;
+#[derive(Debug,Clone)]pub struct Episode{pub id:i64,pub cue:String,pub outcome:String}
+pub struct Memory{db:Connection}
+impl Memory{
+ pub fn open(path:&Path)->Result<Self>{let db=Connection::open(path)?;db.pragma_update(None,"cache_size",-1024)?;db.execute_batch("CREATE TABLE IF NOT EXISTS episodes(id INTEGER PRIMARY KEY,cue TEXT NOT NULL,outcome TEXT NOT NULL);CREATE TABLE IF NOT EXISTS skills(name TEXT NOT NULL,version INTEGER NOT NULL,body TEXT NOT NULL,PRIMARY KEY(name,version));")?;Ok(Self{db})}
+ pub fn remember(&self,cue:&str,outcome:&str)->Result<i64>{if cue.trim().is_empty()||cue.len()>8192||outcome.len()>8192{return Err("episode limit".into())}self.db.execute("INSERT INTO episodes(cue,outcome) VALUES (?1,?2)",params![cue,outcome])?;Ok(self.db.last_insert_rowid())}
+ /// Search only the most recent bounded window; report the window to callers.
+ pub fn recall(&self,cue:&str,window:u32,k:u32)->Result<Vec<(Episode,f64)>>{if window==0||window>256||k>32{return Err("recall budget".into())}let q=Signature::from_text(cue)?;let mut stmt=self.db.prepare("SELECT id,cue,outcome FROM episodes ORDER BY id DESC LIMIT ?1")?;let mut v=vec![];for row in stmt.query_map([window],|r|Ok(Episode{id:r.get(0)?,cue:r.get(1)?,outcome:r.get(2)?}))?{let e=row?;let score=q.similarity(&Signature::from_text(&e.cue)?);if score>0.0{v.push((e,score));}}v.sort_by(|a,b|b.1.total_cmp(&a.1).then(b.0.id.cmp(&a.0.id)));v.truncate(k as usize);Ok(v)}
+ pub fn publish_skill(&mut self,s:&Skill)->Result<i64>{compile(s)?;let body=serde_json::to_string(s)?;if body.len()>32768{return Err("skill size".into())}let tx=self.db.transaction_with_behavior(rusqlite::TransactionBehavior::Immediate)?;let version:i64=tx.query_row("SELECT coalesce(max(version),0)+1 FROM skills WHERE name=?1",[&s.name],|r|r.get(0))?;tx.execute("INSERT INTO skills VALUES (?1,?2,?3)",params![s.name,version,body])?;tx.commit()?;Ok(version)}
+ pub fn skill(&self,name:&str,version:Option<i64>)->Result<Option<Skill>>{let raw:Option<String>=match version{Some(v)=>self.db.query_row("SELECT body FROM skills WHERE name=?1 AND version=?2",params![name,v],|r|r.get(0)).optional()?,None=>self.db.query_row("SELECT body FROM skills WHERE name=?1 ORDER BY version DESC LIMIT 1",[name],|r|r.get(0)).optional()?};match raw{Some(s)=>{if s.len()>32768{return Err("skill size".into())}let skill=serde_json::from_str(&s)?;compile(&skill)?;Ok(Some(skill))},None=>Ok(None)}}
+ pub fn run_skill(&self,name:&str,version:Option<i64>,args:&[i64])->Result<i64>{execute(&self.skill(name,version)?.ok_or("unknown skill")?,args)}
+}
+pub struct Working{items:Vec<String>,bytes:usize,max:usize}
+impl Working{pub fn new(max:usize)->Self{Self{items:vec![],bytes:0,max}}pub fn push(&mut self,s:String)->Result<()>{if self.items.len()>=256||self.bytes.saturating_add(s.len())>self.max{return Err("working memory budget".into())}self.bytes+=s.len();self.items.push(s);Ok(())}pub fn items(&self)->&[String]{&self.items}}
+#[test]fn memory_and_versions(){use crate::skills::{Expr,Skill};let mut m=Memory::open(Path::new(":memory:")).unwrap();m.remember("diesel engine","inspect air").unwrap();assert_eq!(m.recall("diesel",10,1).unwrap().len(),1);let mut s=Skill{name:"x".into(),arity:0,body:Expr::Const{value:1}};assert_eq!(m.publish_skill(&s).unwrap(),1);s.body=Expr::Const{value:2};assert_eq!(m.publish_skill(&s).unwrap(),2);assert_eq!(m.run_skill("x",Some(1),&[]).unwrap(),1);assert_eq!(m.run_skill("x",None,&[]).unwrap(),2);let mut w=Working::new(1);assert!(w.push("ab".into()).is_err());}

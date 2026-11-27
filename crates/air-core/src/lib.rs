@@ -14,3 +14,9 @@ pub mod curate;
 
 pub mod model;
 pub mod reasoning;
+
+pub mod cognition;
+pub mod skills;
+pub mod associative;
+pub mod evidence;
+pub mod language;

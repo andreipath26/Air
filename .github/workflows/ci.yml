@@ -22,3 +22,9 @@ jobs:
           cargo run -p air-cli -- ask /tmp/air-demo.db "unknown request" '{"kind":"category","category":"automotive"}' | grep Combustion
           cargo run --release -p air-bench -- retrieval 1000 /tmp/air-bench.db
       - run: bash scripts/run-cpu-budgeted.sh target/debug/air-cli doctor
+      - run: |
+          cargo run -p air-cli -- remember /tmp/air-memory.db "diesel engine" "inspect air intake"
+          cargo run -p air-cli -- recall /tmp/air-memory.db diesel | grep "inspect air intake"
+          cargo run -p air-cli -- learn-skill /tmp/air-memory.db multiply knowledge/examples/multiply.json
+          test "$(cargo run -q -p air-cli -- run-skill /tmp/air-memory.db multiply 11 13)" = 143
+          AIR_LANGUAGE=fr cargo run -p air-cli -- ask /tmp/air-demo.db "What is the capital of France?" | grep "Paris est la capitale"

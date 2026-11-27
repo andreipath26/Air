@@ -905,7 +905,7 @@
     {
       "id": "P10",
       "name": "Cognitive memory architecture",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -936,12 +936,15 @@
         }
       ],
       "acceptance_gate": "Each memory type independently usable",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-04.md."
+      ]
     },
     {
       "id": "P11",
       "name": "Intelligence Genome",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1050,12 +1053,15 @@
         }
       ],
       "acceptance_gate": "Automatically discovered primitives solve unseen compositions with lower resource cost",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-04.md."
+      ]
     },
     {
       "id": "P12",
       "name": "Intelligence Compiler",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1086,12 +1092,15 @@
         }
       ],
       "acceptance_gate": "Replace selected learned behaviour with cheaper validated representations",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-04.md."
+      ]
     },
     {
       "id": "P13",
       "name": "Weightless intelligence",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1109,7 +1118,10 @@
         }
       ],
       "acceptance_gate": "Meaningful learned capability beats optimised neural baseline at comparable quality or record negative result",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-04.md."
+      ]
     },
     {
       "id": "P14",
@@ -1134,7 +1146,7 @@
       "acceptance_gate": "Cross-domain composition with inspectable evidence where applicable",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-03.md."
+        "No phase gate passed; see docs/architecture/prototype-04.md."
       ]
     },
     {
@@ -1212,7 +1224,7 @@
       "acceptance_gate": "Structured answers without neural decoding",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-02.md."
+        "No phase gate passed; see docs/architecture/prototype-04.md."
       ]
     },
     {
@@ -1283,7 +1295,7 @@
     {
       "id": "P19",
       "name": "Continuous learning and consolidation",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1301,7 +1313,10 @@
         }
       ],
       "acceptance_gate": "Improve selected capabilities without corrupting knowledge or full retraining",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-04.md."
+      ]
     },
     {
       "id": "P20",
@@ -1326,7 +1341,7 @@
       "acceptance_gate": "Adversarial and recovery tests before unrestricted acquisition/execution",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-03.md."
+        "No phase gate passed; see docs/architecture/prototype-04.md."
       ]
     },
     {

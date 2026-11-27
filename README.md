@@ -44,3 +44,13 @@ bash scripts/benchmark-local.sh 10000
 ```
 
 Deterministic fast paths run before the model. Extracted claims are explicitly unverified; inspect source quotes. See [prototype 03](docs/architecture/prototype-03.md) for constraints. Actual model quality and hardware results remain unmeasured.
+
+## Cognitive and procedural prototype
+```sh
+cargo run -p air-cli -- remember memory.db "diesel engine" "inspect air intake"
+cargo run -p air-cli -- recall memory.db diesel
+cargo run -p air-cli -- learn-skill memory.db multiply knowledge/examples/multiply.json
+cargo run -p air-cli -- run-skill memory.db multiply 11 13
+AIR_LANGUAGE=fr cargo run -p air-cli -- ask demo.db "What is the capital of France?"
+```
+Restricted integer program induction and compilation are experiments, not general-purpose learned intelligence. See [prototype 04](docs/architecture/prototype-04.md).
