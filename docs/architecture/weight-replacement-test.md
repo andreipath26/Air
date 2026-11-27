@@ -59,9 +59,8 @@ python3 scripts/g01-run.py corpus.json dataset.json router.json "$RUN" \\
   --binary target/release/air-cli \\
   --llama-server /path/to/llama-server --gguf /path/to/model.gguf \\
   --model-sha "$MODEL_SHA" --server-sha "$SERVER_SHA" \\
-  --teacher-id "model-name@exact-revision" --fallback-mode resident
-python3 scripts/g02-evaluate.py dataset.json "$RUN" "$RUN-review.json" \\
-  hardware.json "$RUN/teacher-store/conversion-summary.json" "$RUN/g02-evaluation.json"
+  --teacher-id "model-name@exact-revision" --fallback-mode resident \\
+  --g02-review "$RUN-review.json" --hardware hardware.json
 ```
 
 The run directory contains reference retrieval, AIR-only, quantized-model and hybrid observations, raw answer traces, fallback reasons, binary/model identities, storage sizes, sampled whole-host used memory, CPU-package energy when RAPL is available, and conversion time/energy. Use `--fallback-mode on_demand` to charge model startup on each fallback. The evaluator checks identical task IDs, exact input hashes, domain quality, unknown abstention, relative quality, throughput, RAM, energy, conversion cost, and complete fallback accounting. It reports a numeric pass as requiring human review; it cannot authenticate reviewer or hardware declarations.
