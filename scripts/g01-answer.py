@@ -57,6 +57,11 @@ def normalize(value,group):
     if group in ("science","engineering"):
         # Greek mu and micro sign are interchangeable in this narrow notation contract.
         return value.replace("μ","µ")
+    if group=="geography":
+        # Place names are often written with or without diacritics in model
+        # output (e.g. Bogotá/Bogota). Fold accents only for this natural-
+        # language group; scientific notation remains exact.
+        value="".join(c for c in unicodedata.normalize("NFD",value) if unicodedata.category(c)!="Mn")
     return value.casefold()
 def matches(actual,expected,group):
     return normalize(actual,group)==normalize(expected,group)
