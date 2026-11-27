@@ -118,3 +118,6 @@ See [draft corpus](knowledge/development/README.md). The AMT workflow now runs 2
 
 ## Consolidated G01 protocol
 See [consolidated G01](docs/architecture/g01-consolidated.md). Scientific symbols are case-sensitive, teacher response status is explicit, and a conservative lexical fallback handles reordered phrasing. The manually dispatched G01 quantized workflow requires pinned model and executable source identities. The review template is intentionally incomplete; independent review is required.
+
+## G01 blocker fixes
+Context-aware extraction and multi-teacher trace reconciliation are available. Indexed knowledge schema v2 preserves case for notation relations; rebuild v1 databases and repeat claim reviews from source. See [migration and limitations](docs/architecture/g01-blocker-fixes.md).

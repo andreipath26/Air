@@ -25,7 +25,7 @@ def validate(corpus):
         if key in seen:raise ValueError("duplicate or conflicting fact")
         seen.add(key)
     return corpus
-def build(corpus,out,binary,teacher=None):
+def build(corpus,out,binary,teacher=None,teacher_id=None):
     out.mkdir(parents=True,exist_ok=False)
     tsv=out/"facts.tsv";trace=out/"conversion.jsonl";accepted=[]
     started=time.monotonic()
@@ -35,7 +35,7 @@ def build(corpus,out,binary,teacher=None):
             if teacher is not None:
                 try:
                     reply=teacher(f["question"])
-                    candidate,status=answer_contract.extract(reply)
+                    candidate,status=answer_contract.extract(reply,f["subject"],f["relation"])
                     if status=="extracted":
                         if answer_contract.matches(candidate,f["answer"],f["group"]):value=f["answer"];status="reference_match"
                         else:status="incorrect"
@@ -44,7 +44,7 @@ def build(corpus,out,binary,teacher=None):
             if value is not None:accepted.append((f,value))
     with tsv.open("w") as f:
         for item,value in accepted:
-            f.write("\t".join([item["subject"],item["relation"],value,item["group"],item["source"]])+"\n")
+            f.write("\t".join([item["subject"],item["relation"],value,item["group"],item["source"]+(" | teacher: "+teacher_id if teacher_id else "")])+"\n")
     if not accepted:raise RuntimeError("no reviewed facts available; conversion trace retained")
     subprocess.run([binary,"index-import",str(tsv),str(out/"knowledge.db")],check=True)
     review_rows=[{"subject":f["subject"],"relation":f["relation"],"object":v,"reviewer":f["reviewer"],"rationale":f["review_rationale"]} for f,v in accepted]
@@ -67,6 +67,6 @@ def main():
                 raw=r.read(65537)
                 if len(raw)>65536:raise ValueError("response limit")
                 return json.loads(raw)["choices"][0]["message"]["content"]
-    out=pathlib.Path(a.output);result=build(corpus,out,a.binary,teacher);result.update({"mode":a.mode,"corpus_sha256":hashlib.sha256(raw).hexdigest(),"teacher_id":a.teacher_id,"declared_teacher_model_sha256":a.teacher_model_sha,"energy_joules":None})
+    out=pathlib.Path(a.output);result=build(corpus,out,a.binary,teacher,a.teacher_id);result.update({"mode":a.mode,"corpus_sha256":hashlib.sha256(raw).hexdigest(),"teacher_id":a.teacher_id,"declared_teacher_model_sha256":a.teacher_model_sha,"energy_joules":None})
     (out/"conversion-summary.json").write_text(json.dumps(result,indent=2))
 if __name__=="__main__":main()

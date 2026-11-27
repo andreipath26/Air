@@ -8,6 +8,11 @@ class Tests(unittest.TestCase):
         self.assertFalse(a.matches("mW","MW","engineering"))
         self.assertTrue(a.matches("μF","µF","engineering"))
         self.assertTrue(a.matches("PARIS","Paris","geography"))
+    def test_contextual(self):
+        self.assertEqual(a.extract("Thailand's capital city is Bangkok.","Thailand","capital"),("Bangkok","extracted"))
+        self.assertEqual(a.extract("Boron has the chemical symbol B.","Boron","chemical symbol"),("B","extracted"))
+        self.assertEqual(a.extract("Oxygen (O)","Oxygen","chemical symbol"),("O","extracted"))
+        self.assertNotEqual(a.extract("Boron does not have the chemical symbol B.","Boron","chemical symbol")[0],"B")
     def test_extraction(self):
         self.assertEqual(a.extract("Answer: Paris."),("Paris","extracted"))
         self.assertEqual(a.extract('{"answer":null}'),(None,"abstained"))
