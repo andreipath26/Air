@@ -12,7 +12,9 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo test --workspace
       - run: python3 scripts/test-evidence-gate.py
-      - run: python3 -m py_compile scripts/g01-benchmark.py scripts/g01-corpus.py scripts/g01-resource.py scripts/g01-assemble.py
+      - run: python3 -m py_compile scripts/g01-benchmark.py scripts/g01-run.py scripts/g01-corpus.py scripts/g01-resource.py scripts/g01-assemble.py scripts/g02-hybrid.py scripts/g02-evaluate.py
+      - run: python3 scripts/test-g02-hybrid.py
+      - run: python3 scripts/test-g02-evaluate.py
       - run: python3 scripts/test-g01-pipeline.py
       - run: python3 scripts/test-g01-answer.py
       - run: python3 scripts/test-g01-reconcile.py
