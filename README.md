@@ -121,3 +121,6 @@ See [consolidated G01](docs/architecture/g01-consolidated.md). Scientific symbol
 
 ## G01 blocker fixes
 Context-aware extraction and multi-teacher trace reconciliation are available. Indexed knowledge schema v2 preserves case for notation relations; rebuild v1 databases and repeat claim reviews from source. See [migration and limitations](docs/architecture/g01-blocker-fixes.md).
+
+## Automated teacher reconciliation and quantized experiment
+The AMT matrix now has a dependent reconciliation job that checks corpus and teacher identities, builds the reference-validated union and benchmarks it. The quantized workflow resolves and records official upstream commit and LFS hashes on its development push trigger, verifies downloaded bytes, and supports explicit pins for reproduction. See docs/architecture/g01-automation.md. Neither workflow certifies G01.

@@ -8,6 +8,10 @@ on:
       - 'scripts/amt-real-model.py'
       - 'scripts/amt-structural.py'
       - 'scripts/g01-real-development.py'
+      - 'scripts/g01-answer.py'
+      - 'scripts/g01-corpus.py'
+      - 'scripts/g01-reconcile.py'
+      - 'scripts/g01-ensemble-report.py'
       - 'knowledge/development/**'
       - 'crates/air-core/src/elicitation.rs'
 permissions:
@@ -36,4 +40,24 @@ jobs:
         with:
           name: amt-real-model-results-${{ strategy.job-index }}
           path: amt-results/
+          if-no-files-found: warn
+
+  reconcile:
+    needs: pilot
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: amt-real-model-results-*
+          path: teacher-artifacts
+      - run: cargo build --release -p air-cli
+      - run: python3 scripts/g01-ensemble-report.py teacher-artifacts ensemble-results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: g01-ensemble-results
+          path: ensemble-results/
           if-no-files-found: warn

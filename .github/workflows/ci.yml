@@ -16,6 +16,7 @@ jobs:
       - run: python3 scripts/test-g01-pipeline.py
       - run: python3 scripts/test-g01-answer.py
       - run: python3 scripts/test-g01-reconcile.py
+      - run: python3 -m py_compile scripts/g01-resolve-pins.py scripts/g01-ensemble-report.py
       - run: python3 -m py_compile scripts/g01-review.py
       - run: python3 -m py_compile scripts/g01-development.py scripts/g01-run.py scripts/g01-real-development.py
       - run: cargo run -p air-cli -- doctor

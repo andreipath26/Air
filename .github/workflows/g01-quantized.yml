@@ -1,5 +1,10 @@
 name: G01 quantized development comparison
 on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/g01-quantized.yml'
+      - 'scripts/g01-resolve-pins.py'
   workflow_dispatch:
     inputs:
       llama_revision:
@@ -25,6 +30,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
       - run: cargo build --release -p air-cli
+      - name: Resolve and record development pins on push
+        if: github.event_name == 'push'
+        run: |
+          python3 scripts/g01-resolve-pins.py g01-pins.json
+          python3 -c 'import json; x=json.load(open("g01-pins.json")); print("LLAMA_REV="+x["llama_revision"]); print("MODEL_REV="+x["model_revision"]); print("MODEL_SHA="+x["model_sha256"])' >> "$GITHUB_ENV"
+      - name: Record manual pins
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          python3 -c 'import os,json; json.dump({"llama_revision":os.environ["LLAMA_REV"],"model_revision":os.environ["MODEL_REV"],"model_sha256":os.environ["MODEL_SHA"]},open("g01-pins.json","w"),indent=2)'
       - name: Build pinned CPU llama.cpp and fetch pinned checkpoint
         run: |
           [[ "$LLAMA_REV" =~ ^[0-9a-f]{40}$ && "$MODEL_REV" =~ ^[0-9a-f]{40}$ && "$MODEL_SHA" =~ ^[0-9a-f]{64}$ ]]
@@ -44,5 +58,7 @@ jobs:
         if: always()
         with:
           name: g01-quantized-development-results
-          path: g01-quantized-results/
+          path: |
+            g01-quantized-results/
+            g01-pins.json
           if-no-files-found: warn

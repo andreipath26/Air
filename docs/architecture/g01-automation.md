@@ -1,0 +1,5 @@
+# G01 automation
+
+The two FP32 teacher jobs are followed by a separate CPU-only reconciliation job. It requires complete artifacts and verifies each conversion summary against the corpus SHA-256 and teacher weight inventory hash. It reconstructs the reference-validated union using raw responses and benchmarks it with the same draft router and test set. No majority voting or assertion of independent review. The earlier jobs remain historical evidence.
+
+The quantized development workflow is triggered by changes to its definition or pin resolver. On push, it queries the official Hugging Face model metadata, validates the declared Apache-2.0 license, extracts the exact repository revision and LFS SHA-256, and resolves llama.cpp HEAD to a commit. It records these pins before building/downloading and verifies bytes. The manual route accepts explicit pins for reproducibility. Resolution at run time is a deliberate development choice, not a pre-reviewed baseline lock; inspect the resulting pin artifact before any acceptance run. Network, upstream metadata and build compatibility remain possible failures. Physical measurements and independent review are not automated.
