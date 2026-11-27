@@ -97,3 +97,6 @@ See [roadmap](ROADMAP.md) and [post-pilot execution plan](docs/architecture/post
 
 ## Portable classifier candidates
 The AMT pilot compares weightless and lexical baselines. Use classifier-package REPORT SHA256 NEW_PACKAGE to export an experimental candidate and classifier-run PACKAGE TEXT to test it offline. Explicit classifier-install POLICY PACKAGE SHA256 requires preliminary quality and coverage thresholds. Use select-representation CANDIDATES CRITERIA for quality-first validation selection. See [prototype 11](docs/architecture/prototype-11.md).
+
+## Capability discovery and optional hybrid execution
+Use amt-discover SPEC REPORT to record bounded capability probes. AIR_PREDICTIVE=1 enables experimental resident category page warming. AIR_RESIDUAL=1 enables clearly labelled unverified local neural fallback. Both are disabled by default. See [prototype 12](docs/architecture/prototype-12.md).

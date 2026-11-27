@@ -1484,11 +1484,12 @@
           "dependencies": [
             "P23.02"
           ],
-          "implementation": "crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py",
+          "implementation": "crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/discovery.rs; crates/air-core/src/prefetch.rs; scripts/amt-structural.py; crates/air-core/src/engine.rs",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [
-            "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim."
+            "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim.",
+            "Exploratory discovery, coordinate ablation and opt-in fallback; independent validation pending."
           ],
           "blocking_issues": [],
           "deployment_ready": false
@@ -1502,11 +1503,12 @@
           "dependencies": [
             "P09.01"
           ],
-          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py",
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/discovery.rs; crates/air-core/src/prefetch.rs; scripts/amt-structural.py; crates/air-core/src/engine.rs",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [
-            "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim."
+            "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim.",
+            "Exploratory discovery, coordinate ablation and opt-in fallback; independent validation pending."
           ],
           "blocking_issues": [],
           "deployment_ready": false
@@ -1569,15 +1571,17 @@
           "id": "P23.08",
           "name": "Residual neural execution",
           "description": "Retain original model as reference and fallback; evaluate targeted distillation, quantisation, pruning or specialised modules only under capability-preservation gates.",
-          "status": "planned",
+          "status": "prototype_partial",
           "completion_percent": 0,
           "dependencies": [
             "P23.07"
           ],
-          "implementation": null,
+          "implementation": "crates/air-core/src/discovery.rs; crates/air-core/src/prefetch.rs; scripts/amt-structural.py; crates/air-core/src/engine.rs",
           "acceptance_tests": [],
           "benchmark_evidence": [],
-          "known_limitations": [],
+          "known_limitations": [
+            "Exploratory discovery, coordinate ablation and opt-in fallback; independent validation pending."
+          ],
           "blocking_issues": [],
           "deployment_ready": false
         },
@@ -1590,11 +1594,12 @@
           "dependencies": [
             "P23.01"
           ],
-          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py",
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/discovery.rs; crates/air-core/src/prefetch.rs; scripts/amt-structural.py; crates/air-core/src/engine.rs",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [
-            "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim."
+            "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim.",
+            "Exploratory discovery, coordinate ablation and opt-in fallback; independent validation pending."
           ],
           "blocking_issues": [],
           "deployment_ready": false
@@ -1608,12 +1613,13 @@
           "dependencies": [
             "P23.07"
           ],
-          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/classifier_package.rs; crates/air-core/src/lexical.rs; crates/air-core/src/representation_selection.rs",
+          "implementation": "crates/air-core/src/amt_knowledge.rs; crates/air-core/src/amt_classification.rs; crates/air-core/src/checkpoint.rs; scripts/amt-real-model.py; crates/air-core/src/elicitation.rs; scripts/amt-real-model.py; scripts/amt-structural.py; crates/air-core/src/classifier_package.rs; crates/air-core/src/lexical.rs; crates/air-core/src/representation_selection.rs; crates/air-core/src/discovery.rs; crates/air-core/src/prefetch.rs; scripts/amt-structural.py; crates/air-core/src/engine.rs",
           "acceptance_tests": [],
           "benchmark_evidence": [],
           "known_limitations": [
             "Post-pilot changes pending validation; no semantic weight decoding or full acceptance claim.",
-            "Preliminary fixture thresholds; independent validation pending."
+            "Preliminary fixture thresholds; independent validation pending.",
+            "Exploratory discovery, coordinate ablation and opt-in fallback; independent validation pending."
           ],
           "blocking_issues": [],
           "deployment_ready": false

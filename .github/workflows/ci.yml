@@ -123,6 +123,8 @@ jobs:
       - run: cargo test -p air-core intelligence_package
       - run: cargo test -p air-core classifier_package
       - run: cargo test -p air-core elicitation
+      - run: cargo test -p air-core discovery
+      - run: cargo test -p air-core prefetch
       - run: python3 -m py_compile scripts/amt-structural.py
   performance:
     name: Performance and resource measurements

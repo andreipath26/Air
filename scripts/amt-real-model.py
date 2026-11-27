@@ -61,7 +61,7 @@ def main():
     env=dict(os.environ,AIR_MODEL_PORT=str(server.server_port),AIR_MODEL_NAME="local")
     failures=[]
     try:
-        for name,cmd in [("pilot","amt-convert"),("facts","amt-facts"),("classification","amt-classify")]:
+        for name,cmd in [("pilot","amt-convert"),("facts","amt-facts"),("classification","amt-classify"),("discovery","amt-discover")]:
             s=json.loads((pathlib.Path("knowledge/examples")/f"amt-{name}.json").read_text())
             s["teacher_id"]=args.model+"@"+revision
             if name=="pilot": s["teacher_license"]=license_id

@@ -59,3 +59,6 @@ pub mod elicitation;
 pub mod lexical;
 pub mod classifier_package;
 pub mod representation_selection;
+
+pub mod discovery;
+pub mod prefetch;

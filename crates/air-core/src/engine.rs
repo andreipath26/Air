@@ -19,6 +19,7 @@ impl Engine<'_>{
  let t=crate::learned_router::Training::open(&self.policy.path)?;let learner=crate::learned_router::Learned{classifier:t.classifier()?};
  if let Route::Category{category}=learner.route(q)?{let category=self.policy.canonical("category",&category)?;if self.knowledge.has_category(&category)?{let r=self.knowledge.category(&category)?;let text=format!("Suggested category {:?}; related claims, not a verified answer:\n{}",category,self.render_claims(r)?);work.push(text.clone())?;return Ok(Response{text,path:"learned_category",model_called:called,complete:false});}}}
 
+ if matches!(&answer,Answer::Unknown{..})&&std::env::var("AIR_RESIDUAL").as_deref()==Ok("1"){if let Some(m)=self.model{called=true;if let Ok(Some(text))=m.residual(q){let text=format!("Unverified neural fallback:\n{text}");work.push(text.clone())?;return Ok(Response{text,path:"neural_residual",model_called:called,complete:false});}}}
  let (text,path,complete)=match answer{
  Answer::Claims(r)=>{let complete=!r.truncated&&r.facts.len()==1&&self.policy.assessment(&r.facts[0])?.map(|r|r.verdict)==Some(Verdict::Accepted);(self.render_claims(r)?,"knowledge",complete)},
  Answer::Number(n)=>(n.to_string(),"arithmetic",true),

@@ -1,0 +1,113 @@
+{
+  "teacher_id": "replace with resolved teacher identity",
+  "probes": [
+    {
+      "id": "probe-1",
+      "domain": "geo",
+      "question": "What is the capital of France?",
+      "expected": "Paris"
+    },
+    {
+      "id": "probe-2",
+      "domain": "geo",
+      "question": "Which city is Japan's capital?",
+      "expected": "Tokyo"
+    },
+    {
+      "id": "probe-3",
+      "domain": "geo",
+      "question": "Name the capital of Italy.",
+      "expected": "Rome"
+    },
+    {
+      "id": "probe-4",
+      "domain": "math",
+      "question": "What is 12 times 4?",
+      "expected": "48"
+    },
+    {
+      "id": "probe-5",
+      "domain": "math",
+      "question": "What is 17 minus 9?",
+      "expected": "8"
+    },
+    {
+      "id": "probe-6",
+      "domain": "math",
+      "question": "What is 6 plus 13?",
+      "expected": "19"
+    },
+    {
+      "id": "probe-7",
+      "domain": "auto",
+      "question": "Which part charges a car battery while the engine runs?",
+      "expected": "alternator"
+    },
+    {
+      "id": "probe-8",
+      "domain": "auto",
+      "question": "What component removes particles from engine intake air?",
+      "expected": "air filter"
+    },
+    {
+      "id": "probe-9",
+      "domain": "auto",
+      "question": "What device compresses intake air using exhaust energy?",
+      "expected": "turbocharger"
+    },
+    {
+      "id": "probe-10",
+      "domain": "science",
+      "question": "What is the chemical symbol for oxygen?",
+      "expected": "O"
+    },
+    {
+      "id": "probe-11",
+      "domain": "science",
+      "question": "Which planet is closest to the Sun?",
+      "expected": "Mercury"
+    },
+    {
+      "id": "probe-12",
+      "domain": "science",
+      "question": "What is the chemical symbol for iron?",
+      "expected": "Fe"
+    },
+    {
+      "id": "probe-13",
+      "domain": "language",
+      "question": "What is the French word for cat?",
+      "expected": "chat"
+    },
+    {
+      "id": "probe-14",
+      "domain": "language",
+      "question": "What is the Spanish word for water?",
+      "expected": "agua"
+    },
+    {
+      "id": "probe-15",
+      "domain": "language",
+      "question": "What is the opposite of hot?",
+      "expected": "cold"
+    },
+    {
+      "id": "probe-16",
+      "domain": "unknown",
+      "question": "What is the capital of the invented country Zorvella? Return unknown if invented.",
+      "expected": null
+    },
+    {
+      "id": "probe-17",
+      "domain": "unknown",
+      "question": "What is the serial number of an unspecified engine? Return unknown if unspecified.",
+      "expected": null
+    },
+    {
+      "id": "probe-18",
+      "domain": "unknown",
+      "question": "What is the exact birthday of an unnamed person? Return unknown if unspecified.",
+      "expected": null
+    }
+  ]
+}

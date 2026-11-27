@@ -4,7 +4,7 @@ use serde::{Serialize,Deserialize};
 #[derive(Debug,Clone,Serialize,Deserialize,PartialEq,Eq)]
 #[serde(tag="kind",rename_all="snake_case",deny_unknown_fields)]
 pub enum Route{Lookup{subject:String,relation:String},Category{category:String},Arithmetic{left:i64,right:i64,operator:String},Chain{subject:String,first:String,second:String},Unknown}
-pub trait SemanticRouter {fn route(&self,question:&str)->Result<Route>;}
+pub trait SemanticRouter {fn route(&self,question:&str)->Result<Route>;fn residual(&self,_question:&str)->Result<Option<String>>{Ok(None)}}
 pub fn deterministic(q:&str)->Route{
  let q=q.trim().trim_end_matches(['?','.']).to_lowercase();
  for prefix in ["what is the ","what's the ","tell me the "]{if let Some(x)=q.strip_prefix(prefix){if let Some((r,s))=x.split_once(" of "){if !r.is_empty()&&!s.is_empty(){return Route::Lookup{subject:s.into(),relation:r.into()}}}}}
