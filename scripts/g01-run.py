@@ -17,10 +17,13 @@ def main():
     p.add_argument("--llama-server");p.add_argument("--gguf");p.add_argument("--model-sha");p.add_argument("--server-sha");p.add_argument("--teacher-id")
     p.add_argument("--port",type=int,default=18081);p.add_argument("--threads",type=int,default=4)
     p.add_argument("--fallback-mode",choices=("resident","on_demand"),default="resident")
+    p.add_argument("--g02-review",help="hash-bound review record produced before the run")
+    p.add_argument("--hardware",help="JSON hardware identity record for G02 evaluation")
     p.add_argument("--development-reference-only",action="store_true")
     a=p.parse_args()
     if not 1<=a.threads<=8 or not 1024<=a.port<=65535:raise ValueError("resource bounds")
     if not a.development_reference_only and a.port>65534:raise ValueError("port must leave room for hybrid server port")
+    if bool(a.g02_review)!=bool(a.hardware):raise ValueError("--g02-review and --hardware must be supplied together")
     out=pathlib.Path(a.output).resolve();out.mkdir(parents=True,exist_ok=False)
     def run(script,*args):
         subprocess.run([sys.executable,str(ROOT/"scripts"/script),*map(str,args)],check=True)
@@ -80,4 +83,6 @@ def main():
         cs=json.loads(conversion_summary_path.read_text())
         conversion={k:cs.get(k) for k in ("seconds","energy_joules","storage_bytes","energy_boundary")}
     (out/"summary.json").write_text(json.dumps({"systems":summary,"conversion":conversion,"gate_eligible":False,"note":"Independent review and hardware evidence are still required; CPU package energy is not wall-power energy."},indent=2))
+    if a.g02_review and not a.development_reference_only:
+        run("g02-evaluate.py",a.dataset,out,a.g02_review,a.hardware,conversion_summary_path,out/"g02-evaluation.json")
 if __name__=="__main__":main()
