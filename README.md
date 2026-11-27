@@ -85,3 +85,6 @@ Reuse existing pretrained models by extracting selected capabilities through beh
 
 ## AMT real-model experiment
 The [AMT experiment workflow](.github/workflows/amt-experiment.yml) runs a small CPU-only pretrained teacher and produces weight inventories, numerical statistics, procedure, fact and classification reports. See [pilot 02](docs/architecture/amt-pilot-02.md). Results must be inspected before claiming capability transfer.
+
+## Capability packages and runtime safety
+`amt-package REPORT SHA256 NEW_PACKAGE` produces a bounded portable procedure artifact; `amt-package-run PACKAGE ARGS...` explicitly executes the experimental artifact. Integrated sessions require separate content-bound approval; legacy approvals must be renewed. `revoke-skill POLICY NAME VERSION` revokes approval. Resident `{"kind":"metrics"}` returns request counters. See [prototype 10](docs/architecture/prototype-10.md).

@@ -18,7 +18,7 @@ pub fn execute(e:&Engine<'_>,p:&Program)->Result<Report>{
  Node::Lookup{subject,relation}=>{let s=e.policy.canonical("subject",&text(subject,v)?)?;let r=e.policy.canonical("relation",relation)?;let hits=e.knowledge.lookup(&s,&r)?;if hits.truncated||hits.facts.len()!=1||e.policy.assessment(&hits.facts[0])?.map(|x|x.verdict)!=Some(Verdict::Accepted){report.stopped=Some("lookup not uniquely reviewed".into());return Ok(report)}let o=&hits.facts[0].object;if o.len()>256{return Err("lookup value limit".into())}Value::Text(o.clone())},
  Node::Add{a,b}=>Value::Integer(integer(a,v)?.checked_add(integer(b,v)?).ok_or("overflow")?),
  Node::Multiply{a,b}=>Value::Integer(integer(a,v)?.checked_mul(integer(b,v)?).ok_or("overflow")?),
- Node::Skill{name,args}=>{if args.len()>8{return Err("arity limit".into())}let n=e.memory.latest_version(name)?.ok_or("unknown skill")?;if !e.policy.skill_approved(name,n)?{report.stopped=Some("skill not approved".into());return Ok(report)}let a=args.iter().map(|x|integer(x,v)).collect::<Result<Vec<_>>>()?;Value::Integer(e.memory.run_skill(name,Some(n),&a)?)}};
+ Node::Skill{name,args}=>{if args.len()>8{return Err("arity limit".into())}let n=e.memory.latest_version(name)?.ok_or("unknown skill")?;let skill=e.memory.skill(name,Some(n))?.ok_or("missing skill")?;if !e.policy.skill_approved(&skill,n)?{report.stopped=Some("skill not approved".into());return Ok(report)}let a=args.iter().map(|x|integer(x,v)).collect::<Result<Vec<_>>>()?;Value::Integer(crate::skills::execute(&skill,&a)?)}};
  report.values.push(result);
  }Ok(report)
 }

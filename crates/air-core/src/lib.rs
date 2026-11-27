@@ -51,3 +51,5 @@ pub mod checkpoint;
 
 pub mod amt_knowledge;
 pub mod amt_classification;
+
+pub mod intelligence_package;

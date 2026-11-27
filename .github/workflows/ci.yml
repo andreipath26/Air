@@ -68,3 +68,7 @@ jobs:
       - run: |
           cargo run -p air-cli -- amt-stats /tmp/air-fixture.safetensors | python3 -c 'import json,sys; a=json.load(sys.stdin)[0]; assert a["elements"]==2 and a["mean"]==1.5 and a["finite"]==2'
           python3 -m py_compile scripts/amt-real-model.py
+      - run: |
+          cargo run -p air-cli -- revoke-skill /tmp/air-policy.db compound 1
+          if cargo run -p air-cli -- session /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db "skill compound 8 10"; then exit 1; fi
+          printf '%s\n' '{"kind":"ask","question":"calculate 5 * 7"}' '{"kind":"metrics"}' | cargo run -q -p air-cli -- serve /tmp/air-demo.db /tmp/air-memory.db /tmp/air-policy.db | python3 -c 'import sys,json; a,b=map(json.loads,sys.stdin); assert b["result"]["requests"]==1 and b["result"]["completed"]==1'
