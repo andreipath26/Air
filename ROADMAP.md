@@ -1,12 +1,92 @@
 # AIR — Adaptive Intelligence Representation
-## Master research and development roadmap v0.5
+## Master research and development roadmap v0.6 (Coding Assistant Deployment Focus)
 
-Status: proposed research programme; no performance or general-intelligence claims. This repository version captures the roadmap's substantive requirements; chat diagrams are expressed as text. All targets are hypotheses, not results.
+Status: active engineering and research programme; no performance or general-intelligence claims. All targets remain hypotheses until verified by passing acceptance gates.
+
+# v0.6 Scope Directive
+
+The immediate deployment target is a CPU-first hybrid AI coding assistant running on the mandatory Dell Latitude 7490 (i7-8650U, 4 cores/8 threads, 16 GB DDR4, NVMe, no dedicated GPU). General-intelligence research, historical architecture recovery, and non-coding phases are preserved in this roadmap but explicitly deferred until the coding assistant reaches validated v1.0 deployment.
+
+The v0.5 research programme, hypotheses, implementation phases, technology inventory, baselines, experiments, historical results, and failure clauses remain below as preserved Track B material. Where older text describes immediate or parallel work, this v0.6 directive supersedes it: only Track A is active until its deployment gates pass. Coding-scoped portions of older phases are active only through the v1.0 crosswalk below.
+
+## Track A — Active Execution: Hybrid Coding Assistant v1.0
+
+### Mission and principle
+
+Develop CPU-first local coding assistance with lower quality-adjusted resource costs by separating offline compilation, curation, representation, retrieval, deterministic tool execution, and on-demand neural fallback. Support offline inference, no dedicated GPU, selective activation, inspectability, provenance, rollback, and optional KILN integration. Expensive offline compilation is allowed only with full lifecycle cost and break-even accounting.
+
+**Principle:** Do not store as weights what can be stored as indexed knowledge or code patterns; do not calculate what can be retrieved; do not repeatedly infer what can be compiled and verified by a compiler; do not load a neural model when deterministic tools and compiled packages are sufficient.
+
+### Active architecture
+
+**Offline compilation pipeline:** permissively licensed developer corpora (standard-library documentation, compiler error registries, RFCs, and permitted repositories) plus a licensed frontier teacher → behavioural extraction and canonical reduction → automated verification with the relevant compiler, linter, and tests → versioned, content-addressed AIR coding packages using SQLite and compressed indexes. Every teacher, corpus, extraction run, verification environment, and package must have recorded provenance and license status. Generated candidates are quarantined until checks pass; compilation success alone does not establish semantic correctness.
+
+A frontier teacher such as DeepSeek V4.1-Flash may be evaluated for offline compilation only after the exact model revision, license, local inference support, hardware requirements, and redistribution conditions are verified. Teacher compute, storage, energy, and human review are included in lifecycle and break-even accounting. A teacher used for package compilation is not required at runtime.
+
+**Online CPU-first runtime:** user or IDE request → deterministic canonical reduction and lexical/intent routing → Tree-sitter incremental syntax parsing and language-server queries (initially rust-analyzer; pyright and clangd are later adapters) → compiled AIR coding packages for API lookup, verified diagnostic-to-fix rules, and AST rewrite templates → deterministic patch verification → on-demand quantized neural residual (1.5B–4B through llama.cpp or KILN), unloaded by default and called only on abstention or novel glue logic → verified response or explicit abstention.
+
+Tree-sitter supplies syntax structure, not type or behavioral proof. LSP answers depend on the language server, project configuration, and index state. Their CPU and memory costs are measured as part of the system rather than treated as zero.
+
+### Active execution lanes
+
+| Lane | Active v1.0 priorities | Exit evidence |
+|---|---|---|
+| W1 Curation and verification | Preserve raw teacher traces; represent errors and abstentions explicitly; track provenance; deduplicate; automatically verify every compiled code artifact with compiler, linter, and tests | No unverified snippet or fix rule admitted; reproducible error classification and full source/license provenance |
+| W2 Offline compilation (behavioural AMT subset) | Compile API tables, paraphrase reductions, compiler-error-to-fix rules, and AST templates from approved sources and teachers | Per-capability compilation yield; held-out validation; complete token, time, storage, CPU/GPU energy, and review cost |
+| W4 Package compiler | Produce portable, versioned SQLite/Rust packages with hashes, rollback, dependency manifests, and language/toolchain versions | Portable artifacts pass held-out coding tests and reproduce from manifests |
+| W5 Coding runtime | Extend air-core and air-cli; integrate Tree-sitter and LSP; deterministic routing; bounded memory; unloaded-by-default neural fallback | End-to-end coding task completion, reliable abstention, and every fallback counted |
+| W6 Validation and economics | Independently authored coding benchmark; whole-system RAM and energy; latency; lifecycle cost and break-even against pinned quantized llama.cpp baselines | Reproducible CPU-only evidence on the mandatory Dell |
+
+**W3 Structural AMT is deferred to Track B.**
+
+### Active acceptance gates
+
+**G01-Code — Coding capability transfer:** Freeze at least 240 independently authored tasks: at least 50 tasks in each of four substantive categories (standard-library/API lookup, compiler-error diagnosis and repair, idiomatic AST refactoring, and cross-file/API migration), plus at least 40 unsupported or out-of-scope cases. Use real compilers, linters, unit tests, and hidden regression tests for objective scoring; report human review separately for behavior or maintainability that automated checks cannot establish. Compare a pinned CPU-only quantized coding model, AIR-only end-to-end from natural language with held-out paraphrases, and an optional tool/reference-fed ceiling reported separately (never as the learned-system baseline). Proposed thresholds: at least 90% absolute pass rate; at least 95% of the pinned model's pass rate; at least 80% in every in-scope category; at least 95% correct abstention on unknown cases; at least 2x correct-task throughput; and at least 50% reductions in whole-system peak RAM and energy per correct task on the mandatory Dell. Publish confidence intervals, raw failures, category-level coverage, test-strength limitations, compilation cost, and break-even volume. These are proposed targets, not results.
+
+**G02-Code — Selective model-weight replacement:** Test bounded coding capabilities with the quantized coding model completely unloaded (AIR-only) and with AIR-first routing plus on-demand model fallback. Compare against the same pinned CPU-only model, on identical tasks and the mandatory Dell. Count every fallback, cold model load, compiler/test invocation, and package lookup. AIR-only must meet G01-Code quality targets and lower whole-system peak RAM and energy per correct task by at least 50% before claiming weight replacement. A hybrid result can support a selective-routing/cost-saving claim only if quality remains within one percentage point of baseline and lifecycle-adjusted resource savings are measured; hybrid success alone does not show that model weights were replaced. Create a coding-specific protocol and machine-readable gate before scoring. Preserve the existing G02 factual retrieval protocol and its evidence files without changing their scope.
+
+### Coding comparison models and controls
+
+The proposed primary baseline is Qwen2.5-Coder-7B-Instruct, Q4_K_M GGUF, CPU-only with llama.cpp. Add Qwen2.5-Coder-3B-Instruct, Q4_K_M GGUF, as a size-matched control for a small residual model. Before a benchmark is frozen, pin each exact model revision and GGUF SHA-256, llama.cpp commit, build flags, prompt template, context and generation settings, thread count, and warm/cold protocol. Do not select or retune a model after seeing the held-out test results. Record VRAM as not applicable on the no-dGPU target. A newer model may replace a candidate only through a documented pre-benchmark review, with the old baseline retained for reproducibility.
+
+### Active implementation phases (v1.0 scope)
+
+| AIR phase/work packages | v1.0 coding scope |
+|---|---|
+| P02 | One-command Dell measurement of peak RAM, resident working set, CPU cycles, latency, energy, compiler/test pass rate, and lifecycle break-even |
+| P03 and P05 | Typed coding schema; SQLite indexed retrieval; language/toolchain-versioned manifests (initially rust-std); content hashes and rollback |
+| P04, P09, P23 behavioural subset | Offline coding-package extraction and curation from approved sources/teachers, with automated verification; no broad factual transfer work |
+| P06 and P07 | Deterministic-first coding router, canonical reduction, lexical/intent routing, confidence thresholds, and explicit fallback accounting |
+| P08 and P16 code-native subset | Tree-sitter, LSP, exact symbol/type diagnostics, deterministic patch realization; general NLP interpretation and realization stay deferred |
+| P18 | CPU-native Rust runtime, air-core/air-cli/air-bench, mmap and compressed indexes, optional llama.cpp/KILN residual backend |
+| P20 | Sandboxed compiler/test execution, resource budgets, package integrity, explicit approval/revocation, audit, and rollback |
+| P22 | Local coding CLI and resident JSON/LSP-compatible runtime, package manager, diagnostics, threat model, docs, and benchmark publication |
+
+No v1.0 deployment claim until G01-Code and G02-Code pass and P22's coding-scoped deployment criteria are met. Phase IDs are retained for continuity.
+
+## Track B — Deferred Research Programme (post-v1.0)
+
+**Deferral policy:** Track B is frozen: no implementation, benchmarking, or integration work until Track A passes G01-Code, G02-Code, and the coding-scoped P22 deployment gate. The historical phase definitions below remain available as research backlog and are not current execution instructions. A v1.0 coding result does not establish general intelligence, general weight replacement, or success on non-coding domains.
+
+### Deferred lanes and active-plan exclusions
+
+- W3 structural AMT and mechanistic interpretability (P23.02–P23.03): weight entropy/rank, activation clustering, sparse autoencoders, transcoders, activation patching, circuit tracing, and experiments E01, E31, E32.
+- All general-purpose knowledge acquisition, non-coding domain packages, and broad conversational capabilities.
+- All old general-purpose phase work except the coding-scoped crosswalk explicitly listed in Track A.
+
+### Gate and record separation
+
+G01-Code/G02-Code are new coding gates. Existing G01 factual capability transfer, existing G02 factual weight replacement, their JSON gate files, datasets, and historical artifacts remain intact and deferred. Coding gates require their own frozen workload, evaluator, model hashes, and protocol; results must not be merged with or used to pass the factual gates. The active coding baseline candidates are Qwen2.5-Coder-7B-Instruct Q4_K_M and the 3B control; the existing factual gate's pinned baseline remains governed by its own manifest.
+
+## Preserved v0.5 record and deferred programme
+
+The following v0.5 material is retained for traceability. Its general-purpose execution priorities are superseded by Track A until coding v1.0 is validated. Existing development scores remain diagnostics and do not constitute coding acceptance evidence.
+
 
 ## Mission and directives
 Develop CPU-first local intelligence with substantially lower quality-adjusted resource costs. Separate learning, curation, representation, retrieval, reasoning, execution and language realisation. Offline inference, no dedicated GPU, selective activation, representation independence, automatic learning, compositional reuse, continuous incremental updates, scientific validity, generalisation, reuse before rebuilding, portability, inspectability and optional KILN integration. Expensive training/compilation is permissible only with lifecycle cost accounting. Never assume transformers or weights are mandatory.
 
-## Current execution priorities — post-pilot revision (v0.4)
+## Preserved historical execution priorities — post-pilot revision (v0.4; superseded by v0.6)
 
 Initial real-model experiment: GitHub Actions run 45971173610, artifact 15185626215. Small public fixtures suggest promising classification transfer; factual and procedural extraction failed. The bridge ignored JSON constraints and did not preserve raw responses. Missing model knowledge versus formatting failures cannot yet be distinguished. No acceptance gate is passed.
 
@@ -23,7 +103,7 @@ Six concurrent development lanes govern implementation. All prior hypotheses, ph
 
 Immediate sequence within lanes: repair and instrument communication; compare teachers; evaluate candidate representations; integrate validated capabilities; measure full-system costs. Structural work proceeds independently. Initial research targets remain >=95% teacher accuracy on meaningful independent workloads, >=2x quality-adjusted throughput, >=50% RAM and energy-per-correct-task reductions. Report absolute accuracy, coverage, per-domain regressions and negative results. Weak teachers and trivial tasks do not establish general capability preservation.
 
-## Evidence-driven execution priority (v0.5)
+## Preserved v0.5 evidence-driven priority (general factual capability; deferred under v0.6)
 
 The master research programme is preserved. W1 and W6 are prerequisites for interpreting behavioural transfer results; W2, W4 and W5 concentrate on the next falsifiable capability gate. W3 remains an independent exploratory lane with bounded experiments and appropriate controls. Technology inventory is a research backlog, not a requirement to integrate every system.
 
@@ -31,7 +111,7 @@ The master research programme is preserved. W1 and W6 are prerequisites for inte
 
 **G02 — selective model-weight replacement:** Compare a pinned CPU quantized model, AIR-only with weights unloaded, and AIR-first hybrid with every fallback counted. The runner, evaluator, and resident/on-demand fallback integration are implemented; passing still requires independently reviewed frozen data and measurements on the mandatory Dell. AIR-only must preserve quality and meet RAM, energy, and throughput thresholds before claiming weight replacement. See [the runnable protocol](docs/architecture/weight-replacement-test.md) and [machine-readable gate](research/evidence-gate-02.json).
 
-## Verified implementation snapshot — 2026-11-27
+## Verified implementation snapshot before coding pivot — 2026-11-27
 
 Audited against `main` commit `dcf5fdb` (`Automate teacher ensemble reconciliation and pinned quantized development experiment`). This section records code that exists; it does not mark the associated research phase complete or claim that its acceptance gate passed.
 
@@ -55,7 +135,7 @@ The corrected 0.5B rerun (AMT run `45982358534`, artifact `15189469633`, teacher
 
 The completed 1.5B run from the same matrix (artifact `15190766881`, teacher revision `989aa7980e4cf806f80c7fef2b1adb7bc71aa306`) converted 190/200 draft facts. Teacher-fed AIR scored 230/240 (95.8%); the FP32 teacher scored 186/240 (77.5%). The automated, reference-validated union of both teacher traces retained 192/200 facts and scored 232/240 (96.7%) on AIR, with group results of geography 96%, science 100%, engineering 98%, general reference 90%, and unknown abstention 100%. Reconciliation completed successfully (artifact `15191510844`). These scores clear the numerical accuracy targets on this development workload, but do not pass G01: the dataset and paraphrases are same-author, unknown examples are synthetic, reference-fed retrieval is an oracle ceiling, and no target-machine whole-system RAM/energy evidence exists. The FP32 teacher also remained resident during AIR timing, so the apparent latency contrast is not a valid end-to-end resource comparison.
 
-**Next implementation target:** improve factual-store coverage without relaxing reference checks. The saved 0.5B trace contains four SI-symbol answers in verbose but recoverable formats; relation-aware extraction now normalizes these and admits a candidate only when it matches the reviewed reference. Offline replay raises its accepted draft facts from 117/200 to 121/200. Analysis of the eight misses in the 192-fact teacher union found two geography answers that differed only by diacritics and six genuinely incorrect model answers. Geography matching now accepts accent variants while preserving canonical stored values; scientific notation stays case-sensitive. Replaying the two saved teacher traces raises the reference-matched union to 194/200, recovering Iceland and Colombia. This is an extraction replay, not a new model run or AIR accuracy measurement. The end-to-end retrieval benchmark remains to be rerun; this workspace lacks `target/release/air-cli` and Cargo. Continue coverage and failure reporting by relation/domain, keeping teacher knowledge gaps distinct from router failures.
+**Pre-pivot factual-lane next target (deferred under v0.6):** improve factual-store coverage without relaxing reference checks. The saved 0.5B trace contains four SI-symbol answers in verbose but recoverable formats; relation-aware extraction now normalizes these and admits a candidate only when it matches the reviewed reference. Offline replay raises its accepted draft facts from 117/200 to 121/200. Analysis of the eight misses in the 192-fact teacher union found two geography answers that differed only by diacritics and six genuinely incorrect model answers. Geography matching now accepts accent variants while preserving canonical stored values; scientific notation stays case-sensitive. Replaying the two saved teacher traces raises the reference-matched union to 194/200, recovering Iceland and Colombia. This is an extraction replay, not a new model run or AIR accuracy measurement. The end-to-end retrieval benchmark remains to be rerun; this workspace lacks `target/release/air-cli` and Cargo. Continue coverage and failure reporting by relation/domain, keeping teacher knowledge gaps distinct from router failures.
 
 Historical small pilot 45974698319: 0.5B facts 3/6, 1.5B facts 6/6; weightless classifier 3/6 and 5/6, reference-trained lexical baseline 6/6 for both; no arithmetic candidate. Coordinate ablation changed top predictions on 5/6 and 4/6 prompts, respectively; fixed disjoint controls 0/6, but not magnitude-matched. No scientific acceptance gate passed. Prioritize factual extraction with real natural-language routing and a direct reference-fed retrieval comparator. Retain weightless and procedural work as hypotheses, not presumed winners. Preserve all negative results.
 
@@ -136,7 +216,7 @@ Every technology requires source, scientific foundations, algorithms, language, 
 ## Architecture
 Training and experience -> teacher/discovery -> curator -> compiler -> universal store. User request -> deterministic router / SLM -> Graphmaster 2.0 -> selected knowledge and capabilities -> adaptive reasoning -> CPU runtime -> language realisation -> verified response or uncertainty. Feedback updates are independently validated. Store supports relational facts, semantic and causal graphs, temporal records, programs, decision diagrams, logic, state machines, grammars, binary patterns, compressed sequences, probabilistic structures, episodic records and residual neural tensors. Categories are overlapping references, not duplicated facts. No assumption that existing dense weights can be categorised by topic.
 
-## Implementation phases
+## Preserved general-purpose implementation phases (Track B; coding-scoped work is governed by Track A)
 ### Phase 00 — Scientific foundations
 Complete cross-disciplinary ledger; formalise hypotheses; information-theoretic limits; storage–compute tradeoffs; competing architectures; prior art; reusable code; licensing; falsifiable experiments.
 
@@ -252,7 +332,7 @@ Runtime, CLI, local API, chat, knowledge manager/packages, model manager, diagno
 
 **Acceptance gate:** All required gates pass; no deployment claim on code completion alone.
 
-## Phase 23 — AIR Model Transcompiler (AMT)
+## Phase 23 — AIR Model Transcompiler (AMT; general-purpose scope deferred, coding subset active only as specified in Track A)
 
 **Status:** prototype_partial. Checkpoint inspection, behavioral probes, selected extraction tracks, candidate packaging, and experiment automation exist; no working full-model transcompiler or capability-preservation result has passed its gate.
 
@@ -355,7 +435,7 @@ Mandatory Dell Latitude 7490 i7-8650U, 4 cores/8 threads, 16 GB DDR4, NVMe, no d
 
 Each experiment requires hypothesis/alternatives, baseline configuration, dataset and contamination controls, hardware/software, quality and generalisation, RAM/storage/compute/energy, training/curation/compilation overhead, reproducibility, success/failure thresholds, negative results and architectural implications.
 
-## Implementation strategy
+## Preserved general-purpose implementation strategy (deferred under v0.6)
 Parallel research/benchmarks, curation, format/storage/Graphmaster and semantic routing. First prototype integrates AIR-IR, curator, category store, Graphmaster, SLM router, symbolic execution and language realisation; compare SLM, RAG, ChatScript and neuro-symbolic baseline. Then pursue Genome, Compiler and Weightless independently; integrate only validated components. Finally scale, validate and deploy. Rust proposed; optional native C/C++ and KILN backends; avoid premature crate fragmentation.
 
 AMT (P23) starts in parallel with the existing research, teacher, curation and compiler workstreams; preserve original checkpoints and release converted capabilities only after their independent quality gates.
@@ -363,7 +443,7 @@ AMT (P23) starts in parallel with the existing research, teacher, curation and c
 ## Failure clauses
 If full weightless intelligence fails retain efficient specialised components; if general compilation fails retain selected compiled behaviours; if Genome fails at scale retain reusable libraries; if symbolic reasoning fails use neural fallback; if non-neural generation fails retain grammar fast paths; if full extraction fails retain curated knowledge; if SLM reasoning fails use selectively loaded larger modules; if tenfold gains fail report smaller measured gains; if frontier-level capability fails retain domain-specific utility. No deployment before gates.
 
-## Status
+## Preserved v0.5 status snapshot
 Nine hypotheses, 24 phases, 38 core experiments; a multi-crate Rust prototype and preliminary real-model experiments exist. The prototype demonstrates selected retrieval, reasoning, memory, routing, packaging and measurement paths, not the roadmap's full architecture. No scientific acceptance gate or production-readiness gate is currently established as passed. Machine-readable ledgers are authoritative for gate evidence; completion is based on validated acceptance tests, not code presence or subjective percentages.
 
 **Principle:** Do not store as weights what can be stored as knowledge; do not calculate what can be retrieved; do not repeatedly infer what can be compiled; do not load what is not needed; do not execute an expensive mechanism when a cheaper one is sufficient, subject to validated quality.
