@@ -226,7 +226,7 @@
       "acceptance_gate": "Reproducible measurements across historical, neural, symbolic and hybrid baselines",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-02.md."
+        "No phase gate passed; see docs/architecture/prototype-03.md."
       ]
     },
     {
@@ -590,7 +590,7 @@
       "acceptance_gate": "Automatically curate validated searchable knowledge without manually authoring each record",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-02.md."
+        "No phase gate passed; see docs/architecture/prototype-03.md."
       ]
     },
     {
@@ -668,7 +668,7 @@
       "acceptance_gate": "Store larger than RAM searchable under controlled memory budget",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-02.md."
+        "No phase gate passed; see docs/architecture/prototype-03.md."
       ]
     },
     {
@@ -785,7 +785,7 @@
       "acceptance_gate": "Supported queries without large-model inference and unseen paraphrases via semantic routing",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-02.md."
+        "No phase gate passed; see docs/architecture/prototype-03.md."
       ]
     },
     {
@@ -824,7 +824,7 @@
       "acceptance_gate": "High routing recall on unseen/interdisciplinary questions, measured overhead and recovery",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-02.md."
+        "No phase gate passed; see docs/architecture/prototype-03.md."
       ]
     },
     {
@@ -863,7 +863,7 @@
       "acceptance_gate": "Equivalent paraphrases map compatibly; ambiguity distinguished",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-02.md."
+        "No phase gate passed; see docs/architecture/prototype-03.md."
       ]
     },
     {
@@ -1114,7 +1114,7 @@
     {
       "id": "P14",
       "name": "Hybrid reasoning engine",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1132,7 +1132,10 @@
         }
       ],
       "acceptance_gate": "Cross-domain composition with inspectable evidence where applicable",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-03.md."
+      ]
     },
     {
       "id": "P15",
@@ -1170,7 +1173,7 @@
       "acceptance_gate": "Respect explicit RAM/time/compute budgets at specified quality",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-02.md."
+        "No phase gate passed; see docs/architecture/prototype-03.md."
       ]
     },
     {
@@ -1248,7 +1251,7 @@
       "acceptance_gate": "Adaptive mixed-workload execution beats static baseline",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-02.md."
+        "No phase gate passed; see docs/architecture/prototype-03.md."
       ]
     },
     {
@@ -1274,7 +1277,7 @@
       "acceptance_gate": "Portable heterogeneous operations with measured CPU/memory efficiency",
       "deployment_ready": false,
       "known_limitations": [
-        "No phase gate passed; see docs/architecture/prototype-02.md."
+        "No phase gate passed; see docs/architecture/prototype-03.md."
       ]
     },
     {
@@ -1303,7 +1306,7 @@
     {
       "id": "P20",
       "name": "System integration and safety",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
@@ -1321,7 +1324,10 @@
         }
       ],
       "acceptance_gate": "Adversarial and recovery tests before unrestricted acquisition/execution",
-      "deployment_ready": false
+      "deployment_ready": false,
+      "known_limitations": [
+        "No phase gate passed; see docs/architecture/prototype-03.md."
+      ]
     },
     {
       "id": "P21",

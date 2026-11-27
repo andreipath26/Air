@@ -31,3 +31,16 @@ cargo run -p air-cli -- ask demo.db "calculate 583 * 927"
 cargo run --release -p air-bench -- retrieval 1000 benchmark.db
 ```
 SQLite is a provisional indexed reference backend; Rust bindings require a C compiler for the bundled SQLite build. See [prototype limitations](docs/architecture/prototype-02.md). The semantic router currently exposes a typed interface and supplied JSON fallback, not an embedded model.
+
+## Optional resident local SLM
+Install llama.cpp separately and obtain an appropriately licensed instruction GGUF. Start a CPU-only loopback server:
+
+```sh
+llama-server -m /path/model.gguf -ngl 0 -c 4096 --host 127.0.0.1 --port 8080
+export AIR_MODEL_PORT=8080 AIR_MODEL_NAME=local
+cargo run -p air-cli -- ask demo.db "Which city serves as France's capital?"
+cargo run -p air-cli -- curate-text document.txt extracted.db source-id
+bash scripts/benchmark-local.sh 10000
+```
+
+Deterministic fast paths run before the model. Extracted claims are explicitly unverified; inspect source quotes. See [prototype 03](docs/architecture/prototype-03.md) for constraints. Actual model quality and hardware results remain unmeasured.

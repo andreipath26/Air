@@ -11,3 +11,6 @@ mod tests { use super::*; #[test] fn budget_boundaries() { let b = Budget { max_
 pub mod indexed;
 pub mod router;
 pub mod curate;
+
+pub mod model;
+pub mod reasoning;
