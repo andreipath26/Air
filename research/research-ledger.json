@@ -1,5 +1,5 @@
 {
-  "version": "0.2",
+  "version": "0.3",
   "hypotheses": [
     {
       "id": "H01",
@@ -55,6 +55,13 @@
       "name": "Task-centric inference",
       "claim": "Compute may scale with task complexity rather than total knowledge",
       "foundations": "Control theory, NARS, adaptive execution",
+      "status": "untested"
+    },
+    {
+      "id": "H09",
+      "name": "Pretrained intelligence transcompilation",
+      "claim": "Selected capabilities of existing pretrained models may be transferred into cheaper heterogeneous AIR representations without training a foundation model from scratch; retained neural residuals cover unsupported capabilities.",
+      "foundations": "Mechanistic interpretability, knowledge distillation, program synthesis, knowledge compilation",
       "status": "untested"
     }
   ],
@@ -358,6 +365,86 @@
       "dataset": null,
       "thresholds": null,
       "results": []
+    },
+    {
+      "id": "E31",
+      "name": "Safe checkpoint inspection and weight redundancy",
+      "status": "planned",
+      "hypothesis": "H09",
+      "baseline": "B09",
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E32",
+      "name": "Internal feature and circuit extraction with causal intervention",
+      "status": "planned",
+      "hypothesis": "H09",
+      "baseline": "B13",
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E33",
+      "name": "Behavioural capability discovery and teacher transfer",
+      "status": "planned",
+      "hypothesis": "H09",
+      "baseline": "B13",
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E34",
+      "name": "Hybrid extraction versus behavioural-only conversion",
+      "status": "planned",
+      "hypothesis": "H09",
+      "baseline": "B15",
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E35",
+      "name": "Representation selection and held-out capability preservation",
+      "status": "planned",
+      "hypothesis": "H09",
+      "baseline": "B14",
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E36",
+      "name": "Residual neural fallback and safe replacement ablation",
+      "status": "planned",
+      "hypothesis": "H09",
+      "baseline": "B13",
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E37",
+      "name": "Conversion lifecycle cost, energy and break-even",
+      "status": "planned",
+      "hypothesis": "H09",
+      "baseline": "B14",
+      "dataset": null,
+      "thresholds": null,
+      "results": []
+    },
+    {
+      "id": "E38",
+      "name": "Converted package portability, rollback and adversarial safety",
+      "status": "planned",
+      "hypothesis": "H09",
+      "baseline": "B12",
+      "dataset": null,
+      "thresholds": null,
+      "results": []
     }
   ],
   "baselines": [
@@ -419,6 +506,26 @@
     {
       "id": "B12",
       "name": "Complete AIR",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B13",
+      "name": "Original pinned pretrained teacher",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B14",
+      "name": "Conventional neural student / quantised teacher comparison",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B15",
+      "name": "AIR behavioural-only conversion",
+      "status": "not_benchmarked"
+    },
+    {
+      "id": "B16",
+      "name": "AIR hybrid internal-analysis plus behavioural conversion",
       "status": "not_benchmarked"
     }
   ],
@@ -914,6 +1021,51 @@
     {
       "name": "Dictionary encoding",
       "group": "Storage",
+      "status": "audit_pending"
+    },
+    {
+      "name": "SafeTensors",
+      "group": "Model transcompilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "GGUF tensor metadata inspection",
+      "group": "Model transcompilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Sparse autoencoders",
+      "group": "Model transcompilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Transcoders",
+      "group": "Model transcompilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Activation patching",
+      "group": "Model transcompilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Circuit tracing",
+      "group": "Model transcompilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Knowledge distillation",
+      "group": "Model transcompilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Behavioural program extraction",
+      "group": "Model transcompilation",
+      "status": "audit_pending"
+    },
+    {
+      "name": "Neural pruning and residual routing",
+      "group": "Model transcompilation",
       "status": "audit_pending"
     }
   ]

@@ -76,3 +76,6 @@ Operator reviews and skill approvals are separate from untrusted model output. S
 
 ## Learned routing and reversible objects
 `teach-route POLICY CATEGORY PHRASE` adds operator-provided category examples. Integrated sessions may return a clearly marked category suggestion when other routing abstains. `observe` / `predict` record and retrieve transition counts. `revision-put`, `revision-get`, and `revision-rollback` operate on content-addressed objects. See [prototype 09](docs/architecture/prototype-09.md).
+
+## Planned: AIR Model Transcompiler (AMT)
+Reuse existing pretrained models by extracting selected capabilities through behavioural distillation and experimental weight/activation analysis, compiling them into AIR-native representations and retaining neural fallback where needed. No full-model inversion or equivalence is claimed. See [architecture and validation strategy](docs/architecture/model-transcompiler.md) and Phase 23 of the [roadmap](ROADMAP.md).

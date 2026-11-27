@@ -1,5 +1,5 @@
 # AIR — Adaptive Intelligence Representation
-## Master research and development roadmap v0.2
+## Master research and development roadmap v0.3
 
 Status: proposed research programme; no performance or general-intelligence claims. This repository version captures the roadmap's substantive requirements; chat diagrams are expressed as text. All targets are hypotheses, not results.
 
@@ -15,6 +15,8 @@ Develop CPU-first local intelligence with substantially lower quality-adjusted r
 - H06 **Weightless intelligence:** Selected capabilities may execute through logic, binary patterns and lookup. Foundations: Digital electronics, HDC, logic networks.
 - H07 **Category-based selective activation:** SLM coordinates larger stores with small active working set. Foundations: Information science, cognition.
 - H08 **Task-centric inference:** Compute may scale with task complexity rather than total knowledge. Foundations: Control theory, NARS, adaptive execution.
+
+- H09 **Pretrained intelligence transcompilation:** Selected capabilities of pretrained models may transfer into cheaper AIR representations without full foundation-model retraining; residual neural inference remains when necessary.
 
 ## Cross-disciplinary research
 - Genetics: generative instructions
@@ -197,6 +199,41 @@ Runtime, CLI, local API, chat, knowledge manager/packages, model manager, diagno
 
 **Acceptance gate:** All required gates pass; no deployment claim on code completion alone.
 
+## Phase 23 — AIR Model Transcompiler (AMT)
+
+**Status:** planned research and engineering; no working full-model transcompiler or capability-preservation result yet.
+
+**Purpose:** Reuse intelligence already learned by existing pretrained models without requiring full model training from scratch. Treat AMT as a hybrid conversion pipeline, not a lossless decoder of all knowledge from weights. Behavioural extraction is the practical first path; direct weight/activation analysis is a complementary research path. Existing weights are distributed and cannot be assumed to map one-to-one to facts, topics or procedures.
+
+### Work packages
+- P23.01 **Model intake and licensing:** Validate model identity, exact revision, tokenizer, architecture, tensor inventory, hashes and licenses; reject unsafe deserialisation and unauthorised extraction.
+- P23.02 **Weight and activation inspection:** Read safe tensors and GGUF metadata; stream tensor statistics, entropy, redundancy, rank and sparsity; optionally collect bounded activation traces.
+- P23.03 **Mechanistic interpretability:** Evaluate sparse autoencoders, transcoders, probing, activation patching and circuit tracing; distinguish association from causal intervention.
+- P23.04 **Behavioural capability discovery:** Build domain and capability inventories, teacher queries, paraphrases, counterexamples, multilingual tasks, exceptions and abstention tests; record teacher provenance.
+- P23.05 **Teacher-to-AIR knowledge transfer:** Convert candidate claims into curated canonical knowledge with evidence, conflict detection and independent validation; never treat teacher output as truth.
+- P23.06 **Procedure and structure extraction:** Extract demonstrations, rules, causal candidates, grammar patterns and reusable algorithms; use bounded synthesis and validation on unseen compositions.
+- P23.07 **Representation selection and compilation:** Evaluate candidate facts, graphs, programs, decision diagrams, state machines, grammars, binary classifiers and neural residuals using measured quality and lifecycle costs.
+- P23.08 **Residual neural execution:** Retain original model as reference and fallback; evaluate targeted distillation, quantisation, pruning or specialised modules only under capability-preservation gates.
+- P23.09 **Conversion orchestration and checkpoints:** Resumable offline pipeline, deterministic manifests, shard streaming, bounded resources, reproducible experiment metadata, candidate quarantine and rollback.
+- P23.10 **Capability-preservation validation:** Independent ground truth, held-out paraphrases, reasoning, adversarial and cross-domain tasks; compare teacher and converted system, record regressions and abstentions.
+- P23.11 **AIR package and runtime integration:** Build versioned installable intelligence packages with provenance, dependencies, router and residual model references; integrate with AIR-IR and CPU runtime.
+- P23.12 **Lifecycle economics and scaling:** Measure conversion time, GPU/CPU energy, peak RAM, storage, inference energy and latency per correct task; report amortisation and break-even.
+- P23.13 **Safety, negative results and release gates:** Test poisoning, memorised sensitive material, prompt injection, unsafe outputs, model compatibility, license compliance, rollback and reproducibility; publish failures.
+
+**Acceptance gate:** Demonstrate reproducible conversion of at least one selected pretrained-model capability into a cheaper AIR-native representation, with independently validated held-out quality, full lifecycle accounting, explicit fallback and rollback. General model conversion and removal of neural residuals require separate stronger evidence.
+
+**Dependencies:** P02–P05, P07–P09, P11–P13, P15, P17–P21. AMT is numbered P23 to preserve all existing phase IDs, but starts alongside the research, teacher, curation and compiler workstreams, before production deployment. P22 must not imply AMT readiness until its applicable gates pass.
+
+### Conversion strategy
+1. Freeze and fingerprint an appropriately licensed pretrained teacher (initial small open-weight instruction model; Qwen, Llama or Mistral families subject to model-specific permissions).
+2. Run internal analysis and behavioural discovery in parallel; begin with bounded factual and procedural tasks, then expand to dialogue, classification, causal candidates and composition.
+3. Curate candidates into canonical records with source, uncertainty, version and provenance; independent evidence rather than teacher agreement is required for factual validation.
+4. Compile and select the least expensive validated representation per capability: structured knowledge, executable procedures, graphs, rules, grammars, binary patterns, predictive states or neural residuals.
+5. Compare original teacher, ordinary compressed neural baseline, behavioural-only conversion, interpretability-assisted conversion and hybrid AIR. Keep residual inference when quality is not preserved; do not remove weights merely because a behaviour was reproduced in a limited test.
+6. Package validated components and residual references; maintain rollback and independently test the converted system on the mandatory CPU-only laptop.
+
+**Failure clauses:** No general lossless weight-to-knowledge inversion assumed. If direct internal extraction fails, continue behavioural transfer; if a compiled capability fails quality gates, retain neural fallback or abstain. If conversion costs outweigh inference savings, report the measured negative result. Never claim full model equivalence from selected-task success.
+
 ## Knowledge acquisition
 Wikidata; Wikipedia; DBpedia; ConceptNet; WordNet; FrameNet; BabelNet; SUMO; OpenCyc archives; ATOMIC; OpenAlex; OpenStax; Project Gutenberg; OpenStreetMap; Open-source software; Scientific publications; Verified technical documentation. Review licenses, source quality, provenance and redistribution restrictions individually. Domain packages (general, science, programming, automotive, mathematics, languages, medicine) have manifests, dependencies, versions, source provenance, compressed indexes, compatibility and integrity. Install selectively.
 
@@ -216,6 +253,11 @@ Mandatory Dell Latitude 7490 i7-8650U, 4 cores/8 threads, 16 GB DDR4, NVMe, no d
 - B10 KILN neural inference
 - B11 AIR without compilation
 - B12 Complete AIR
+
+- B13 Original pinned pretrained teacher
+- B14 Conventional neural student / quantised teacher comparison
+- B15 AIR behavioural-only conversion
+- B16 AIR hybrid internal-analysis plus behavioural conversion
 
 ## Experiments
 - E01 Neural weight entropy and redundancy
@@ -249,15 +291,26 @@ Mandatory Dell Latitude 7490 i7-8650U, 4 cores/8 threads, 16 GB DDR4, NVMe, no d
 - E29 Case-based reasoning reuse
 - E30 Full-system comparative evaluation
 
+- E31 Safe checkpoint inspection and weight redundancy
+- E32 Internal feature and circuit extraction with causal intervention
+- E33 Behavioural capability discovery and teacher transfer
+- E34 Hybrid extraction versus behavioural-only conversion
+- E35 Representation selection and held-out capability preservation
+- E36 Residual neural fallback and safe replacement ablation
+- E37 Conversion lifecycle cost, energy and break-even
+- E38 Converted package portability, rollback and adversarial safety
+
 Each experiment requires hypothesis/alternatives, baseline configuration, dataset and contamination controls, hardware/software, quality and generalisation, RAM/storage/compute/energy, training/curation/compilation overhead, reproducibility, success/failure thresholds, negative results and architectural implications.
 
 ## Implementation strategy
 Parallel research/benchmarks, curation, format/storage/Graphmaster and semantic routing. First prototype integrates AIR-IR, curator, category store, Graphmaster, SLM router, symbolic execution and language realisation; compare SLM, RAG, ChatScript and neuro-symbolic baseline. Then pursue Genome, Compiler and Weightless independently; integrate only validated components. Finally scale, validate and deploy. Rust proposed; optional native C/C++ and KILN backends; avoid premature crate fragmentation.
 
+AMT (P23) starts in parallel with the existing research, teacher, curation and compiler workstreams; preserve original checkpoints and release converted capabilities only after their independent quality gates.
+
 ## Failure clauses
 If full weightless intelligence fails retain efficient specialised components; if general compilation fails retain selected compiled behaviours; if Genome fails at scale retain reusable libraries; if symbolic reasoning fails use neural fallback; if non-neural generation fails retain grammar fast paths; if full extraction fails retain curated knowledge; if SLM reasoning fails use selectively loaded larger modules; if tenfold gains fail report smaller measured gains; if frontier-level capability fails retain domain-specific utility. No deployment before gates.
 
 ## Status
-Eight hypotheses, 23 phases, 30 core experiments; preliminary conceptual survey only. Technology audits, experimental validation and production readiness not established. The bootstrap workspace is infrastructure, not evidence of the hypotheses. Machine-readable ledgers are authoritative for work and evidence; completion is based on validated acceptance tests, not subjective percentages.
+Nine hypotheses, 24 phases, 38 core experiments; preliminary conceptual survey only. Technology audits, experimental validation and production readiness not established. The bootstrap workspace is infrastructure, not evidence of the hypotheses. Machine-readable ledgers are authoritative for work and evidence; completion is based on validated acceptance tests, not subjective percentages.
 
 **Principle:** Do not store as weights what can be stored as knowledge; do not calculate what can be retrieved; do not repeatedly infer what can be compiled; do not load what is not needed; do not execute an expensive mechanism when a cheaper one is sufficient, subject to validated quality.

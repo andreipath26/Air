@@ -1,5 +1,5 @@
 {
-  "version": "0.2",
+  "version": "0.3",
   "phases": [
     {
       "id": "P00",
@@ -1433,6 +1433,227 @@
       "deployment_ready": false,
       "known_limitations": [
         "No phase gate passed; see docs/architecture/prototype-08.md."
+      ]
+    },
+    {
+      "id": "P23",
+      "name": "AIR Model Transcompiler (AMT)",
+      "status": "planned",
+      "completion_percent": 0,
+      "work_packages": [
+        {
+          "id": "P23.01",
+          "name": "Model intake and licensing",
+          "description": "Validate model identity, exact revision, tokenizer, architecture, tensor inventory, hashes and licenses; reject unsafe deserialisation and unauthorised extraction.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P00.08"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.02",
+          "name": "Weight and activation inspection",
+          "description": "Read safe tensors and GGUF metadata; stream tensor statistics, entropy, redundancy, rank and sparsity; optionally collect bounded activation traces.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P23.01"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.03",
+          "name": "Mechanistic interpretability",
+          "description": "Evaluate sparse autoencoders, transcoders, probing, activation patching and circuit tracing; distinguish association from causal intervention.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P23.02"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.04",
+          "name": "Behavioural capability discovery",
+          "description": "Build domain and capability inventories, teacher queries, paraphrases, counterexamples, multilingual tasks, exceptions and abstention tests; record teacher provenance.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P09.01"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.05",
+          "name": "Teacher-to-AIR knowledge transfer",
+          "description": "Convert candidate claims into curated canonical knowledge with evidence, conflict detection and independent validation; never treat teacher output as truth.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P23.04"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.06",
+          "name": "Procedure and structure extraction",
+          "description": "Extract demonstrations, rules, causal candidates, grammar patterns and reusable algorithms; use bounded synthesis and validation on unseen compositions.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P23.04"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.07",
+          "name": "Representation selection and compilation",
+          "description": "Evaluate candidate facts, graphs, programs, decision diagrams, state machines, grammars, binary classifiers and neural residuals using measured quality and lifecycle costs.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P23.06"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.08",
+          "name": "Residual neural execution",
+          "description": "Retain original model as reference and fallback; evaluate targeted distillation, quantisation, pruning or specialised modules only under capability-preservation gates.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P23.07"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.09",
+          "name": "Conversion orchestration and checkpoints",
+          "description": "Resumable offline pipeline, deterministic manifests, shard streaming, bounded resources, reproducible experiment metadata, candidate quarantine and rollback.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P23.01"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.10",
+          "name": "Capability-preservation validation",
+          "description": "Independent ground truth, held-out paraphrases, reasoning, adversarial and cross-domain tasks; compare teacher and converted system, record regressions and abstentions.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P23.07"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.11",
+          "name": "AIR package and runtime integration",
+          "description": "Build versioned installable intelligence packages with provenance, dependencies, router and residual model references; integrate with AIR-IR and CPU runtime.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P23.10"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.12",
+          "name": "Lifecycle economics and scaling",
+          "description": "Measure conversion time, GPU/CPU energy, peak RAM, storage, inference energy and latency per correct task; report amortisation and break-even.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P23.11"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        },
+        {
+          "id": "P23.13",
+          "name": "Safety, negative results and release gates",
+          "description": "Test poisoning, memorised sensitive material, prompt injection, unsafe outputs, model compatibility, license compliance, rollback and reproducibility; publish failures.",
+          "status": "planned",
+          "completion_percent": 0,
+          "dependencies": [
+            "P23.12"
+          ],
+          "implementation": null,
+          "acceptance_tests": [],
+          "benchmark_evidence": [],
+          "known_limitations": [],
+          "blocking_issues": [],
+          "deployment_ready": false
+        }
+      ],
+      "acceptance_gate": "Demonstrate reproducible conversion of at least one selected pretrained-model capability into a cheaper AIR-native representation, with independently validated held-out quality, full lifecycle accounting, explicit fallback and rollback. General model conversion and removal of neural residuals require separate stronger evidence.",
+      "deployment_ready": false,
+      "known_limitations": [
+        "No full-model converter implemented; no lossless recovery or capability-preservation evidence."
       ]
     }
   ]
