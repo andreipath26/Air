@@ -869,7 +869,7 @@
     {
       "id": "P09",
       "name": "AI teacher and automated learning",
-      "status": "planned",
+      "status": "prototype_partial",
       "completion_percent": 0,
       "work_packages": [
         {
