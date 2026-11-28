@@ -16,5 +16,5 @@ pub fn review(model:&LocalModel,f:&Fact,source:&str,document:&str,hash:&str)->Re
 /// A candidate is trusted only when this verifier returns Ok.
 pub trait GeneratedOutputVerifier {
     type Error: std::fmt::Display;
-    fn verify(&self, question: &str, candidate: &str) -> Result<(), Self::Error>;
+    fn verify(&self, question: &str, candidate: &str) -> std::result::Result<(), Self::Error>;
 }
