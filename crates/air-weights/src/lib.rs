@@ -257,6 +257,78 @@ impl ArchiveReader {
     }
 }
 
+
+/// Helpers for creating deterministic AIRW fixtures at test time. No binary
+/// fixtures need to be checked into the repository.
+pub mod testing {
+    use super::{ArchiveBuilder, ArchiveError, MAX_PAYLOAD_BYTES, MAX_SECTIONS};
+
+    /// Builds a canonical archive from named sections. Inputs are sorted before
+    /// serialization so identical logical inputs yield identical bytes.
+    pub fn build_deterministic_archive(
+        package: &str,
+        languages: &[&str],
+        sections: &[(&str, &str, &[u8])],
+    ) -> Result<Vec<u8>, ArchiveError> {
+        let mut sorted_languages = languages.to_vec();
+        sorted_languages.sort_unstable();
+        let mut sorted_sections = sections.to_vec();
+        sorted_sections.sort_unstable_by(|a, b| a.0.cmp(b.0));
+
+        let mut builder = ArchiveBuilder::new(package);
+        for language in sorted_languages {
+            builder.add_language(language)?;
+        }
+        for (name, kind, data) in sorted_sections {
+            builder.add_section(name, kind, data)?;
+        }
+        builder.finish()
+    }
+
+    /// Generates deterministic pseudo-random test weights in a valid AIRW
+    /// archive. The seed and section sizes fully determine the output. The
+    /// archive can be opened with ArchiveReader::open to exercise mmap.
+    pub fn deterministic_test_weights(
+        seed: u64,
+        section_count: usize,
+        bytes_per_section: usize,
+    ) -> Result<Vec<u8>, ArchiveError> {
+        if section_count == 0 || bytes_per_section == 0 {
+            return Err(ArchiveError::Invalid("empty test weights"));
+        }
+        if section_count > MAX_SECTIONS {
+            return Err(ArchiveError::Limit("section count"));
+        }
+        let payload_len = section_count.checked_mul(bytes_per_section)
+            .ok_or(ArchiveError::Limit("payload size"))?;
+        if payload_len > MAX_PAYLOAD_BYTES {
+            return Err(ArchiveError::Limit("payload size"));
+        }
+
+        fn next(state: &mut u64) -> u64 {
+            *state = state.wrapping_add(0x9e3779b97f4a7c15);
+            let mut z = *state;
+            z = (z ^ (z >> 30)).wrapping_mul(0xbf58476d1ce4e5b9);
+            z = (z ^ (z >> 27)).wrapping_mul(0x94d049bb133111eb);
+            z ^ (z >> 31)
+        }
+
+        let mut state = seed;
+        let mut builder = ArchiveBuilder::new("air-test-weights");
+        builder.add_language("rust")?;
+        for index in 0..section_count {
+            let mut data = Vec::with_capacity(bytes_per_section);
+            while data.len() < bytes_per_section {
+                data.extend_from_slice(&next(&mut state).to_le_bytes());
+            }
+            data.truncate(bytes_per_section);
+            let name = format!("weight.{index:04}");
+            builder.add_section(name, "test-weight", &data)?;
+        }
+        builder.finish()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
