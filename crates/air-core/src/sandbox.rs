@@ -51,6 +51,8 @@ pub struct SandboxConfig {
     /// Allow the vfork syscall only for trusted compiler/linker invocations.
     /// Generated code must run with the default strict policy.
     pub allow_vfork_for_toolchain: bool,
+    /// Permit fork only for trusted compiler/linker invocations.
+    pub allow_fork_for_toolchain: bool,
 }
 
 impl SandboxConfig {
@@ -70,6 +72,7 @@ impl SandboxConfig {
             wall_timeout: Duration::from_secs(10),
             max_output_bytes: 1024 * 1024,
             allow_vfork_for_toolchain: false,
+            allow_fork_for_toolchain: false,
         }
     }
 
@@ -79,6 +82,10 @@ impl SandboxConfig {
 
     pub fn allow_vfork_for_toolchain(&mut self, allowed: bool) {
         self.allow_vfork_for_toolchain = allowed;
+    }
+
+    pub fn allow_fork_for_toolchain(&mut self, allowed: bool) {
+        self.allow_fork_for_toolchain = allowed;
     }
 
     pub fn require_landlock(&mut self, required: bool) {
@@ -229,7 +236,10 @@ fn prepare_security(config: &SandboxConfig) -> io::Result<(PreparedSecurity, Enf
     if abi.is_none() && config.landlock_mode == LandlockMode::Required {
         return Err(io::Error::new(io::ErrorKind::Unsupported, "Landlock is unavailable on this kernel"));
     }
-    let seccomp = build_seccomp_filter(config.allow_vfork_for_toolchain);
+    let seccomp = build_seccomp_filter(
+        config.allow_vfork_for_toolchain,
+        config.allow_fork_for_toolchain,
+    );
     let report = EnforcementReport {
         landlock: if abi.is_some() { Enforcement::Enforced } else { Enforcement::Unavailable },
         landlock_abi: abi,
@@ -357,7 +367,7 @@ unsafe fn apply_landlock(security: &PreparedSecurity) -> io::Result<()> {
 }
 
 #[cfg(target_os = "linux")]
-fn build_seccomp_filter(allow_vfork: bool) -> Vec<libc::sock_filter> {
+fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_filter> {
     const BPF_LD: u16 = 0x00;
     const BPF_W: u16 = 0x00;
     const BPF_ABS: u16 = 0x20;
@@ -409,8 +419,12 @@ fn build_seccomp_filter(allow_vfork: bool) -> Vec<libc::sock_filter> {
         // the exact posix_spawn flag word is checked below.
         code.push(jump_eq(libc::SYS_clone3 as u32, 0, 1));
         code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::ENOSYS as u32));
-        // vfork is denied for untrusted programs. Trusted rustc/linker mode may
-        // use it for posix_spawn; descendants inherit this same bounded filter.
+        // fork/vfork are denied for untrusted programs. Trusted rustc/linker
+        // mode may use them for process launching; descendants inherit this filter.
+        if !allow_fork {
+            code.push(jump_eq(libc::SYS_fork as u32, 0, 1));
+            code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
+        }
         if !allow_vfork {
             code.push(jump_eq(libc::SYS_vfork as u32, 0, 1));
             code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
@@ -452,7 +466,6 @@ fn build_seccomp_filter(allow_vfork: bool) -> Vec<libc::sock_filter> {
             libc::SYS_reboot,
             libc::SYS_bpf,
             libc::SYS_perf_event_open,
-            libc::SYS_fork,
         ];
         for syscall_nr in denied {
             code.push(jump_eq(*syscall_nr as u32, 0, 1));
@@ -488,7 +501,7 @@ fn build_seccomp_filter(allow_vfork: bool) -> Vec<libc::sock_filter> {
 }
 
 #[cfg(not(target_os = "linux"))]
-fn build_seccomp_filter(_allow_vfork: bool) -> Vec<libc::sock_filter> {
+fn build_seccomp_filter(_allow_vfork: bool, _allow_fork: bool) -> Vec<libc::sock_filter> {
     Vec::new()
 }
 
@@ -828,6 +841,25 @@ mod tests {
         let _ = std::fs::remove_dir_all(root);
     }
 
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn strict_default_blocks_fork() {
+        if !Path::new("/usr/bin/python3").exists() {
+            return;
+        }
+        let root = root();
+        let config = shell_config(&root);
+        let args = [
+            OsString::from("-S"),
+            OsString::from("-c"),
+            OsString::from("import os; os.fork()"),
+        ];
+        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
+        assert!(!output.status.success(), "strict sandbox allowed fork");
+        let _ = std::fs::remove_dir_all(root);
+    }
+
     #[cfg(target_os = "linux")]
     #[test]
     fn rustc_test_binary_compiles_and_runs_inside_scratch() {
@@ -843,6 +875,7 @@ mod tests {
         config.file_size_bytes = 128 * 1024 * 1024;
         config.wall_timeout = Duration::from_secs(120);
         config.allow_vfork_for_toolchain(true);
+        config.allow_fork_for_toolchain(true);
 
         if let Some(home) = std::env::var_os("HOME") {
             let home = PathBuf::from(home);
@@ -863,6 +896,16 @@ mod tests {
             "#[test] fn sandboxed_test_runs() { assert_eq!(2 + 2, 4); } #[test] fn sandboxed_thread_runs() { assert_eq!(std::thread::spawn(|| 7).join().unwrap(), 7); }",
         )
         .unwrap();
+
+        let cc = if Path::new("/usr/bin/cc").exists() { OsString::from("/usr/bin/cc") } else { OsString::from("cc") };
+        let cc_args = [OsString::from("--version")];
+        let cc_probe = run_sandboxed(&cc, &cc_args, &config).unwrap();
+        assert!(
+            cc_probe.status.success() && !cc_probe.timed_out,
+            "sandboxed cc --version probe failed: status={:?} stderr={}",
+            cc_probe.status,
+            String::from_utf8_lossy(&cc_probe.stderr),
+        );
 
         let compile_args = [
             OsString::from("--edition=2021"),
