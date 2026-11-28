@@ -135,8 +135,8 @@ fn archive() -> ArchiveReader {
     fs::write(&path, bytes).expect("write generated AIRW archive");
     let reader = ArchiveReader::open(&path).expect("mmap generated AIRW archive");
     assert!(reader.is_memory_mapped());
-    // Keep the file around while its read-only mapping is alive.
-    std::mem::forget(path);
+    // The mmap remains valid after unlinking the generated temporary file.
+    fs::remove_file(path).expect("remove generated AIRW archive");
     reader
 }
 
