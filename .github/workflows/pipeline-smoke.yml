@@ -3,9 +3,11 @@ name: Rust Coding Pipeline Smoke
 on:
   push:
     branches:
+      - main
       - feat/neuro-symbolic-dual-gauntlet
   pull_request:
     branches:
+      - main
       - feat/neuro-symbolic-dual-gauntlet
   workflow_dispatch:
 
