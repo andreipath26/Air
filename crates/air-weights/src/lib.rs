@@ -335,4 +335,51 @@ mod tests {
         assert!(matches!(m.validate(8),Err(ArchiveError::Invalid("overlapping sections"))));
         assert!(matches!(m.validate(6),Err(ArchiveError::Invalid("section outside payload"))));
     }
+    #[test]
+    fn canonical_fixture_builder_sorts_languages_and_sections() {
+        let forward = testing::build_deterministic_archive(
+            "canonical",
+            &["rust", "python"],
+            &[("zeta", "rule", b"z".as_slice()), ("alpha", "rule", b"a".as_slice())],
+        ).unwrap();
+        let reversed = testing::build_deterministic_archive(
+            "canonical",
+            &["python", "rust"],
+            &[("alpha", "rule", b"a".as_slice()), ("zeta", "rule", b"z".as_slice())],
+        ).unwrap();
+        assert_eq!(forward, reversed);
+        let reader = ArchiveReader::from_bytes(forward).unwrap();
+        assert_eq!(reader.section("alpha"), Some(&b"a"[..]));
+        assert_eq!(reader.section("zeta"), Some(&b"z"[..]));
+    }
+
+    #[test]
+    fn generated_fixture_opens_through_memory_map() {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        let path = std::env::temp_dir().join(format!(
+            "airw-generated-{}-{}.airw",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        std::fs::write(&path, testing::deterministic_test_weights(7, 4, 32).unwrap()).unwrap();
+        let reader = ArchiveReader::open(&path).unwrap();
+        assert!(reader.is_memory_mapped());
+        assert_eq!(reader.section("weight.0003").unwrap().len(), 32);
+        drop(reader);
+        std::fs::remove_file(path).unwrap();
+    }
+
+    #[test]
+    fn deterministic_weight_seed_changes_payload_and_rejects_invalid_sizes() {
+        let a = testing::deterministic_test_weights(7, 2, 16).unwrap();
+        let b = testing::deterministic_test_weights(8, 2, 16).unwrap();
+        assert_ne!(a, b);
+        assert!(matches!(
+            testing::deterministic_test_weights(7, 0, 16),
+            Err(ArchiveError::Invalid("empty test weights"))
+        ));
+        assert!(testing::deterministic_test_weights(7, 1, MAX_PAYLOAD_BYTES + 1).is_err());
+    }
+
 }
