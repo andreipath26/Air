@@ -924,17 +924,6 @@ mod tests {
     }
 
 
-    #[test]
-    fn rust_command_spawn_probe_marker() {
-        let success = Command::new("cc")
-            .arg("--version")
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
-            .is_ok_and(|status| status.success());
-        std::process::exit(if success { 0 } else { 42 });
-    }
-
     #[cfg(target_os = "linux")]
     #[test]
     fn compiler_profile_can_spawn_cc_with_rust_std() {
@@ -942,19 +931,44 @@ mod tests {
         let mut config = shell_config(&root);
         config.allow_vfork_for_toolchain(true);
         config.allow_fork_for_toolchain(true);
-        let mut args = vec![
-            OsString::from("--exact"),
-            OsString::from("sandbox::tests::rust_command_spawn_probe_marker"),
-            OsString::from("--nocapture"),
-        ];
-        let current = std::env::current_exe().unwrap();
-        let output = run_sandboxed(current, &args, &config).unwrap();
+        std::fs::create_dir_all(&config.scratch_dir).unwrap();
+
+        // A plain main binary avoids the test harness writing to sandbox pipes.
+        // This probe is compiled during test setup, then only execution/spawn is
+        // subject to the compiler-profile sandbox.
+        let source = config.scratch_dir.join("rust-command-spawn.rs");
+        let binary = config.scratch_dir.join("rust-command-spawn");
+        std::fs::write(
+            &source,
+            r#"use std::process::{Command, Stdio};
+fn main() {
+    let code = match Command::new("cc")
+        .arg("--version")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status() {
+            Ok(status) if status.success() => 0,
+            Ok(status) => 40 + status.code().unwrap_or(1),
+            Err(error) => 100 + error.raw_os_error().unwrap_or(1),
+        };
+    std::process::exit(code);
+}"#,
+        ).unwrap();
+        let rustc = std::env::var_os("RUSTC").unwrap_or_else(|| OsString::from("rustc"));
+        let compiled = Command::new(rustc)
+            .arg("--edition=2021")
+            .arg(&source)
+            .arg("-o")
+            .arg(&binary)
+            .status()
+            .expect("test setup could not launch rustc");
+        assert!(compiled.success(), "plain Rust spawn probe did not compile");
+
+        let output = run_sandboxed(&binary, &[], &config).unwrap();
         assert!(
             output.status.success(),
-            "Rust std cc spawn probe failed (exit code distinguishes spawn result): status={:?} stdout={} stderr={}",
-            output.status,
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr),
+            "Rust std cc spawn failed: exit_code={:?} (100 + raw errno on spawn failure)",
+            output.status.code(),
         );
         let _ = std::fs::remove_dir_all(root);
     }
