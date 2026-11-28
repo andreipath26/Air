@@ -75,4 +75,5 @@ pub mod compiler_repair;
 
 pub mod patch;
 pub mod incremental_syntax;
+pub mod invariants;
 pub mod sandbox;
