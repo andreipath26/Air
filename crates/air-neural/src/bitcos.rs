@@ -47,12 +47,12 @@ impl BitcosTernary {
 
     /// Opens an encoded stream by borrowing its two byte sections; validation
     /// checks lengths and zero padding before any decoding operation.
-    pub fn from_borrowed(
+    pub fn from_borrowed<'a>(
         len: usize,
         active: usize,
-        presence: &[u8],
-        signs: &[u8],
-    ) -> Result<BorrowedBitcos<'_>, BitcosError> {
+        presence: &'a [u8],
+        signs: &'a [u8],
+    ) -> Result<BorrowedBitcos<'a>, BitcosError> {
         let value = BorrowedBitcos { len, active, presence, signs };
         value.validate()?;
         Ok(value)
