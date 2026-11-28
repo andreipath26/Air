@@ -1,6 +1,6 @@
 //! Run with: cargo bench -p air-neural --bench neural_primitives
 //! Reports local release timings only; these are not hardware acceptance results.
-use air_neural::{HyperVector, PackedTernaryRouter, Ternary, HYPERVECTOR_BITS};
+use air_neural::{hamming_distance, HyperVector, PackedTernaryRouter, Ternary, HYPERVECTOR_BITS};
 use std::hint::black_box;
 use std::time::Instant;
 
@@ -19,6 +19,7 @@ fn measure<T>(label: &str, iterations: usize, mut operation: impl FnMut() -> T) 
 
 fn main() {
     let vector = HyperVector::from_seed(0x1234_5678);
+    let other = HyperVector::from_seed(0x8765_4321);
     let batch: Vec<_> = (0..16).map(HyperVector::from_seed).collect();
     let mut router = PackedTernaryRouter::new(HYPERVECTOR_BITS, 8, 100).expect("dimensions");
     for output in 0..router.outputs() {
@@ -32,6 +33,7 @@ fn main() {
         }
     }
 
+    measure("hdc_hamming_10000", 100_000, || hamming_distance(&vector, &other));
     measure("hdc_permute", 1_000, || vector.permute(137));
     measure("hdc_bundle_16", 100, || HyperVector::bundle(black_box(&batch)));
     measure("ternary_score_8_outputs", 500, || router.score(&vector));

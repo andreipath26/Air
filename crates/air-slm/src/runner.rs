@@ -1,5 +1,6 @@
 //! CPU llama.cpp server integration, resource bounds, and verified escalation.
 use air_core::verification::GeneratedOutputVerifier;
+use crate::grammar::OutputGrammar;
 use serde_json::{json, Value};
 use std::{
     fs, io::Read, path::Path, process::{Child, Command, Stdio},
@@ -62,9 +63,55 @@ impl ResourceLimits {
         Ok(limits)
     }
 }
+/// Token-free self-speculative n-gram drafting for llama.cpp's CPU server.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct SpeculativeConfig {
+    pub enabled: bool,
+    pub min_draft_tokens: u32,
+    pub max_draft_tokens: u32,
+    pub ngram_size_n: u32,
+    pub ngram_size_m: u32,
+    pub min_hits: u32,
+}
+impl Default for SpeculativeConfig {
+    fn default() -> Self {
+        Self { enabled: false, min_draft_tokens: 0, max_draft_tokens: 3, ngram_size_n: 12, ngram_size_m: 48, min_hits: 1 }
+    }
+}
+impl SpeculativeConfig {
+    pub fn validate(self) -> Result<Self, String> {
+        if !self.enabled { return Ok(self); }
+        if self.max_draft_tokens == 0 || self.max_draft_tokens > 32
+            || self.min_draft_tokens > self.max_draft_tokens
+            || self.ngram_size_n == 0 || self.ngram_size_n > 64
+            || self.ngram_size_m < self.ngram_size_n || self.ngram_size_m > 256
+            || self.min_hits == 0 || self.min_hits > 32 {
+            return Err("invalid ngram-simple speculative configuration".into());
+        }
+        Ok(self)
+    }
+    fn append_server_args(self, args: &mut Vec<std::ffi::OsString>) {
+        if !self.enabled { return; }
+        args.extend([
+            format!("--spec-type=ngram-simple").into(),
+            format!("--spec-ngram-simple-size-n={}", self.ngram_size_n).into(),
+            format!("--spec-ngram-simple-size-m={}", self.ngram_size_m).into(),
+            format!("--spec-ngram-simple-min-hits={}", self.min_hits).into(),
+            format!("--spec-draft-n-min={}", self.min_draft_tokens).into(),
+            format!("--spec-draft-n-max={}", self.max_draft_tokens).into(),
+        ]);
+    }
+}
 #[derive(Debug,Clone,PartialEq,Eq)]
-pub struct GenerationOptions {pub thinking:ThinkingMode,pub max_new_tokens:u32}
-impl Default for GenerationOptions {fn default()->Self{Self{thinking:ThinkingMode::Direct,max_new_tokens:256}}}
+pub struct GenerationOptions {
+    pub thinking:ThinkingMode,
+    pub max_new_tokens:u32,
+    /// Apply server-side GBNF token constraints and a filler-free output check.
+    pub grammar: Option<OutputGrammar>,
+}
+impl Default for GenerationOptions {
+    fn default()->Self{Self{thinking:ThinkingMode::Direct,max_new_tokens:256,grammar:None}}
+}
 #[derive(Debug,Clone,PartialEq,Eq)]
 pub struct Completion {pub text:String,pub elapsed:Duration}
 pub trait CompletionBackend:Send+Sync {fn complete(&self,prompt:&str,options:&GenerationOptions)->Result<Completion,String>;}
@@ -72,9 +119,9 @@ pub trait CompletionBackend:Send+Sync {fn complete(&self,prompt:&str,options:&Ge
 
 /// Construct the Linux prlimit invocation. RLIMIT_AS is applied before llama.cpp
 /// executes or maps the GGUF; the RSS watchdog remains a secondary guard.
-fn prlimit_command_args(executable:&Path,model:&Path,port:u16,limits:ResourceLimits,threads:usize)->Vec<std::ffi::OsString>{
+fn prlimit_command_args(executable:&Path,model:&Path,port:u16,limits:ResourceLimits,threads:usize,speculative:SpeculativeConfig)->Vec<std::ffi::OsString>{
     use std::ffi::OsString;
-    vec![
+    let mut args=vec![
         OsString::from(format!("--as={}",limits.max_rss_bytes)),
         OsString::from("--"),
         executable.as_os_str().to_owned(),
@@ -85,7 +132,9 @@ fn prlimit_command_args(executable:&Path,model:&Path,port:u16,limits:ResourceLim
         OsString::from("--n-gpu-layers"),OsString::from("0"),
         OsString::from("--threads"),OsString::from(threads.to_string()),
         OsString::from("--no-webui"),
-    ]
+    ];
+    speculative.append_server_args(&mut args);
+    args
 }
 
 /// Owns a CPU-only llama.cpp loopback server loading a local GGUF file.
@@ -98,13 +147,18 @@ pub struct LlamaCppRunner {
 }
 impl LlamaCppRunner {
     pub fn launch(executable:impl AsRef<Path>,gguf:impl AsRef<Path>,family:ModelFamily,port:u16,limits:ResourceLimits)->Result<Self,String>{
+        Self::launch_with_speculative(executable,gguf,family,port,limits,SpeculativeConfig::default())
+    }
+    /// Launch llama.cpp with optional zero-extra-model ngram-simple drafting.
+    pub fn launch_with_speculative(executable:impl AsRef<Path>,gguf:impl AsRef<Path>,family:ModelFamily,port:u16,limits:ResourceLimits,speculative:SpeculativeConfig)->Result<Self,String>{
+        let speculative=speculative.validate()?;
         let limits=limits.effective_for(family)?;
         if port==0{return Err("port must be nonzero".into())}
         let file=gguf.as_ref();
         if !file.is_file()||file.extension().and_then(|x|x.to_str())!=Some("gguf"){return Err("model must be an existing GGUF file".into())}
         let file=fs::canonicalize(file).map_err(|e|format!("GGUF path: {e}"))?;
         let threads=thread::available_parallelism().map_or(2,usize::from).min(4);
-        let args=prlimit_command_args(executable.as_ref(),&file,port,limits,threads);
+        let args=prlimit_command_args(executable.as_ref(),&file,port,limits,threads,speculative);
         let child=Command::new("prlimit").args(args).stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null()).spawn()
             .map_err(|e|format!("prlimit is required to enforce the AIR SLM address-space cap: {e}"))?;
         let child=Arc::new(Mutex::new(child));
@@ -194,9 +248,10 @@ impl LlamaCppRunner {
         let started=Instant::now();
         let system=if thinking==0{"Respond directly and concisely; do not emit a reasoning trace."}
             else{"Reason within the configured thinking budget, then provide a concise answer."};
-        let body=json!({"model":self.model_name,"messages":[{"role":"system","content":system},{"role":"user","content":prompt}],
+        let mut body=json!({"model":self.model_name,"messages":[{"role":"system","content":system},{"role":"user","content":prompt}],
             "temperature":0,"max_tokens":token_cap,"stream":false,
             "chat_template_kwargs":{"enable_thinking":thinking>0,"reasoning_budget":thinking}});
+        if let Some(grammar)=options.grammar { body["grammar"]=Value::String(grammar.gbnf().to_owned()); }
         let agent=ureq::AgentBuilder::new().redirects(0).timeout_connect(Duration::from_secs(2))
             .timeout(Duration::from_secs(120)).build();
         let response=agent.post(&self.endpoint).send_json(body).map_err(|e|e.to_string())?;
@@ -233,7 +288,8 @@ impl CompletionBackend for DeterministicMock {
 pub struct VerifiedCompletion{pub completion:Completion}
 /// Never returns an accepted SLM answer unless AIR core's task-specific verifier passes it.
 pub fn run_verified<B:CompletionBackend,V:GeneratedOutputVerifier>(backend:&B,verifier:&V,prompt:&str,options:&GenerationOptions)->Result<VerifiedCompletion,String>{
-    let completion=backend.complete(prompt,options)?;
+    let mut completion=backend.complete(prompt,options)?;
+    if let Some(grammar)=options.grammar { completion.text=grammar.filter_output(&completion.text)?; }
     if completion.text.trim().is_empty()||completion.text.len()>MAX_OUTPUT_BYTES{return Err("candidate output is empty or exceeds output cap".into())}
     verifier.verify(prompt,&completion.text).map_err(|e|format!("air-core verification rejected candidate: {e}"))?;
     Ok(VerifiedCompletion{completion})
@@ -286,10 +342,18 @@ mod behavior_tests {
  #[test] fn context_and_generation_caps(){assert!(ResourceLimits{context_tokens:1,max_new_tokens:1,..Default::default()}.validate().is_ok());assert!(ResourceLimits{context_tokens:MAX_CONTEXT_TOKENS,max_new_tokens:1,..Default::default()}.validate().is_ok());assert!(ResourceLimits{context_tokens:MAX_CONTEXT_TOKENS+1,..Default::default()}.validate().is_err());assert!(ResourceLimits{context_tokens:128,max_new_tokens:129,..Default::default()}.validate().is_err());assert!(ResourceLimits{max_new_tokens:0,..Default::default()}.validate().is_err());}
  #[test] fn reasoning_budget_toggle_is_bounded(){assert_eq!(ThinkingMode::Direct.budget().unwrap(),0);assert_eq!(ThinkingMode::Budgeted{reasoning_tokens:1}.budget().unwrap(),1);assert_eq!(ThinkingMode::Budgeted{reasoning_tokens:1024}.budget().unwrap(),1024);assert!(ThinkingMode::Budgeted{reasoning_tokens:0}.budget().is_err());assert!(ThinkingMode::Budgeted{reasoning_tokens:1025}.budget().is_err());}
  #[test] fn mock_is_repeatable_and_zero_latency(){let m=DeterministicMock::new("fixed");let a=m.complete("same",&GenerationOptions::default()).unwrap();let b=m.complete("same",&GenerationOptions::default()).unwrap();assert_eq!(a.text,"fixed");assert_eq!(a,b);assert_eq!(a.elapsed,Duration::ZERO);}
- #[test] fn mock_rejects_empty_large_prompt_and_invalid_mode(){let m=DeterministicMock::default();assert!(m.complete("",&GenerationOptions::default()).is_err());assert!(m.complete(&"x".repeat(MAX_PROMPT_BYTES+1),&GenerationOptions::default()).is_err());assert!(m.complete("q",&GenerationOptions{thinking:ThinkingMode::Budgeted{reasoning_tokens:0},max_new_tokens:1}).is_err());}
+ #[test] fn mock_rejects_empty_large_prompt_and_invalid_mode(){let m=DeterministicMock::default();assert!(m.complete("",&GenerationOptions::default()).is_err());assert!(m.complete(&"x".repeat(MAX_PROMPT_BYTES+1),&GenerationOptions::default()).is_err());assert!(m.complete("q",&GenerationOptions{thinking:ThinkingMode::Budgeted{reasoning_tokens:0},max_new_tokens:1,grammar:None}).is_err());}
  #[test] fn air_core_verifier_accepts_exact_answer_and_rejects_other(){assert_eq!(run_verified(&DeterministicMock::new("answer"),&Accept,"task",&GenerationOptions::default()).unwrap().completion.text,"answer");assert!(run_verified(&DeterministicMock::new("wrong"),&Accept,"task",&GenerationOptions::default()).is_err());assert!(run_verified(&DeterministicMock::new("answer"),&Reject,"task",&GenerationOptions::default()).is_err());}
  #[test] fn verifier_not_called_for_empty_or_oversized_candidate(){assert!(run_verified(&DeterministicMock::new(" "),&Reject,"task",&GenerationOptions::default()).is_err());assert!(run_verified(&DeterministicMock::new("x".repeat(MAX_OUTPUT_BYTES+1)),&Accept,"task",&GenerationOptions::default()).is_err());}
- #[test] fn mock_thinking_toggle_preserves_fixture_output(){let m=DeterministicMock::new("stable");let direct=GenerationOptions{thinking:ThinkingMode::Direct,max_new_tokens:32};let budgeted=GenerationOptions{thinking:ThinkingMode::Budgeted{reasoning_tokens:32},max_new_tokens:32};assert_eq!(m.complete("p",&direct).unwrap().text,m.complete("p",&budgeted).unwrap().text);}
+ #[test] fn grammar_is_attached_to_verified_generation_and_filters_mock_output(){
+  struct AcceptRust;
+  impl GeneratedOutputVerifier for AcceptRust { type Error=&'static str; fn verify(&self,_:&str,candidate:&str)->Result<(),Self::Error>{if candidate.starts_with("pub fn ") {Ok(())} else {Err("not Rust")}} }
+  let options=GenerationOptions{thinking:ThinkingMode::Direct,max_new_tokens:32,grammar:Some(OutputGrammar::Rust)};
+  let answer=run_verified(&DeterministicMock::new("  pub fn answer() -> u32 { 42 }  "),&AcceptRust,"task",&options).unwrap();
+  assert_eq!(answer.completion.text,"pub fn answer() -> u32 { 42 }");
+  assert!(run_verified(&DeterministicMock::new("Here is the code: pub fn answer() {}"),&AcceptRust,"task",&options).is_err());
+ }
+ #[test] fn mock_thinking_toggle_preserves_fixture_output(){let m=DeterministicMock::new("stable");let direct=GenerationOptions{thinking:ThinkingMode::Direct,max_new_tokens:32,grammar:None};let budgeted=GenerationOptions{thinking:ThinkingMode::Budgeted{reasoning_tokens:32},max_new_tokens:32,grammar:None};assert_eq!(m.complete("p",&direct).unwrap().text,m.complete("p",&budgeted).unwrap().text);}
  #[test] fn high_confidence_uses_neuro_symbolic_callback(){let a=route_and_run_verified(&DeterministicMock::new("unused"),&Accept,"task",0.9,0.3,&GenerationOptions::default(),||Ok("symbolic".into())).unwrap();assert_eq!(a,RoutedAnswer::NeuroSymbolic{output:"symbolic".into()});}
  #[test] fn explicit_deep_uses_verified_slm_path(){let a=route_and_run_verified(&DeterministicMock::new("answer"),&Accept,"deep task",0.9,0.3,&GenerationOptions::default(),||panic!("should escalate")).unwrap();assert_eq!(a,RoutedAnswer::VerifiedSlm{output:"answer".into(),elapsed:Duration::ZERO});}
  #[test] fn bang_trigger_strips_prefix_and_checks_output(){let a=route_and_run_verified(&DeterministicMock::new("answer"),&Accept,"! task",0.9,0.3,&GenerationOptions::default(),||panic!("should escalate")).unwrap();assert!(matches!(a,RoutedAnswer::VerifiedSlm{output,..} if output=="answer"));}
@@ -299,9 +363,26 @@ mod behavior_tests {
 #[cfg(test)]
 mod prlimit_tests {
  use super::*;
+ #[test] fn speculative_flags_propagate_to_llama_server_without_extra_model(){
+  let mut config=SpeculativeConfig::default();config.enabled=true;
+  config.min_draft_tokens=1;config.max_draft_tokens=7;config.ngram_size_n=8;config.ngram_size_m=32;config.min_hits=2;
+  let args=prlimit_command_args(Path::new("/usr/bin/llama-server"),Path::new("/models/local.gguf"),8080,ResourceLimits::default(),4,config).into_iter().map(|arg|arg.to_string_lossy().into_owned()).collect::<Vec<_>>();
+  assert!(args.contains(&"--spec-type=ngram-simple".to_owned()));
+  assert!(args.contains(&"--spec-ngram-simple-size-n=8".to_owned()));
+  assert!(args.contains(&"--spec-ngram-simple-size-m=32".to_owned()));
+  assert!(args.contains(&"--spec-ngram-simple-min-hits=2".to_owned()));
+  assert!(args.contains(&"--spec-draft-n-min=1".to_owned()));
+  assert!(args.contains(&"--spec-draft-n-max=7".to_owned()));
+ }
+ #[test] fn speculative_config_is_bounded_and_defaults_off(){
+  assert!(!SpeculativeConfig::default().enabled);
+  assert!(SpeculativeConfig{enabled:true,max_draft_tokens:8,min_draft_tokens:2,..Default::default()}.validate().is_ok());
+  assert!(SpeculativeConfig{enabled:true,max_draft_tokens:0,..Default::default()}.validate().is_err());
+  assert!(SpeculativeConfig{enabled:true,min_draft_tokens:9,max_draft_tokens:8,..Default::default()}.validate().is_err());
+ }
  #[test] fn prlimit_precedes_server_and_applies_configured_address_cap(){
   let limits=ResourceLimits{max_rss_bytes:5*1024*1024*1024,context_tokens:3072,max_new_tokens:256};
-  let args=prlimit_command_args(Path::new("/usr/bin/llama-server"),Path::new("/models/local.gguf"),8080,limits,4);
+  let args=prlimit_command_args(Path::new("/usr/bin/llama-server"),Path::new("/models/local.gguf"),8080,limits,4,SpeculativeConfig::default());
   let text:Vec<_>=args.iter().map(|arg|arg.to_string_lossy().into_owned()).collect();
   assert_eq!(text[0],"--as=5368709120");assert_eq!(text[1],"--");assert_eq!(text[2],"/usr/bin/llama-server");
   assert!(text.windows(2).any(|pair|pair[0]=="--ctx-size"&&pair[1]=="3072"));

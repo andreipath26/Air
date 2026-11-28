@@ -4,10 +4,14 @@
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use memmap2::{Mmap, MmapOptions};
+
 use std::{collections::BTreeSet, error::Error, fmt, fs::File, io, path::Path};
 
 pub const MAGIC: [u8; 4] = *b"AIRW";
 pub const FORMAT_VERSION: u16 = 1;
+/// Known v1 feature bit: one or more sections use BITCOS sparse ternary encoding.
+pub const AIRW_FLAG_BITCOS_TERNARY: u16 = 0x0001;
+const KNOWN_AIRW_FLAGS: u16 = AIRW_FLAG_BITCOS_TERNARY;
 pub const HEADER_LEN: usize = 52;
 pub const MAX_MANIFEST_BYTES: usize = 1024 * 1024;
 pub const MAX_PAYLOAD_BYTES: usize = 512 * 1024 * 1024;
@@ -108,10 +112,17 @@ pub struct ArchiveBuilder {
     languages: Vec<String>,
     sections: Vec<SectionDescriptor>,
     payload: Vec<u8>,
+    header_flags: u16,
 }
 impl ArchiveBuilder {
     pub fn new(package: impl Into<String>) -> Self {
         Self { package: package.into(), ..Self::default() }
+    }
+    /// Sets known archive feature flags. A zero flag remains the legacy v1 encoding.
+    pub fn set_header_flags(&mut self, flags: u16) -> Result<(), ArchiveError> {
+        if flags & !KNOWN_AIRW_FLAGS != 0 { return Err(ArchiveError::Invalid("unknown header flags")); }
+        self.header_flags = flags;
+        Ok(())
     }
     pub fn add_language(&mut self, language: impl Into<String>) -> Result<(), ArchiveError> {
         let language = language.into();
@@ -145,10 +156,10 @@ impl ArchiveBuilder {
     pub fn finish(self) -> Result<Vec<u8>, ArchiveError> {
         let manifest = Manifest { package: self.package, languages: self.languages, sections: self.sections };
         manifest.validate(self.payload.len())?;
-        encode(&manifest, &self.payload)
+        encode(&manifest, &self.payload, self.header_flags)
     }
 }
-fn encode(manifest: &Manifest, payload: &[u8]) -> Result<Vec<u8>, ArchiveError> {
+fn encode(manifest: &Manifest, payload: &[u8], header_flags: u16) -> Result<Vec<u8>, ArchiveError> {
     if payload.len() > MAX_PAYLOAD_BYTES { return Err(ArchiveError::Limit("payload size")); }
     manifest.validate(payload.len())?;
     let meta = serde_json::to_vec(manifest)?;
@@ -163,7 +174,7 @@ fn encode(manifest: &Manifest, payload: &[u8]) -> Result<Vec<u8>, ArchiveError> 
     let mut out = Vec::with_capacity(total);
     out.extend_from_slice(&MAGIC);
     out.extend_from_slice(&FORMAT_VERSION.to_le_bytes());
-    out.extend_from_slice(&0u16.to_le_bytes());
+    out.extend_from_slice(&header_flags.to_le_bytes());
     out.extend_from_slice(&meta_len.to_le_bytes());
     out.extend_from_slice(&payload_len.to_le_bytes());
     out.extend_from_slice(&digest);
@@ -187,6 +198,7 @@ pub struct ArchiveReader {
     manifest: Manifest,
     payload_start: usize,
     payload_len: usize,
+    header_flags: u16,
 }
 impl ArchiveReader {
     /// Opens an archive using a read-only memory map.
@@ -219,7 +231,8 @@ impl ArchiveReader {
         if bytes[0..4] != MAGIC { return Err(ArchiveError::Invalid("bad magic")); }
         let version = u16::from_le_bytes([bytes[4], bytes[5]]);
         if version != FORMAT_VERSION { return Err(ArchiveError::UnsupportedVersion(version)); }
-        if u16::from_le_bytes([bytes[6], bytes[7]]) != 0 {
+        let header_flags = u16::from_le_bytes([bytes[6], bytes[7]]);
+        if header_flags & !KNOWN_AIRW_FLAGS != 0 {
             return Err(ArchiveError::Invalid("unknown header flags"));
         }
         let meta_len = u32::from_le_bytes(bytes[8..12].try_into().unwrap()) as usize;
@@ -241,11 +254,15 @@ impl ArchiveReader {
         }
         let manifest: Manifest = serde_json::from_slice(meta)?;
         manifest.validate(payload_len)?;
-        Ok(Self { storage, manifest, payload_start, payload_len })
+        Ok(Self { storage, manifest, payload_start, payload_len, header_flags })
     }
 
     pub fn manifest(&self) -> &Manifest { &self.manifest }
     pub fn payload_len(&self) -> usize { self.payload_len }
+    /// Returns the validated feature flags from the AIRW header.
+    pub fn header_flags(&self) -> u16 { self.header_flags }
+    /// Compatibility alias emphasizing that v1 flag bits select section encoding.
+    pub fn encoding_flag(&self) -> u16 { self.header_flags }
     pub fn is_memory_mapped(&self) -> bool { matches!(&self.storage, ArchiveStorage::Mapped(_)) }
     pub fn section(&self, name: &str) -> Option<&[u8]> {
         let d = self.manifest.sections.iter().find(|s| s.name == name)?;
@@ -385,8 +402,10 @@ mod tests {
     fn rejects_unsupported_version_and_flags() {
         let mut bytes = fixture(); bytes[4..6].copy_from_slice(&2u16.to_le_bytes());
         assert!(matches!(ArchiveReader::from_bytes(bytes), Err(ArchiveError::UnsupportedVersion(2))));
-        let mut bytes = fixture(); bytes[6..8].copy_from_slice(&1u16.to_le_bytes());
+        let mut bytes = fixture(); bytes[6..8].copy_from_slice(&0x8000u16.to_le_bytes());
         assert!(matches!(ArchiveReader::from_bytes(bytes), Err(ArchiveError::Invalid("unknown header flags"))));
+        let mut bytes = fixture(); bytes[6..8].copy_from_slice(&AIRW_FLAG_BITCOS_TERNARY.to_le_bytes());
+        assert_eq!(ArchiveReader::from_bytes(bytes).unwrap().header_flags(), AIRW_FLAG_BITCOS_TERNARY);
     }
     #[test]
     fn rejects_duplicate_and_empty_sections() {
@@ -455,3 +474,6 @@ mod tests {
     }
 
 }
+
+
+pub mod overlay;

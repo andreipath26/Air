@@ -9,6 +9,7 @@ description = "CPU-native hyperdimensional and packed ternary routing primitives
 path = "src/lib.rs"
 
 [dependencies]
+air-weights = { path = "../air-weights" }
 
 [[bench]]
 name = "neural_primitives"

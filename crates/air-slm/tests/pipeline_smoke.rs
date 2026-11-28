@@ -265,7 +265,7 @@ fn run_case(id: &str) {
     }
     let backend = DeterministicMock::new(case.source);
     let verifier = ExactGeneratedOutput(case.source);
-    let options = GenerationOptions { thinking, max_new_tokens: 512 };
+    let options = GenerationOptions { thinking, max_new_tokens: 512, grammar: None };
     let routed = route_and_run_verified(
         &backend,
         &verifier,
