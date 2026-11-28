@@ -389,6 +389,7 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
     // glibc posix_spawn's vfork-style clone. Match the complete flags word,
     // including SIGCHLD, so this cannot be widened by extra clone capabilities.
     const POSIX_SPAWN_FLAGS: u32 = 0x0000_4111; // CLONE_VM | CLONE_VFORK | SIGCHLD
+    const CLONE_FORK_FLAGS: u32 = 0x0000_0011; // SIGCHLD, allowed only in trusted compiler mode
     // glibc may set this to return the child PID without widening process semantics.
     const POSIX_SPAWN_PARENT_TID_FLAGS: u32 = POSIX_SPAWN_FLAGS | 0x0010_0000;
     // Rust/glibc pthread flags. Reject all bits outside this mask, especially
@@ -490,6 +491,11 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
             code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
             spawn_jumps.push(code.len());
             code.push(jump_eq(POSIX_SPAWN_PARENT_TID_FLAGS, 0, 0));
+        }
+        if allow_fork {
+            code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
+            spawn_jumps.push(code.len());
+            code.push(jump_eq(CLONE_FORK_FLAGS, 0, 0));
         }
         code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
         code.push(ins(BPF_ALU | BPF_AND | BPF_K, 0, 0, THREAD_FLAGS));
@@ -866,6 +872,7 @@ mod tests {
         let root = root();
         let mut config = shell_config(&root);
         config.allow_vfork_for_toolchain(true);
+        config.allow_fork_for_toolchain(true);
         let spawn_flags = 0x0000_4111u32; // CLONE_VM | CLONE_VFORK | SIGCHLD
         let parent_tid_flags = spawn_flags | 0x0010_0000u32; // + CLONE_PARENT_SETTID
         let namespace_flags = spawn_flags | 0x0002_0000u32; // + CLONE_NEWNS
@@ -889,6 +896,55 @@ mod tests {
             String::from_utf8_lossy(&output.stderr),
         );
         assert!(String::from_utf8_lossy(&output.stdout).contains("SANDBOX_CLONE_FLAGS=pass"));
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn compiler_profile_rejects_unapproved_clone_flags() {
+        if !Path::new("/usr/bin/python3").exists() {
+            return;
+        }
+        let root = root();
+        let mut config = shell_config(&root);
+        config.allow_vfork_for_toolchain(true);
+        config.allow_fork_for_toolchain(true);
+        let bad_flags = 0x0000_0011u32 | 0x0000_1000u32; // SIGCHLD | CLONE_PIDFD
+        let script = format!(
+            "import ctypes, errno; libc=ctypes.CDLL(None, use_errno=True); r=libc.syscall({}, {}, 0, 0, 0, 0); e=ctypes.get_errno(); print(e); assert r == -1 and e == errno.EPERM",
+            libc::SYS_clone,
+            bad_flags,
+        );
+        let args = [OsString::from("-S"), OsString::from("-c"), OsString::from(script)];
+        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
+        assert!(output.status.success(), "bad clone flags were not denied: {}", String::from_utf8_lossy(&output.stderr));
+        assert!(String::from_utf8_lossy(&output.stdout).trim().ends_with(&libc::EPERM.to_string()));
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn compiler_profile_allows_exact_sigchld_clone_and_waits_for_child() {
+        if !Path::new("/usr/bin/python3").exists() {
+            return;
+        }
+        let root = root();
+        let mut config = shell_config(&root);
+        config.allow_fork_for_toolchain(true);
+        let script = format!(
+            "import ctypes, os; libc=ctypes.CDLL(None); pid=libc.syscall({}, 0x11, 0, 0, 0, 0); assert pid >= 0, 'clone(SIGCHLD) failed'; os._exit(0) if pid == 0 else None; waited, status=os.waitpid(pid, 0); assert waited == pid and status == 0; print('SANDBOX_SIGCHLD_CLONE=pass')",
+            libc::SYS_clone,
+        );
+        let args = [OsString::from("-S"), OsString::from("-c"), OsString::from(script)];
+        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
+        assert!(
+            output.status.success() && String::from_utf8_lossy(&output.stdout).contains("SANDBOX_SIGCHLD_CLONE=pass"),
+            "compiler profile failed clone(SIGCHLD): status={:?} stdout={} stderr={}",
+            output.status,
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr),
+        );
         let _ = std::fs::remove_dir_all(root);
     }
 
