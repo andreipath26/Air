@@ -853,7 +853,7 @@ mod tests {
     #[cfg(target_os = "linux")]
     #[test]
     fn compiler_profile_can_spawn_cc() {
-        if !Path::new("/usr/bin/python3").exists() || !Path::new("/usr/bin/cc").exists() {
+        if !Path::new("/usr/bin/python3").exists() {
             return;
         }
         let root = root();
@@ -863,7 +863,7 @@ mod tests {
         let args = [
             OsString::from("-S"),
             OsString::from("-c"),
-            OsString::from("import subprocess; p=subprocess.run(['/usr/bin/cc','--version'],check=True,capture_output=True,text=True); print('SANDBOX_CC_SPAWN=pass '+p.stdout.splitlines()[0])"),
+            OsString::from("import subprocess; p=subprocess.run(['cc','--version'],check=True,capture_output=True,text=True); print('SANDBOX_CC_SPAWN=pass '+p.stdout.splitlines()[0])"),
         ];
         let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
         assert!(
@@ -936,9 +936,8 @@ mod tests {
         )
         .unwrap();
 
-        let cc = if Path::new("/usr/bin/cc").exists() { OsString::from("/usr/bin/cc") } else { OsString::from("cc") };
         let cc_args = [OsString::from("--version")];
-        let cc_probe = run_sandboxed(&cc, &cc_args, &config).unwrap();
+        let cc_probe = run_sandboxed("cc", &cc_args, &config).unwrap();
         assert!(
             cc_probe.status.success() && !cc_probe.timed_out,
             "sandboxed cc --version probe failed: status={:?} stderr={}",
