@@ -10,8 +10,11 @@ This report separates GitHub Actions component-test evidence from historical ben
 |---|---|---|---|
 | [#10 — `air-neural` HDC and ternary primitives](https://github.com/andreipath26/Air/pull/10) | `632688391ee796723a5d38e46d3adde9f00f8353` | [Run #154 / `46093790182`](https://github.com/andreipath26/Air/actions/runs/46093790182) | All six jobs completed successfully. `cargo test --workspace`: **72 tests** (49 air-core + 16 air-neural + 7 air-weights). |
 | [#11 — `air-core` typed coding reducer and oracle seam](https://github.com/andreipath26/Air/pull/11) | `37c8ae3456cc98b4b26efcef1cf92f71c3f07e44` | [Run #151 / `46093725300`](https://github.com/andreipath26/Air/actions/runs/46093725300) | All six jobs completed successfully. `cargo test --workspace`: **62 tests** (55 air-core + 7 air-weights). |
+| Combined feature branch workspace | `8178a958331f2d28b858df52710995f1217bc2cd` | [Run #177 / `46094716372`](https://github.com/andreipath26/Air/actions/runs/46094716372) | All six jobs succeeded. `cargo test --workspace`: **78 passed, 0 failed** (55 air-core + 16 air-neural + 7 air-weights). |
 
-These ran on different branch states and are separate counts. They do **not** establish a combined 82-test or 92-test acceptance run, nor do they test the original coding gauntlet.
+These component runs were on different branch states and their counts must not be added as if they were one suite. A subsequent combined feature-branch run is listed below. None of these runs tests the original coding gauntlet.
+
+The combined run completed 78 tests, which is below the previous 82/92 requested suite thresholds. It verifies the feature-branch workspace crates only; it is not an end-to-end coding-gauntlet or SLM acceptance run.
 
 ## Current capability boundary
 
