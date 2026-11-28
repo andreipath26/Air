@@ -240,4 +240,39 @@ mod tests {
         assert!(!section.is_empty());
         assert_eq!(reader.encoding_flag(), AIRW_FLAG_BITCOS_TERNARY);
     }
+    #[test]
+    fn memory_mapped_bitcos_sections_are_borrowed_without_copy_or_alignment_assumption() {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        let path = std::env::temp_dir().join(format!(
+            "airw-bitcos-{}-{}.airw",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        let weights: Vec<_> = (0..HYPERVECTOR_BITS).map(|index| match index % 5 {
+            0 => Ternary::Positive,
+            1 => Ternary::Negative,
+            _ => Ternary::Zero,
+        }).collect();
+        let encoding = BitcosTernary::encode(&weights).unwrap();
+        let mut builder = crate::ArchiveBuilder::new("bitcos-mmap");
+        builder.add_language("rust").unwrap();
+        builder.set_header_flags(AIRW_FLAG_BITCOS_TERNARY).unwrap();
+        builder.add_section("presence", "bitcos-presence-v1", encoding.presence()).unwrap();
+        builder.add_section("signs", "bitcos-signs-v1", encoding.signs()).unwrap();
+        std::fs::write(&path, builder.finish().unwrap()).unwrap();
+
+        let reader = crate::ArchiveReader::open(&path).unwrap();
+        assert!(reader.is_memory_mapped());
+        let presence = reader.section("presence").unwrap();
+        let signs = reader.section("signs").unwrap();
+        let view = BitcosTernary::from_borrowed(encoding.len(), encoding.active(), presence, signs).unwrap();
+        assert_eq!(view.presence.as_ptr(), presence.as_ptr());
+        assert_eq!(view.signs.as_ptr(), signs.as_ptr());
+        // BITCOS is a packed byte stream and therefore requires alignment 1;
+        // no pointer cast or copy is needed, regardless of manifest length.
+        assert_eq!((presence.as_ptr() as usize) % std::mem::align_of::<u8>(), 0);
+        drop(reader);
+        std::fs::remove_file(path).unwrap();
+    }
 }
