@@ -481,7 +481,7 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
         if allow_vfork {
             code.push(jump_eq(libc::SYS_clone as u32, 0, 13));
         } else {
-            code.push(jump_eq(libc::SYS_clone as u32, 0, 9));
+            code.push(jump_eq(libc::SYS_clone as u32, 0, 8));
         }
         if allow_vfork {
             code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
@@ -496,7 +496,6 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
         code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
         code.push(ins(BPF_ALU | BPF_AND | BPF_K, 0, 0, !THREAD_ALLOWED_FLAGS));
         code.push(jump_eq(0, 1, 0));
-        code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
         code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
         // A matching posix-spawn word jumps to this compiler-only allow.
         if allow_vfork {
