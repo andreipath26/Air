@@ -211,12 +211,16 @@ fn ioerr(e:std::io::Error)->SlmError{SlmError::Io(e.to_string())}
   assert!(!parse_escalation("deeply repair").explicit_deep);assert!(!parse_escalation("please go deep").explicit_deep);
  }
  #[test]fn every_returned_role_path_strips_thought(){
-  for (ambiguous,low,candidates,prompt,expected) in [
-   (true,false,&[][..],"repair",SlmRole::Translator),
-   (false,true,&["a".to_owned()][..],"repair",SlmRole::TieBreaker),
-   (false,true,&[][..],"repair",SlmRole::PatchFallback),
-   (false,false,&[][..],"! repair",SlmRole::PatchFallback),
-  ] {let (r,_)=run(prompt,ambiguous,low,candidates);assert_eq!(r.role,expected);assert!(!r.content.contains("hidden"));assert!(!r.content.contains("secret"));}
+  let cases=[
+   ("repair",true,false,Vec::<String>::new(),SlmRole::Translator),
+   ("repair",false,true,vec!["a".to_owned()],SlmRole::TieBreaker),
+   ("repair",false,true,Vec::<String>::new(),SlmRole::PatchFallback),
+   ("! repair",false,false,Vec::<String>::new(),SlmRole::PatchFallback),
+  ];
+  for (prompt,ambiguous,low,candidates,expected) in cases {
+   let (r,_)=run(prompt,ambiguous,low,&candidates);
+   assert_eq!(r.role,expected);assert!(!r.content.contains("hidden"));assert!(!r.content.contains("secret"));
+  }
  }
  #[test]fn response_budget_settings_are_hard_capped_and_invalid_values_rejected(){
   assert_eq!(bounded_setting("context",Some("100000"),4096,256,8192).unwrap(),8192);
