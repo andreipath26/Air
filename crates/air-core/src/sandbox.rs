@@ -728,6 +728,7 @@ mod tests {
         ];
         let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
         assert!(!output.status.success(), "child retained an inherited socket descriptor");
+        drop(inherited);
         let mut received = [0u8; 1];
         assert_eq!(receiver.read(&mut received).unwrap_or(0), 0);
         let _ = std::fs::remove_dir_all(root);
