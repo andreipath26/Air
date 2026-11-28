@@ -12,10 +12,25 @@ const MAX_RSS_BYTES: u64 = 8 * 1024 * 1024 * 1024;
 const MAX_CONTEXT_TOKENS: u32 = 4096;
 
 #[derive(Debug,Clone,Copy,PartialEq,Eq)]
-pub enum ModelFamily { Gemma4E2b, SmolLm3B }
+pub enum ModelFamily {
+    Gemma4E2b,
+    SmolLm3B,
+    /// Compatibility label for a caller-provided local Qwen2.5-Coder 7B GGUF.
+    /// It does not imply that this model was downloaded or executed.
+    Qwen25Coder7B,
+}
 impl ModelFamily {
-    pub fn as_str(self)->&'static str { match self {Self::Gemma4E2b=>"Gemma 4 E2B",Self::SmolLm3B=>"SmolLM3 3B"} }
-    pub fn recommended_context(self)->u32 {4096}
+    pub fn as_str(self)->&'static str {
+        match self {
+            Self::Gemma4E2b=>"Gemma 4 E2B",
+            Self::SmolLm3B=>"SmolLM3 3B",
+            Self::Qwen25Coder7B=>"Qwen2.5-Coder 7B",
+        }
+    }
+    /// Conservative context recommendation for the Dell CPU-first profile.
+    pub fn recommended_context(self)->u32 {
+        match self { Self::Qwen25Coder7B=>2048, _=>4096 }
+    }
 }
 #[derive(Debug,Clone,Copy,PartialEq,Eq)]
 pub enum ThinkingMode { Direct, Budgeted{reasoning_tokens:u16} }
@@ -37,6 +52,14 @@ impl ResourceLimits {
         if self.context_tokens==0||self.context_tokens>MAX_CONTEXT_TOKENS{return Err(format!("context cap must be in 1..={MAX_CONTEXT_TOKENS} tokens"))}
         if self.max_new_tokens==0||self.max_new_tokens>self.context_tokens{return Err("generation cap must fit within context cap".into())}
         Ok(self)
+    }
+    /// Resolve requested limits against a model-specific hard context ceiling.
+    /// Qwen 2.5 Coder uses the conservative 2,048-token ceiling on the Dell profile.
+    pub fn effective_for(self,family:ModelFamily)->Result<Self,String>{
+        let mut limits=self.validate()?;
+        limits.context_tokens=limits.context_tokens.min(family.recommended_context());
+        limits.max_new_tokens=limits.max_new_tokens.min(limits.context_tokens);
+        Ok(limits)
     }
 }
 #[derive(Debug,Clone,PartialEq,Eq)]
@@ -75,7 +98,7 @@ pub struct LlamaCppRunner {
 }
 impl LlamaCppRunner {
     pub fn launch(executable:impl AsRef<Path>,gguf:impl AsRef<Path>,family:ModelFamily,port:u16,limits:ResourceLimits)->Result<Self,String>{
-        let limits=limits.validate()?;
+        let limits=limits.effective_for(family)?;
         if port==0{return Err("port must be nonzero".into())}
         let file=gguf.as_ref();
         if !file.is_file()||file.extension().and_then(|x|x.to_str())!=Some("gguf"){return Err("model must be an existing GGUF file".into())}
@@ -250,8 +273,16 @@ mod behavior_tests {
  impl GeneratedOutputVerifier for Accept { type Error=&'static str; fn verify(&self,q:&str,c:&str)->Result<(),Self::Error>{if q=="task"&&c=="answer"{Ok(())}else{Err("mismatch")}} }
  struct Reject;
  impl GeneratedOutputVerifier for Reject { type Error=&'static str; fn verify(&self,_:&str,_:&str)->Result<(),Self::Error>{Err("rejected")} }
- #[test] fn model_names_and_recommended_context(){assert_eq!(ModelFamily::Gemma4E2b.as_str(),"Gemma 4 E2B");assert_eq!(ModelFamily::SmolLm3B.as_str(),"SmolLM3 3B");assert_eq!(ModelFamily::Gemma4E2b.recommended_context(),4096);assert_eq!(ModelFamily::SmolLm3B.recommended_context(),4096);}
+ #[test] fn model_names_and_recommended_context(){assert_eq!(ModelFamily::Gemma4E2b.as_str(),"Gemma 4 E2B");assert_eq!(ModelFamily::SmolLm3B.as_str(),"SmolLM3 3B");assert_eq!(ModelFamily::Qwen25Coder7B.as_str(),"Qwen2.5-Coder 7B");assert_eq!(ModelFamily::Gemma4E2b.recommended_context(),4096);assert_eq!(ModelFamily::SmolLm3B.recommended_context(),4096);assert_eq!(ModelFamily::Qwen25Coder7B.recommended_context(),2048);}
  #[test] fn rss_can_lower_but_not_raise_cap(){assert!(ResourceLimits{max_rss_bytes:1024,..Default::default()}.validate().is_ok());assert!(ResourceLimits{max_rss_bytes:MAX_RSS_BYTES,..Default::default()}.validate().is_ok());assert!(ResourceLimits{max_rss_bytes:MAX_RSS_BYTES+1,..Default::default()}.validate().is_err());assert!(ResourceLimits{max_rss_bytes:0,..Default::default()}.validate().is_err());}
+ #[test] fn qwen_context_is_hard_capped_for_dell_profile(){
+  let requested=ResourceLimits{context_tokens:4096,max_new_tokens:256,..ResourceLimits::default()};
+  let effective=requested.effective_for(ModelFamily::Qwen25Coder7B).unwrap();
+  assert_eq!(effective.context_tokens,2048);
+  assert_eq!(effective.max_new_tokens,256);
+  assert_eq!(effective.max_rss_bytes,ResourceLimits::default().max_rss_bytes);
+  assert_eq!(requested.effective_for(ModelFamily::Gemma4E2b).unwrap().context_tokens,4096);
+ }
  #[test] fn context_and_generation_caps(){assert!(ResourceLimits{context_tokens:1,max_new_tokens:1,..Default::default()}.validate().is_ok());assert!(ResourceLimits{context_tokens:MAX_CONTEXT_TOKENS,max_new_tokens:1,..Default::default()}.validate().is_ok());assert!(ResourceLimits{context_tokens:MAX_CONTEXT_TOKENS+1,..Default::default()}.validate().is_err());assert!(ResourceLimits{context_tokens:128,max_new_tokens:129,..Default::default()}.validate().is_err());assert!(ResourceLimits{max_new_tokens:0,..Default::default()}.validate().is_err());}
  #[test] fn reasoning_budget_toggle_is_bounded(){assert_eq!(ThinkingMode::Direct.budget().unwrap(),0);assert_eq!(ThinkingMode::Budgeted{reasoning_tokens:1}.budget().unwrap(),1);assert_eq!(ThinkingMode::Budgeted{reasoning_tokens:1024}.budget().unwrap(),1024);assert!(ThinkingMode::Budgeted{reasoning_tokens:0}.budget().is_err());assert!(ThinkingMode::Budgeted{reasoning_tokens:1025}.budget().is_err());}
  #[test] fn mock_is_repeatable_and_zero_latency(){let m=DeterministicMock::new("fixed");let a=m.complete("same",&GenerationOptions::default()).unwrap();let b=m.complete("same",&GenerationOptions::default()).unwrap();assert_eq!(a.text,"fixed");assert_eq!(a,b);assert_eq!(a.elapsed,Duration::ZERO);}
