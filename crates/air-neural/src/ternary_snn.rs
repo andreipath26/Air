@@ -29,6 +29,8 @@ pub enum RouterError {
     OutputOutOfRange,
     InputOutOfRange,
     InvalidFeedbackClass,
+    ThreadSpawnFailed,
+    WorkerPanicked,
 }
 
 impl PackedTernaryRouter {
@@ -55,22 +57,80 @@ impl PackedTernaryRouter {
         Ok(())
     }
 
+    /// Score all outputs using packed 64-feature blocks and population counts.
+    /// No allocation occurs inside the per-feature hot loop.
     pub fn score(&self, input: &HyperVector) -> Vec<RouteScore> {
         let mut scores = Vec::with_capacity(self.outputs);
         for output in 0..self.outputs {
             let mut sum = 0i32;
             let base = output * self.input_bits;
-            for input_index in 0..self.input_bits {
-                let x = if input.bit(input_index) { 1 } else { -1 };
-                match self.get_flat(base + input_index) {
-                    Ternary::Zero => {}
-                    Ternary::Positive => sum += x,
-                    Ternary::Negative => sum -= x,
+            for (word_index, input_word) in input.0.iter().copied().enumerate() {
+                let feature_start = word_index * 64;
+                if feature_start >= self.input_bits { break; }
+                let feature_count = (self.input_bits - feature_start).min(64);
+                let packed_start = (base + feature_start) / 4;
+                let byte_count = feature_count / 4;
+                let mut weights = 0u128;
+                if byte_count == 16 {
+                    let bytes: [u8; 16] = self.packed[packed_start..packed_start + 16]
+                        .try_into().expect("packed 64-feature block");
+                    weights = u128::from_le_bytes(bytes);
+                } else {
+                    for offset in 0..byte_count {
+                        weights |= u128::from(self.packed[packed_start + offset]) << (offset * 8);
+                    }
                 }
+                let used_mask = if feature_count == 64 {
+                    u128::MAX
+                } else {
+                    (1u128 << (feature_count * 2)) - 1
+                };
+                let lane_mask = 0x5555_5555_5555_5555_5555_5555_5555_5555u128 & used_mask;
+                let positive = (weights >> 1) & lane_mask;
+                let negative = weights & lane_mask;
+                let x = spread_to_even_bits(input_word) & used_mask;
+                let matches = (positive & x).count_ones()
+                    + (negative & (!x & lane_mask)).count_ones();
+                let active = (positive | negative).count_ones();
+                sum += (2 * matches as i32) - active as i32;
             }
             scores.push(RouteScore { output, score: sum, fired: sum >= self.threshold });
         }
         scores
+    }
+
+    /// Sequential batch scoring. Results preserve input order.
+    pub fn score_batch(&self, inputs: &[HyperVector]) -> Vec<Vec<RouteScore>> {
+        inputs.iter().map(|input| self.score(input)).collect()
+    }
+
+    /// Explicit bounded parallel scoring for independent requests. Small or
+    /// single-item batches stay sequential to avoid thread startup overhead.
+    pub fn score_batch_parallel(
+        &self,
+        inputs: &[HyperVector],
+        max_workers: usize,
+    ) -> Result<Vec<Vec<RouteScore>>, RouterError> {
+        if max_workers == 0 { return Err(RouterError::InvalidDimensions); }
+        if inputs.is_empty() { return Ok(Vec::new()); }
+        let workers = max_workers.min(inputs.len());
+        if workers == 1 { return Ok(self.score_batch(inputs)); }
+        let chunk_size = inputs.len().div_ceil(workers);
+        std::thread::scope(|scope| {
+            let mut handles = Vec::with_capacity(workers);
+            for chunk in inputs.chunks(chunk_size) {
+                let handle = std::thread::Builder::new()
+                    .spawn_scoped(scope, move || chunk.iter().map(|input| self.score(input)).collect::<Vec<_>>())
+                    .map_err(|_| RouterError::ThreadSpawnFailed)?;
+                handles.push(handle);
+            }
+            let mut results = Vec::with_capacity(inputs.len());
+            for handle in handles {
+                let chunk = handle.join().map_err(|_| RouterError::WorkerPanicked)?;
+                results.extend(chunk);
+            }
+            Ok(results)
+        })
     }
 
     pub fn top_k(&self, input: &HyperVector, k: usize) -> Vec<RouteScore> {
@@ -133,6 +193,17 @@ impl PackedTernaryRouter {
     }
 }
 
+/// Spread each source bit into the even positions of a u128 lane mask.
+fn spread_to_even_bits(value: u64) -> u128 {
+    let mut x = u128::from(value);
+    x = (x | (x << 32)) & 0x00000000FFFFFFFF00000000FFFFFFFFu128;
+    x = (x | (x << 16)) & 0x0000FFFF0000FFFF0000FFFF0000FFFFu128;
+    x = (x | (x << 8)) & 0x00FF00FF00FF00FF00FF00FF00FF00FFu128;
+    x = (x | (x << 4)) & 0x0F0F0F0F0F0F0F0F0F0F0F0F0F0F0F0Fu128;
+    x = (x | (x << 2)) & 0x33333333333333333333333333333333u128;
+    (x | (x << 1)) & 0x55555555555555555555555555555555u128
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -173,6 +244,43 @@ mod tests {
         assert_eq!(router.weight(1, 4), Ok(Ternary::Negative));
         assert_eq!(router.score(&input)[0].score, 1);
     }
+
+    #[test] fn packed_scores_match_reference_bitwise_dot() {
+        let mut router = PackedTernaryRouter::new(HYPERVECTOR_BITS, 2, 3).unwrap();
+        let input = HyperVector::from_seed(123);
+        for bit in 0..HYPERVECTOR_BITS {
+            let weight = match (bit * 17 + bit / 7) % 3 {
+                0 => Ternary::Zero,
+                1 => Ternary::Negative,
+                _ => Ternary::Positive,
+            };
+            router.set_weight(bit % 2, bit, weight).unwrap();
+        }
+        let got = router.score(&input);
+        for output in 0..2 {
+            let mut expected = 0i32;
+            for bit in 0..HYPERVECTOR_BITS {
+                let x = if input.bit(bit) { 1 } else { -1 };
+                expected += match router.weight(output, bit).unwrap() {
+                    Ternary::Zero => 0,
+                    Ternary::Positive => x,
+                    Ternary::Negative => -x,
+                };
+            }
+            assert_eq!(got[output].score, expected);
+        }
+    }
+
+    #[test] fn bounded_parallel_batch_matches_sequential_order() {
+        let inputs: Vec<_> = (0..8).map(|seed| HyperVector::from_seed(seed)).collect();
+        let router = PackedTernaryRouter::new(HYPERVECTOR_BITS, 4, 10).unwrap();
+        let sequential = router.score_batch(&inputs);
+        let parallel = router.score_batch_parallel(&inputs, 3).unwrap();
+        assert_eq!(parallel, sequential);
+        assert_eq!(router.score_batch_parallel(&[], 2).unwrap(), Vec::new());
+        assert_eq!(router.score_batch_parallel(&inputs, 0), Err(RouterError::InvalidDimensions));
+    }
+
     #[test] fn dimensions_and_indices_are_checked() {
         assert_eq!(PackedTernaryRouter::new(12, 2, 0), Err(RouterError::InvalidDimensions));
         let router = PackedTernaryRouter::new(HYPERVECTOR_BITS, 1, 0).unwrap();
