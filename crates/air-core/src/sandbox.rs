@@ -926,15 +926,13 @@ mod tests {
 
     #[test]
     fn rust_command_spawn_probe_marker() {
-        let status = Command::new("cc")
+        let success = Command::new("cc")
             .arg("--version")
             .stdout(Stdio::null())
             .stderr(Stdio::null())
-            .status();
-        match status {
-            Ok(status) => println!("RUST_COMMAND_CC_STATUS={:?}", status.code()),
-            Err(error) => println!("RUST_COMMAND_CC_ERR={:?}", error.raw_os_error()),
-        }
+            .status()
+            .is_ok_and(|status| status.success());
+        std::process::exit(if success { 0 } else { 42 });
     }
 
     #[cfg(target_os = "linux")]
@@ -952,10 +950,8 @@ mod tests {
         let current = std::env::current_exe().unwrap();
         let output = run_sandboxed(current, &args, &config).unwrap();
         assert!(
-            output.status.success()
-                && (String::from_utf8_lossy(&output.stdout).contains("RUST_COMMAND_CC_STATUS=")
-                    || String::from_utf8_lossy(&output.stdout).contains("RUST_COMMAND_CC_ERR=")),
-            "Rust std cc spawn probe failed: status={:?} stdout={} stderr={}",
+            output.status.success(),
+            "Rust std cc spawn probe failed (exit code distinguishes spawn result): status={:?} stdout={} stderr={}",
             output.status,
             String::from_utf8_lossy(&output.stdout),
             String::from_utf8_lossy(&output.stderr),
