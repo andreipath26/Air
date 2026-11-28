@@ -28,6 +28,7 @@ pub enum DistillationError {
     Archive(ArchiveError),
     Json(serde_json::Error),
     Unverified,
+    CriticRejected,
     InvalidLanguage,
 }
 impl fmt::Display for DistillationError {
@@ -37,6 +38,7 @@ impl fmt::Display for DistillationError {
             Self::Archive(e) => write!(f, "overlay archive error: {e}"),
             Self::Json(e) => write!(f, "overlay JSON error: {e}"),
             Self::Unverified => f.write_str("refusing to distill an unverified solution"),
+            Self::CriticRejected => f.write_str("refusing to distill without matching sandboxed adversarial proof"),
             Self::InvalidLanguage => f.write_str("language must be rust or python"),
         }
     }
@@ -78,7 +80,7 @@ impl OverlayStore {
     /// Promote only a solution that passed both compiler verification and tests.
     /// The canonical rewrite is an append plus compaction, preventing unbounded
     /// duplicate growth on low-memory laptops.
-    pub fn append_verified(
+    pub(crate) fn append_verified(
         &self,
         language: &str,
         prompt: &str,
@@ -102,6 +104,22 @@ impl OverlayStore {
             });
         }
         self.write_compacted(entries)
+    }
+
+    /// Public promotion path requiring compiler/tests and matching sandboxed critic evidence.
+    pub fn append_critically_verified(
+        &self,
+        language: &str,
+        prompt: &str,
+        template: &str,
+        verification: Verification,
+        proof: &crate::adversarial::CriticProof,
+    ) -> Result<usize, DistillationError> {
+        if !verification.is_verified() { return Err(DistillationError::Unverified); }
+        if !proof.matches(language, prompt, template) {
+            return Err(DistillationError::CriticRejected);
+        }
+        self.append_verified(language, prompt, template, verification)
     }
 
     /// Rebuilds the archive in deterministic fingerprint order and removes duplicates.
