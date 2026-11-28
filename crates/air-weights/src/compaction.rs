@@ -232,7 +232,8 @@ fn allocate_name(base: &str, source_digest: &str, ordinal: usize, used: &mut BTr
 /// it and supplies the rule-pruning cutoff. Unknown sections are preserved
 /// byte-for-byte. The output payload is repacked contiguously through
 /// `ArchiveBuilder`. Only sections explicitly typed as the two formats documented
-/// above receive special treatment.
+/// above receive special treatment. Prototype compatibility is intentionally
+/// tied to the `hdc-10000-le` encoding documented at the top of this module.
 pub fn compact_archives(
     archives: &[&[u8]],
     policy: &CompactionPolicy,
