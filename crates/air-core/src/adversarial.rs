@@ -495,6 +495,7 @@ impl RootlessAdversarialRunner {
         args: &[std::ffi::OsString],
         rustc: &std::path::Path,
         sysroot: &std::path::Path,
+        toolchain_spawn: bool,
     ) -> std::io::Result<crate::sandbox::SandboxOutput> {
         use crate::sandbox::{run_sandboxed, Enforcement, SandboxConfig};
         use std::io;
@@ -505,11 +506,20 @@ impl RootlessAdversarialRunner {
         config.file_size_bytes = 32 * 1024 * 1024;
         config.wall_timeout = self.wall_timeout;
         config.max_output_bytes = 2 * 1024 * 1024;
+        if toolchain_spawn {
+            config.allow_vfork_for_toolchain(true);
+        }
         if let Some(parent) = rustc.parent() {
             config.allow_readonly_path(parent);
         }
         config.allow_readonly_path(rustc);
         config.allow_readonly_path(sysroot);
+        if let Some(path) = std::env::var_os("CARGO_HOME") {
+            config.allow_readonly_path(std::path::PathBuf::from(path));
+        }
+        if let Some(path) = std::env::var_os("RUSTUP_HOME") {
+            config.allow_readonly_path(std::path::PathBuf::from(path));
+        }
         let output = run_sandboxed(program, args, &config)?;
         if output.enforcement.landlock != Enforcement::Enforced
             || output.enforcement.seccomp != Enforcement::Enforced
@@ -553,6 +563,7 @@ impl RootlessAdversarialRunner {
                 &args,
                 &rustc,
                 &sysroot,
+                true,
             )?;
             if compile.timed_out || compile.stdout_truncated || compile.stderr_truncated {
                 return Ok(false);
@@ -570,6 +581,7 @@ impl RootlessAdversarialRunner {
                 &[],
                 &rustc,
                 &sysroot,
+                false,
             )?;
             Ok(run.status.success() && !run.timed_out && !run.stdout_truncated && !run.stderr_truncated)
         })();
