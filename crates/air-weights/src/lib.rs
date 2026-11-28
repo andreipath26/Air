@@ -4,7 +4,7 @@
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use memmap2::{Mmap, MmapOptions};
-use std::{collections::BTreeSet, error::Error, fmt, fs::{self, File}, io, path::Path};
+use std::{collections::BTreeSet, error::Error, fmt, fs::File, io, path::Path};
 
 pub const MAGIC: [u8; 4] = *b"AIRW";
 pub const FORMAT_VERSION: u16 = 1;
@@ -246,7 +246,7 @@ impl ArchiveReader {
 
     pub fn manifest(&self) -> &Manifest { &self.manifest }
     pub fn payload_len(&self) -> usize { self.payload_len }
-    pub fn is_memory_mapped(&self) -> bool { matches!(self.storage, ArchiveStorage::Mapped(_)) }
+    pub fn is_memory_mapped(&self) -> bool { matches!(&self.storage, ArchiveStorage::Mapped(_)) }
     pub fn section(&self, name: &str) -> Option<&[u8]> {
         let d = self.manifest.sections.iter().find(|s| s.name == name)?;
         let start = self.payload_start + d.offset as usize;
