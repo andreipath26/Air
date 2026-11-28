@@ -1,10 +1,10 @@
-//! Versioned AIRW archive container. The reader loads archives into Vec<u8>;
-//! it is file-backed but does not use mmap or claim zero-copy access.
+//! Versioned AIRW archive container. File-backed readers own a read-only mmap;
+//! byte-buffer readers own their Vec. Validated section access borrows the backing storage.
 
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use memmap2::{Mmap, MmapOptions};
-use std::{collections::BTreeSet, error::Error, fmt, fs, fs::File, io, path::Path};
+use std::{collections::BTreeSet, error::Error, fmt, fs::{self, File}, io, path::Path};
 
 pub const MAGIC: [u8; 4] = *b"AIRW";
 pub const FORMAT_VERSION: u16 = 1;
@@ -189,7 +189,9 @@ pub struct ArchiveReader {
     payload_len: usize,
 }
 impl ArchiveReader {
-    /// Opens an immutable archive through a read-only memory map.
+    /// Opens an archive using a read-only memory map.
+    ///
+    /// The caller must ensure the file is not modified or truncated for the reader's lifetime.
     ///
     /// Safety contract: the mapped file must not be modified or truncated by
     /// another process while this reader exists. The mapping is owned by this
@@ -244,6 +246,7 @@ impl ArchiveReader {
 
     pub fn manifest(&self) -> &Manifest { &self.manifest }
     pub fn payload_len(&self) -> usize { self.payload_len }
+    pub fn is_memory_mapped(&self) -> bool { matches!(self.storage, ArchiveStorage::Mapped(_)) }
     pub fn section(&self, name: &str) -> Option<&[u8]> {
         let d = self.manifest.sections.iter().find(|s| s.name == name)?;
         let start = self.payload_start + d.offset as usize;
@@ -269,7 +272,7 @@ mod tests {
     fn round_trip_sections_and_manifest() {
         let r = ArchiveReader::from_bytes(fixture()).unwrap();
         assert_eq!(r.manifest().package, "demo");
-        assert_eq!(r.manifest().languages, ["rust", "python"]);
+        assert_eq!(r.manifest().languages, vec!["rust".to_string(), "python".to_string()]);
         assert_eq!(r.section("rust.e0382"), Some(&b"rule1"[..]));
         assert_eq!(r.section("python.context-manager"), Some(&b"rule2"[..]));
         assert_eq!(r.section("missing"), None);
@@ -295,8 +298,10 @@ mod tests {
         ));
         std::fs::write(&path, fixture()).unwrap();
         let reader = ArchiveReader::open(&path).unwrap();
+        assert!(reader.is_memory_mapped());
         assert_eq!(reader.section("rust.e0382"), Some(&b"rule1"[..]));
-        assert_eq!(reader.manifest().languages, ["rust", "python"]);
+        assert_eq!(reader.manifest().languages, vec!["rust".to_string(), "python".to_string()]);
+        drop(reader);
         std::fs::remove_file(path).unwrap();
     }
     #[test]
