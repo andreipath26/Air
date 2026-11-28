@@ -231,11 +231,17 @@ fn synthesize_borrow_contention(
 ) -> Option<AdversarialProbe> {
     for (shared_index, shared_type) in function.params.iter().enumerate() {
         let shared = canonical_type(shared_type);
-        let shared_base = if shared == "&str" { "String" } else { shared.strip_prefix('&')? };
+        let shared_base = if shared == "&str" {
+            "String"
+        } else if let Some(base) = shared.strip_prefix('&') {
+            base
+        } else {
+            continue;
+        };
         for (mutable_index, mutable_type) in function.params.iter().enumerate() {
             if shared_index == mutable_index { continue; }
             let mutable = canonical_type(mutable_type);
-            let mutable_base = mutable.strip_prefix("&mut")?;
+            let Some(mutable_base) = mutable.strip_prefix("&mut") else { continue };
             if shared_base != mutable_base { continue; }
             if !matches!(mutable_base, "String" | "i32" | "u32" | "i64" | "u64") { continue; }
             let mut args = baseline.to_vec();
