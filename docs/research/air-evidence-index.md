@@ -21,6 +21,17 @@ The repository **does contain a 12-case Rust pipeline smoke suite and its curren
 
 Likewise, a historical workflow name may no longer exist as a file even though its successful run and artifact remain accessible in GitHub Actions. State the current filename and link the historical run rather than calling the benchmark workflow absent.
 
+## Latest validation on the evidence-index PR
+
+The new main-targeted smoke workflow passed on PR #27 head `ee512cd1374ac3d238baba9ddade744fd67a38a3`:
+
+- [Pipeline smoke run 13](https://github.com/andreipath26/Air/actions/runs/46129032014): 117 workspace tests passed, 0 failed; fuzzy routing 6/6; 12/12 static cases passed in Mode A and Mode B.
+- Mode B used `DeterministicMock`, not model inference.
+- Mode A mean case smoke time was 2.380 ms; CI command wall time 80 ms; process peak RSS 196.69 MB.
+- Mode B mean case smoke time was 2.324 ms; CI command wall time 70 ms; process peak RSS 196.79 MB.
+- [Run artifact](https://github.com/andreipath26/Air/actions/runs/46129032014/artifacts/15256852798), artifact ID `15256852798`, SHA-256 `949dcdf063b489b008b89bbe73360921474139a316d810841726f7b0f5e741ff`. GitHub reported expiry on **2027-02-26**.
+- These are GitHub-hosted-runner smoke figures, not Dell Latitude 7490 inference or coding-quality measurements.
+
 ## Successful Actions run and retained artifact
 
 - **Run:** [Rust Dual Gauntlet Benchmark, run 46096546657](https://github.com/andreipath26/Air/actions/runs/46096546657)
