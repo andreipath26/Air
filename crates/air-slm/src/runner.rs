@@ -1,6 +1,7 @@
 //! CPU llama.cpp server integration, resource bounds, and verified escalation.
 use air_core::verification::GeneratedOutputVerifier;
 use crate::grammar::OutputGrammar;
+use crate::prompt::{StablePrompt, StablePromptBuilder, STABLE_SYSTEM_PROMPT};
 use serde_json::{json, Value};
 use std::{
     fs, io::Read, path::Path, process::{Child, Command, Stdio},
@@ -8,6 +9,9 @@ use std::{
     thread::{self, JoinHandle}, time::{Duration, Instant},
 };
 const MAX_PROMPT_BYTES: usize = 16 * 1024;
+const MAX_SYSTEM_PROMPT_BYTES: usize = 8 * 1024;
+const CODE_TEMPERATURE: f32 = 0.2;
+const CODE_TOP_P: f32 = 0.95;
 const MAX_OUTPUT_BYTES: usize = 32 * 1024;
 const MAX_RSS_BYTES: u64 = 8 * 1024 * 1024 * 1024;
 const MAX_CONTEXT_TOKENS: u32 = 4096;
@@ -131,6 +135,12 @@ fn prlimit_command_args(executable:&Path,model:&Path,port:u16,limits:ResourceLim
         OsString::from("--ctx-size"),OsString::from(limits.context_tokens.to_string()),
         OsString::from("--n-gpu-layers"),OsString::from("0"),
         OsString::from("--threads"),OsString::from(threads.to_string()),
+        OsString::from("--threads-batch"),OsString::from(threads.to_string()),
+        OsString::from("--load-mode=mmap"),
+        OsString::from("--cache-prompt"),
+        OsString::from("--cache-reuse=64"),
+        OsString::from("--cache-type-k=q8_0"),
+        OsString::from("--cache-type-v=q8_0"),
         OsString::from("--no-webui"),
     ];
     speculative.append_server_args(&mut args);
@@ -240,16 +250,17 @@ impl LlamaCppRunner {
         if let Ok(mut c)=self.child.lock(){let _=c.kill();let _=c.wait();}
         if let Ok(mut w)=self.watchdog.lock(){if let Some(handle)=w.take(){let _=handle.join();}}
     }
-    fn request(&self,prompt:&str,options:&GenerationOptions)->Result<Completion,String>{
+    fn request(&self,system_prompt:&str,prompt:&str,options:&GenerationOptions)->Result<Completion,String>{
         if self.rss_exceeded.load(Ordering::Acquire){return Err("llama.cpp RSS watchdog terminated the server at its configured cap".into())}
+        if system_prompt.is_empty() || system_prompt.len()>MAX_SYSTEM_PROMPT_BYTES || prompt.is_empty() || prompt.len()>MAX_PROMPT_BYTES {
+            return Err("stable system/user prompt exceeds byte limits".into())
+        }
         let token_cap=options.max_new_tokens.min(self.limits.max_new_tokens);
         if token_cap==0||token_cap>self.limits.context_tokens{return Err("invalid output token budget".into())}
         let thinking=options.thinking.budget()?;
         let started=Instant::now();
-        let system=if thinking==0{"Respond directly and concisely; do not emit a reasoning trace."}
-            else{"Reason within the configured thinking budget, then provide a concise answer."};
-        let mut body=json!({"model":self.model_name,"messages":[{"role":"system","content":system},{"role":"user","content":prompt}],
-            "temperature":0,"max_tokens":token_cap,"stream":false,
+        let mut body=json!({"model":self.model_name,"messages":[{"role":"system","content":system_prompt},{"role":"user","content":prompt}],
+            "temperature":CODE_TEMPERATURE,"top_p":CODE_TOP_P,"max_tokens":token_cap,"stream":false,
             "chat_template_kwargs":{"enable_thinking":thinking>0,"reasoning_budget":thinking}});
         if let Some(grammar)=options.grammar { body["grammar"]=Value::String(grammar.gbnf().to_owned()); }
         let agent=ureq::AgentBuilder::new().redirects(0).timeout_connect(Duration::from_secs(2))
@@ -265,10 +276,17 @@ impl LlamaCppRunner {
         Ok(Completion{text:text.to_owned(),elapsed:started.elapsed()})
     }
 }
+impl LlamaCppRunner {
+    /// Run with a byte-stable system/symbol prefix while allowing the user task to vary.
+    pub fn complete_with_stable_prompt(&self,prompt:&StablePrompt,options:&GenerationOptions)->Result<Completion,String>{
+        self.request(prompt.system_prefix(),prompt.user_prompt(),options)
+    }
+}
 impl CompletionBackend for LlamaCppRunner {
     fn complete(&self,prompt:&str,options:&GenerationOptions)->Result<Completion,String>{
         if prompt.is_empty()||prompt.len()>MAX_PROMPT_BYTES{return Err("prompt is empty or exceeds byte cap".into())}
-        self.request(prompt,options)
+        let stable=StablePromptBuilder::default().build(prompt)?;
+        self.complete_with_stable_prompt(&stable,options)
     }
 }
 impl Drop for LlamaCppRunner {fn drop(&mut self){self.stop()}}
@@ -387,5 +405,9 @@ mod prlimit_tests {
   assert_eq!(text[0],"--as=5368709120");assert_eq!(text[1],"--");assert_eq!(text[2],"/usr/bin/llama-server");
   assert!(text.windows(2).any(|pair|pair[0]=="--ctx-size"&&pair[1]=="3072"));
   assert!(text.windows(2).any(|pair|pair[0]=="--n-gpu-layers"&&pair[1]=="0"));
+  assert!(text.contains(&"--threads=4".to_owned()) || text.windows(2).any(|pair|pair[0]=="--threads"&&pair[1]=="4"));
+  for flag in ["--load-mode=mmap","--cache-prompt","--cache-reuse=64","--cache-type-k=q8_0","--cache-type-v=q8_0"] {
+   assert!(text.contains(&flag.to_owned()),"missing runner cache flag {flag}");
+  }
  }
 }
