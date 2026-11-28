@@ -72,6 +72,7 @@ pub mod distillation;
 pub mod ast_index;
 
 pub mod compiler_repair;
+pub mod hot_swap;
 
 pub mod patch;
 pub mod incremental_syntax;
