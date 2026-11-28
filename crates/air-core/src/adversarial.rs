@@ -517,6 +517,11 @@ impl RootlessAdversarialRunner {
         if let Some(path) = std::env::var_os("CARGO_HOME") {
             config.allow_readonly_path(std::path::PathBuf::from(path));
         }
+        if let Some(home) = std::env::var_os("HOME") {
+            let home = std::path::PathBuf::from(home);
+            config.allow_readonly_path(home.join(".rustup"));
+            config.allow_readonly_path(home.join(".cargo"));
+        }
         if let Some(path) = std::env::var_os("RUSTUP_HOME") {
             config.allow_readonly_path(std::path::PathBuf::from(path));
         }
