@@ -91,7 +91,7 @@ jobs:
               if not elapsed or not peak:
                   raise SystemExit(f"{mode}: missing /usr/bin/time resource data")
               mean_ms = sum(float(c[3]) for c in matching) / len(matching)
-              peak_mb = int(peak.group(1)) / 1024
+              peak_mb = max(float(c[4]) for c in matching)
               rows.append((mode, passed, failed, mean_ms, float(elapsed.group(1)) * 1000, peak_mb))
               Path(f"/tmp/mode-{mode}-cases.tsv").write_text(
                   "mode\tcase\tresult\tlatency_ms\tcase_rss_mb\n" +
@@ -99,7 +99,7 @@ jobs:
               )
 
           lines = [
-              "| Mode | Passed | Failed | Mean case latency (ms) | Wall latency (ms) | Peak process RSS (MB) |",
+              "| Mode | Passed | Failed | Mean case latency (ms) | Wall latency (ms) | Peak test-process RSS (MB) |",
               "|---|---:|---:|---:|---:|---:|",
           ]
           for mode, passed, failed, mean_ms, wall_ms, peak_mb in rows:
