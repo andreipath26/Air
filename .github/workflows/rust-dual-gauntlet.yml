@@ -70,7 +70,7 @@ jobs:
 
           pattern = re.compile(
               r"^GAUNTLET_CASE mode=(neuro|dual) id=(\S+) result=(pass|fail) "
-              r"latency_ms=([0-9]+(?:[.][0-9]+)?) peak_rss_mb=([0-9]+(?:[.][0-9]+)?)\\s*$",
+              r"latency_ms=([0-9]+(?:[.][0-9]+)?) peak_rss_mb=([0-9]+(?:[.][0-9]+)?)\s*$",
               re.M,
           )
           rows = []
