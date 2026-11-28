@@ -5,7 +5,7 @@
 AIR explores whether knowledge and learned capabilities can be curated, indexed, composed and executed in representations other than dense numerical weights. Inspired by A.L.I.C.E., cognitive architectures, modern semantic models and compiler engineering, AIR aims to combine selective retrieval, executable knowledge and optional neural reasoning on ordinary CPUs.
 
 ## Status
-Early structured-knowledge prototype. No validated efficiency or intelligence claims. See the [master roadmap](ROADMAP.md), [architecture](docs/architecture/overview.md), [research ledger](research/research-ledger.json), [implementation ledger](research/implementation-ledger.json) and [benchmark protocol](docs/benchmark-methodology/protocol.md).
+Early structured-knowledge prototype. No validated efficiency or intelligence claims. See the [master roadmap](ROADMAP.md), [architecture](docs/architecture/overview.md), [research ledger](research/research-ledger.json), [implementation ledger](research/implementation-ledger.json) and [benchmark protocol](docs/benchmark-methodology/protocol.md). See the [AIR evidence index](docs/research/air-evidence-index.md) for exact benchmark, workflow, Actions artifact, and external-reference locations.
 
 ## Development
 Requires stable Rust and Cargo. No runtime dependencies in the bootstrap.
