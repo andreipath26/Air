@@ -464,31 +464,26 @@ impl RootlessAdversarialRunner {
 
     fn rustc_paths() -> std::io::Result<(std::path::PathBuf, std::path::PathBuf)> {
         use std::io;
-        use std::path::{Path, PathBuf};
-        let requested = std::env::var_os("RUSTC").unwrap_or_else(|| "rustc".into());
-        let requested_path = PathBuf::from(&requested);
-        let rustc = if requested_path.components().count() > 1 || requested_path.is_absolute() {
-            requested_path
-        } else {
-            let mut found = None;
-            for directory in std::env::split_paths(&std::env::var_os("PATH").unwrap_or_default()) {
-                let candidate = directory.join(&requested_path);
-                if candidate.is_file() {
-                    found = Some(candidate);
-                    break;
-                }
+        use std::path::PathBuf;
+        // Resolve the compiler from PATH without executing any caller-selected
+        // RUSTC wrapper outside the sandbox.
+        let requested_path = PathBuf::from("rustc");
+        let mut found = None;
+        for directory in std::env::split_paths(&std::env::var_os("PATH").unwrap_or_default()) {
+            let candidate = directory.join(&requested_path);
+            if candidate.is_file() {
+                found = Some(candidate);
+                break;
             }
-            found.ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "rustc is not on PATH"))?
-        };
-        let rustc = std::fs::canonicalize(rustc)?;
-        let output = std::process::Command::new(&rustc)
-            .args(["--print", "sysroot"])
-            .output()?;
-        if !output.status.success() {
-            return Err(io::Error::new(io::ErrorKind::Other, "rustc --print sysroot failed"));
         }
-        let sysroot_text = String::from_utf8_lossy(&output.stdout);
-        let sysroot = Path::new(sysroot_text.trim());
+        let rustc = std::fs::canonicalize(found.ok_or_else(|| {
+            io::Error::new(io::ErrorKind::NotFound, "rustc is not on PATH")
+        })?)?;
+        // Rust toolchains use <sysroot>/bin/rustc. Canonicalizing the executable
+        // resolves rustup shims and avoids probing an untrusted external command.
+        let sysroot = rustc.parent()
+            .and_then(|bin| bin.parent())
+            .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "cannot infer rustc sysroot"))?;
         let sysroot = std::fs::canonicalize(sysroot)?;
         Ok((rustc, sysroot))
     }
