@@ -277,7 +277,7 @@ mod tests {
         let sequential = router.score_batch(&inputs);
         let parallel = router.score_batch_parallel(&inputs, 3).unwrap();
         assert_eq!(parallel, sequential);
-        assert_eq!(router.score_batch_parallel(&[], 2).unwrap(), Vec::new());
+        assert!(router.score_batch_parallel(&[], 2).unwrap().is_empty());
         assert_eq!(router.score_batch_parallel(&inputs, 0), Err(RouterError::InvalidDimensions));
     }
 
