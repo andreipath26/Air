@@ -1,0 +1,129 @@
+name: Rust Dual Gauntlet Benchmark
+
+on:
+  push:
+    branches:
+      - feat/neuro-symbolic-dual-gauntlet
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rust-dual-gauntlet:
+    name: Workspace tests and 12-case dual gauntlet
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Run workspace tests and enforce test-count gates
+        shell: bash
+        run: |
+          set -euo pipefail
+          AIR_GAUNTLET_MODE=neuro cargo test --workspace -- --nocapture --test-threads=1 2>&1 | tee /tmp/workspace-tests.log
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          output = Path("/tmp/workspace-tests.log").read_text()
+          summaries = re.findall(r"test result: (?:ok|FAILED)\.\s*(\d+) passed;\s*(\d+) failed;", output)
+          passed = sum(int(ok) for ok, _ in summaries)
+          failed = sum(int(bad) for _, bad in summaries)
+          fuzzy_pass = len(re.findall(r"^FUZZY_ROUTE result=pass case=\S+\s*$", output, re.M))
+          fuzzy_fail = len(re.findall(r"^FUZZY_ROUTE result=fail case=\S+\s*$", output, re.M))
+          print(f"WORKSPACE_TESTS passed={passed} failed={failed} libtest_summaries={len(summaries)}")
+          print(f"FUZZY_ROUTING passed={fuzzy_pass} failed={fuzzy_fail}")
+          assert summaries, "No libtest summaries found"
+          assert passed >= 92, f"Expected at least 92 passing tests; found {passed}"
+          assert failed == 0, f"Found {failed} failed tests"
+          assert (fuzzy_pass, fuzzy_fail) == (6, 0), f"Expected exactly 6/6 fuzzy routing markers; got {fuzzy_pass}/{fuzzy_fail}"
+          PY
+
+      - name: Run Mode A neuro-symbolic only
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'elapsed_s=%e peak_rss_kb=%M' -o /tmp/mode-a-resource.txt \
+            env AIR_GAUNTLET_MODE=neuro cargo test -p air-slm --test rust_gauntlet -- --nocapture --test-threads=1 \
+            2>&1 | tee /tmp/mode-a.log
+          cat /tmp/mode-a-resource.txt
+
+      - name: Run Mode B dual with SLM escalation
+        shell: bash
+        run: |
+          set -euo pipefail
+          /usr/bin/time -f 'elapsed_s=%e peak_rss_kb=%M' -o /tmp/mode-b-resource.txt \
+            env AIR_GAUNTLET_MODE=dual cargo test -p air-slm --test rust_gauntlet -- --nocapture --test-threads=1 \
+            2>&1 | tee /tmp/mode-b.log
+          cat /tmp/mode-b-resource.txt
+
+      - name: Validate gauntlet results and publish CI summary
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+
+          pattern = re.compile(
+              r"^GAUNTLET_CASE mode=(neuro|dual) id=(\S+) result=(pass|fail) "
+              r"latency_ms=([0-9]+(?:[.][0-9]+)?) peak_rss_mb=([0-9]+(?:[.][0-9]+)?)\\s*$",
+              re.M,
+          )
+          rows = []
+          for mode, log_path, resource_path in (
+              ("neuro", "/tmp/mode-a.log", "/tmp/mode-a-resource.txt"),
+              ("dual", "/tmp/mode-b.log", "/tmp/mode-b-resource.txt"),
+          ):
+              log = Path(log_path).read_text() if Path(log_path).exists() else ""
+              cases = [m.groups() for m in pattern.finditer(log)]
+              matching = [c for c in cases if c[0] == mode]
+              passed = sum(c[2] == "pass" for c in matching)
+              failed = sum(c[2] == "fail" for c in matching)
+              if len(matching) != 12 or passed != 12 or failed != 0:
+                  raise SystemExit(f"{mode}: expected 12 passing case records; found total={len(matching)} pass={passed} fail={failed}")
+              resource = Path(resource_path).read_text().strip() if Path(resource_path).exists() else ""
+              elapsed = re.search(r"elapsed_s=([0-9.]+)", resource)
+              peak = re.search(r"peak_rss_kb=(\d+)", resource)
+              if not elapsed or not peak:
+                  raise SystemExit(f"{mode}: missing /usr/bin/time resource data")
+              mean_ms = sum(float(c[3]) for c in matching) / len(matching)
+              peak_mb = int(peak.group(1)) / 1024
+              rows.append((mode, passed, failed, mean_ms, float(elapsed.group(1)) * 1000, peak_mb))
+              Path(f"/tmp/mode-{mode}-cases.tsv").write_text(
+                  "mode\tcase\tresult\tlatency_ms\tcase_rss_mb\n" +
+                  "".join(f"{c[0]}\t{c[1]}\t{c[2]}\t{c[3]}\t{c[4]}\n" for c in matching)
+              )
+
+          lines = [
+              "| Mode | Passed | Failed | Mean case latency (ms) | Wall latency (ms) | Peak process RSS (MB) |",
+              "|---|---:|---:|---:|---:|---:|",
+          ]
+          for mode, passed, failed, mean_ms, wall_ms, peak_mb in rows:
+              label = "A: neuro-symbolic only" if mode == "neuro" else "B: dual + SLM escalation"
+              lines.append(f"| {label} | {passed}/12 | {failed} | {mean_ms:.3f} | {wall_ms:.1f} | {peak_mb:.2f} |")
+          summary = "\n".join(lines) + "\n"
+          print(summary)
+          with open(Path(__import__("os").environ["GITHUB_STEP_SUMMARY"]), "a") as f:
+              f.write("## Rust gauntlet benchmark\n\n" + summary)
+          Path("/tmp/gauntlet-summary.md").write_text(summary)
+          PY
+
+      - name: Upload raw benchmark logs and case tables
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rust-dual-gauntlet-${{ github.run_id }}
+          path: |
+            /tmp/workspace-tests.log
+            /tmp/mode-a.log
+            /tmp/mode-b.log
+            /tmp/mode-a-resource.txt
+            /tmp/mode-b-resource.txt
+            /tmp/mode-neuro-cases.tsv
+            /tmp/mode-dual-cases.tsv
+            /tmp/gauntlet-summary.md
+          if-no-files-found: warn
