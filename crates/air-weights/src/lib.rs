@@ -3,7 +3,8 @@
 
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::{collections::BTreeSet, error::Error, fmt, fs, io, path::Path};
+use memmap2::{Mmap, MmapOptions};
+use std::{collections::BTreeSet, error::Error, fmt, fs, fs::File, io, path::Path};
 
 pub const MAGIC: [u8; 4] = *b"AIRW";
 pub const FORMAT_VERSION: u16 = 1;
@@ -171,22 +172,47 @@ fn encode(manifest: &Manifest, payload: &[u8]) -> Result<Vec<u8>, ArchiveError> 
     Ok(out)
 }
 
+enum ArchiveStorage {
+    Owned(Vec<u8>),
+    Mapped(Mmap),
+}
+impl ArchiveStorage {
+    fn as_slice(&self) -> &[u8] {
+        match self { Self::Owned(bytes) => bytes, Self::Mapped(map) => map }
+    }
+}
+
 pub struct ArchiveReader {
-    bytes: Vec<u8>,
+    storage: ArchiveStorage,
     manifest: Manifest,
     payload_start: usize,
     payload_len: usize,
 }
 impl ArchiveReader {
-    /// Reads a bounded archive into memory and validates its header, checksum, manifest, and ranges.
+    /// Opens an immutable archive through a read-only memory map.
+    ///
+    /// Safety contract: the mapped file must not be modified or truncated by
+    /// another process while this reader exists. The mapping is owned by this
+    /// object and remains valid for the reader's lifetime.
     pub fn open(path: impl AsRef<Path>) -> Result<Self, ArchiveError> {
-        let bytes = fs::read(path)?;
-        if bytes.len() > HEADER_LEN + MAX_MANIFEST_BYTES + MAX_PAYLOAD_BYTES {
-            return Err(ArchiveError::Limit("archive size"));
-        }
-        Self::from_bytes(bytes)
+        let file = File::open(path)?;
+        let length = file.metadata()?.len();
+        let max_len = (HEADER_LEN + MAX_MANIFEST_BYTES + MAX_PAYLOAD_BYTES) as u64;
+        if length > max_len { return Err(ArchiveError::Limit("archive size")); }
+        if length < HEADER_LEN as u64 { return Err(ArchiveError::Invalid("truncated header")); }
+
+        // SAFETY: the map is read-only and owned by ArchiveReader. Callers must
+        // uphold the documented no-mutation/no-truncation requirement.
+        let map = unsafe { MmapOptions::new().len(length as usize).map(&file)? };
+        Self::from_storage(ArchiveStorage::Mapped(map))
     }
+
     pub fn from_bytes(bytes: Vec<u8>) -> Result<Self, ArchiveError> {
+        Self::from_storage(ArchiveStorage::Owned(bytes))
+    }
+
+    fn from_storage(storage: ArchiveStorage) -> Result<Self, ArchiveError> {
+        let bytes = storage.as_slice();
         if bytes.len() < HEADER_LEN { return Err(ArchiveError::Invalid("truncated header")); }
         if bytes[0..4] != MAGIC { return Err(ArchiveError::Invalid("bad magic")); }
         let version = u16::from_le_bytes([bytes[4], bytes[5]]);
@@ -213,14 +239,15 @@ impl ArchiveReader {
         }
         let manifest: Manifest = serde_json::from_slice(meta)?;
         manifest.validate(payload_len)?;
-        Ok(Self { bytes, manifest, payload_start, payload_len })
+        Ok(Self { storage, manifest, payload_start, payload_len })
     }
+
     pub fn manifest(&self) -> &Manifest { &self.manifest }
     pub fn payload_len(&self) -> usize { self.payload_len }
     pub fn section(&self, name: &str) -> Option<&[u8]> {
         let d = self.manifest.sections.iter().find(|s| s.name == name)?;
         let start = self.payload_start + d.offset as usize;
-        Some(&self.bytes[start..start + d.length as usize])
+        Some(&self.storage.as_slice()[start..start + d.length as usize])
     }
     pub fn section_names(&self) -> impl Iterator<Item = &str> {
         self.manifest.sections.iter().map(|s| s.name.as_str())
@@ -256,6 +283,21 @@ mod tests {
         assert!(matches!(ArchiveReader::from_bytes(bytes), Err(ArchiveError::Invalid("archive length mismatch"))));
         let mut bytes = fixture(); bytes[0] = b'X';
         assert!(matches!(ArchiveReader::from_bytes(bytes), Err(ArchiveError::Invalid("bad magic"))));
+    }
+    #[test]
+    fn file_open_uses_mapping_and_reads_validated_sections() {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        let path = std::env::temp_dir().join(format!(
+            "airw-test-{}-{}.airw",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        std::fs::write(&path, fixture()).unwrap();
+        let reader = ArchiveReader::open(&path).unwrap();
+        assert_eq!(reader.section("rust.e0382"), Some(&b"rule1"[..]));
+        assert_eq!(reader.manifest().languages, ["rust", "python"]);
+        std::fs::remove_file(path).unwrap();
     }
     #[test]
     fn rejects_checksum_tampering() {
