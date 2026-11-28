@@ -608,10 +608,6 @@ mod tests {
         SandboxConfig::new(root.join("scratch"))
     }
 
-    fn run_shell(root: &Path, script: &str, args: &[OsString], config: &SandboxConfig) -> SandboxOutput {
-        run_sandboxed("/bin/sh", args_with_script(script, args), config).unwrap()
-    }
-
     fn args_with_script(script: &str, args: &[OsString]) -> Vec<OsString> {
         let mut result = vec![OsString::from("-c"), OsString::from(script), OsString::from("sandbox-test")];
         result.extend_from_slice(args);
