@@ -311,6 +311,67 @@ fn touch(order: &mut VecDeque<[u8; 32]>, key: [u8; 32]) {
     order.push_back(key);
 }
 
+#[derive(Debug, Clone)]
+struct RustcToolchain {
+    program: PathBuf,
+    sysroot: Option<PathBuf>,
+}
+
+fn discover_rustc_toolchain() -> Result<RustcToolchain, HotSwapError> {
+    let requested = std::env::var_os("RUSTC").unwrap_or_else(|| OsString::from("rustc"));
+    let probe = Command::new(&requested)
+        .args(["--print", "sysroot"])
+        .output()
+        .map_err(HotSwapError::RustcUnavailable)?;
+    let sysroot = if probe.status.success() {
+        String::from_utf8_lossy(&probe.stdout).trim().to_owned()
+    } else {
+        String::new()
+    };
+    if !sysroot.is_empty() {
+        let sysroot = PathBuf::from(sysroot).canonicalize().ok();
+        if let Some(root) = &sysroot {
+            #[cfg(windows)]
+            let candidate = root.join("bin").join("rustc.exe");
+            #[cfg(not(windows))]
+            let candidate = root.join("bin").join("rustc");
+            if candidate.is_file() {
+                return Ok(RustcToolchain { program: candidate, sysroot });
+            }
+        }
+        return Ok(RustcToolchain {
+            program: resolve_executable(&requested).ok_or_else(|| {
+                HotSwapError::RustcUnavailable(std::io::Error::new(
+                    std::io::ErrorKind::NotFound,
+                    "rustc executable could not be resolved",
+                ))
+            })?,
+            sysroot,
+        });
+    }
+    let program = resolve_executable(&requested).ok_or_else(|| {
+        HotSwapError::RustcUnavailable(std::io::Error::new(
+            std::io::ErrorKind::NotFound,
+            "rustc executable could not be resolved",
+        ))
+    })?;
+    Ok(RustcToolchain { program, sysroot: None })
+}
+
+fn resolve_executable(name: &OsStr) -> Option<PathBuf> {
+    let requested = Path::new(name);
+    if requested.components().count() > 1 || requested.is_absolute() {
+        return requested.canonicalize().ok();
+    }
+    for directory in std::env::split_paths(&std::env::var_os("PATH")?) {
+        let candidate = directory.join(requested);
+        if candidate.is_file() {
+            return candidate.canonicalize().ok().or(Some(candidate));
+        }
+    }
+    None
+}
+
 fn target_deps_dir(workspace_root: &Path) -> PathBuf {
     let target = std::env::var_os("CARGO_TARGET_DIR")
         .map(PathBuf::from)
@@ -461,6 +522,11 @@ mod tests {
         let first = verifier.verify_source(source).unwrap();
         assert!(first.success, "{}", first.stderr);
         assert!(!first.cache_hit);
+        assert!(!first.timed_out);
+        assert!(!first.output_truncated);
+        assert_eq!(first.enforcement.resource_limits, Enforcement::Enforced);
+        assert_eq!(first.enforcement.seccomp, Enforcement::Enforced);
+        assert!(matches!(first.enforcement.landlock, Enforcement::Enforced | Enforcement::Unavailable));
         assert!(first.artifact.as_ref().is_some_and(|path| path.exists()));
         let second = verifier.verify_source(source).unwrap();
         assert!(second.success, "{}", second.stderr);
