@@ -330,7 +330,12 @@ unsafe fn apply_landlock(security: &PreparedSecurity) -> io::Result<()> {
             return Err(error);
         }
     }
-    if let Err(error) = add_landlock_path_rule(ruleset_fd, &security.scratch, security.handled_access) {
+    // Verification needs ordinary files/directories/symlinks in scratch, but never device nodes or Unix sockets.
+    const MAKE_CHAR: u64 = 1 << 6;
+    const MAKE_SOCK: u64 = 1 << 9;
+    const MAKE_BLOCK: u64 = 1 << 11;
+    let scratch_access = security.handled_access & !(MAKE_CHAR | MAKE_SOCK | MAKE_BLOCK);
+    if let Err(error) = add_landlock_path_rule(ruleset_fd, &security.scratch, scratch_access) {
         libc::close(ruleset_fd);
         return Err(error);
     }
@@ -389,6 +394,23 @@ fn build_seccomp_filter() -> Vec<libc::sock_filter> {
         let denied: &[libc::c_long] = &[
             libc::SYS_socket,
             libc::SYS_socketpair,
+            libc::SYS_sendto,
+            libc::SYS_recvfrom,
+            libc::SYS_sendmsg,
+            libc::SYS_recvmsg,
+            libc::SYS_recvmmsg,
+            libc::SYS_sendmmsg,
+            libc::SYS_shutdown,
+            libc::SYS_getsockopt,
+            libc::SYS_setsockopt,
+            libc::SYS_getsockname,
+            libc::SYS_getpeername,
+            libc::SYS_io_uring_setup,
+            libc::SYS_io_uring_enter,
+            libc::SYS_io_uring_register,
+            libc::SYS_splice,
+            libc::SYS_tee,
+            libc::SYS_vmsplice,
             libc::SYS_connect,
             libc::SYS_bind,
             libc::SYS_listen,
@@ -429,6 +451,31 @@ fn build_seccomp_filter() -> Vec<libc::sock_filter> {
 #[cfg(not(target_os = "linux"))]
 fn build_seccomp_filter() -> Vec<libc::sock_filter> {
     Vec::new()
+}
+
+#[cfg(target_os = "linux")]
+unsafe fn close_inherited_fds() -> io::Result<()> {
+    const SYS_CLOSE_RANGE: libc::c_long = 436;
+    let result = libc::syscall(SYS_CLOSE_RANGE, 3u32, u32::MAX, 0u32);
+    if result == 0 {
+        return Ok(());
+    }
+    let error = io::Error::last_os_error();
+    if !matches!(error.raw_os_error(), Some(libc::ENOSYS) | Some(libc::EINVAL)) {
+        return Err(error);
+    }
+
+    // Older kernels have no close_range syscall. Close descriptors one by one;
+    // this path is only used on those older kernels and preserves stdin/out/err.
+    let mut limit = libc::rlimit { rlim_cur: 65_536, rlim_max: 65_536 };
+    if libc::getrlimit(libc::RLIMIT_NOFILE, &mut limit) != 0 {
+        return Err(io::Error::last_os_error());
+    }
+    let max_fd = limit.rlim_cur.min(1_048_576) as libc::c_int;
+    for fd in 3..max_fd {
+        libc::close(fd);
+    }
+    Ok(())
 }
 
 #[cfg(target_os = "linux")]
@@ -500,6 +547,7 @@ pub fn run_sandboxed(
         let prepared = security;
         unsafe {
             command.pre_exec(move || {
+                close_inherited_fds()?;
                 let limits = [
                     (libc::RLIMIT_CPU, rlimits.0, rlimits.0.saturating_add(1)),
                     (libc::RLIMIT_AS, rlimits.1, rlimits.1),
@@ -659,6 +707,29 @@ mod tests {
         ).unwrap();
         assert!(!output.status.success());
         assert!(started.elapsed() < Duration::from_secs(8));
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn inherited_network_descriptors_are_closed_before_exec() {
+        use std::os::unix::io::AsRawFd;
+        use std::os::unix::net::UnixStream;
+        let root = root();
+        let config = shell_config(&root);
+        let (mut receiver, inherited) = UnixStream::pair().unwrap();
+        let fd = inherited.as_raw_fd();
+        assert_eq!(unsafe { libc::fcntl(fd, libc::F_SETFD, 0) }, 0);
+        let script = format!("import os; os.write({}, b'x')", fd);
+        let args = [
+            OsString::from("-S"),
+            OsString::from("-c"),
+            OsString::from(script),
+        ];
+        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
+        assert!(!output.status.success(), "child retained an inherited socket descriptor");
+        let mut received = [0u8; 1];
+        assert_eq!(receiver.read(&mut received).unwrap_or(0), 0);
         let _ = std::fs::remove_dir_all(root);
     }
 
