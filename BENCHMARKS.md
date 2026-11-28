@@ -1,47 +1,46 @@
 # AIR Coding Benchmarks
 
-**Status: blocked — historical benchmark assets are not recoverable from the checked repository branches.**
+**End-to-end coding gauntlet: blocked. Component CI: passing for the merged HDC/ternary and coding-reducer work described below.**
 
-This report is a GitHub-API-only audit of `andreipath26/Air` as of 2026-11-28. No benchmark was run in this task. No local shell, `git`, compiler, or model process was used.
+This report uses GitHub API records only. No local benchmark, Dell measurement, or model inference was performed for this update.
 
-## Asset audit
+## CI-verified component work
 
-Checked `main` and the coordinator branch `feat/neuro-symbolic-dual-gauntlet`, searched the repository for the historical archive and gauntlet paths, and attempted direct reads of the expected files. The following are absent from both inspected branches:
+These are successful GitHub Actions workspace checks for the listed merge commits. They verify Rust workspace/component tests, not the missing 12-case gauntlet or runtime model compatibility. The job summaries show `cargo test --workspace` completed successfully; they do not expose a test-count total here.
 
-- `air-weights` crate and `weights/core.airw`
-- `air-neural` and `air-slm` crates
-- `benchmarks/g01-code-gauntlet/` case packages and runner
-- the reported 52 frozen input files, 12 hidden evaluator files, and per-arm raw benchmark outputs
+| PR | Merge commit | GitHub Actions run | Verified scope |
+|---|---|---|---|
+| [#10](https://github.com/andreipath26/Air/pull/10) | `632688391ee796723a5d38e46d3adde9f00f8353` | [#154 / `46093790182`](https://github.com/andreipath26/Air/actions/runs/46093790182) — all six jobs completed successfully | `cargo test --workspace` passed. Includes the dependency-free `air-neural` component: packed 10,000-bit HDC operations, ternary routing, and bounded batch-scoring tests. The release microbenchmark harness exists, but this CI run is not a Dell performance measurement. |
+| [#11](https://github.com/andreipath26/Air/pull/11) | `37c8ae3456cc98b4b26efcef1cf92f71c3f07e44` | [#151 / `46093725300`](https://github.com/andreipath26/Air/actions/runs/46093725300) — all six jobs completed successfully | `cargo test --workspace` passed, including the bounded `air-core::coding` reducer/oracle seam and its source-level tests. |
 
-The workspace manifest lists only `crates/air-core`, `crates/air-cli`, and `crates/air-bench`. Searches for the reported `.airw` and gauntlet names returned no indexed files; direct file reads returned 404. The historical feature branch names described in the conversation are not currently present in the audited branch list. Other workstream branches may be created during this task, but they do not restore the missing historical assets unless those exact files appear there.
+### Current component boundary on `feat/neuro-symbolic-dual-gauntlet`
 
-Because the input packages, hidden graders, executable runner, archive, and Gemma GGUF are missing, this task cannot truthfully report fresh Mode A/Mode B pass rates, TTFT, tokens/second, peak RSS, or model wake counts. Reconstructing new fixtures would create a new benchmark, not recover or rerun the frozen benchmark, so none were fabricated.
+- `air-weights` is in the workspace and supplies an archive reader. No `weights/core.airw` archive is present.
+- `air-neural` supplies HDC and packed ternary primitives. It is **not yet wired into** the coding reducer or a compiled `.airw` model.
+- `air-core::coding` accepts typed concepts, ranks matching rules deterministically, resolves candidate sections through the archive reader, and delegates acceptance to a caller-supplied oracle. It does **not** parse natural language, generate patches, invoke compilers, include language repair rules, or integrate Tree-sitter/HDC/SLM.
+- No `air-slm` crate is present on this feature branch at this update. No Gemma 4 E2B or SmolLM3 3B model was executed. Thinking-mode controls, `deep`/`!` routing, and model-backed patch fallback remain unverified/unmerged.
 
-## Historical results recovered from ROADMAP.md
+## Historical coding results (transcribed, not reproduced)
 
-These are **unverified historical reports transcribed from the attached conversation**, not results reproduced from files in the current repository. They are not acceptance evidence and were not run on the Dell Latitude 7490.
+The following measurements were reported in the attached conversation and earlier roadmap text. They are **unverified historical development reports**, not results reproduced from available benchmark inputs. They were not run on the Dell Latitude 7490 and do not pass G01-Code/G02-Code.
 
-| Reported run | AIR-only | Qwen 7B Q4_K_M | Qwen 3B Q4_K_M | Evidence boundary |
+| Reported run | AIR-only | Qwen 7B Q4_K_M | Qwen 3B Q4_K_M | Limitation |
 |---|---:|---:|---:|---|
-| 8-case mechanical Rust smoke set | 8/8; 0.062 s median/case | 7/8; 16.45 s | 6/8; 8.65 s | Synthetic supported repairs; no hidden tests or held-out repos; shared AMD EPYC host; inconsistent RSS boundaries; no energy. |
-| First 12-case gauntlet, unified-diff interface | 3/12; 0.13 s; 0.27 GiB | 3/12; 33.99 s; 5.22 GiB | 3/12; 9.74 s; 4.46 GiB | All AIR passes were Tier 4 abstentions. Qwen patch-format failures confounded the coding comparison. Shared AMD EPYC, not Dell; energy unavailable. |
-| Later 12-case run after Search/Replace and Tier 1 rules | 6/12; 0.152 s; 282.8 MiB | 4/12; 5.14 GiB | 3/12; 4.52 GiB | AIR repaired E0382, E0502, E0277 and abstained on all three traps. Same-author development set; AMD EPYC; no energy. |
-| Neuro-symbolic `.airw` v2 report | 6/12; 183.9 ms; 279.4 MiB | Not rerun | Not rerun | Reported archive 41,096 bytes, 16 nodes/15 edges, 15 HDC prototypes, 60,024 ternary parameters; HDC+router 18,014 μs. Archive and tests are absent from checked branches. |
+| 8-case mechanical Rust smoke set | 8/8; 0.062 s median/case | 7/8; 16.45 s | 6/8; 8.65 s | Synthetic supported repairs; no hidden tests/held-out repos; shared AMD EPYC host; differing memory boundaries; no energy. |
+| Initial 12-case gauntlet, unified-diff protocol | 3/12; 0.13 s; 0.27 GiB | 3/12; 33.99 s; 5.22 GiB | 3/12; 9.74 s; 4.46 GiB | AIR's three passes were correct Tier 4 abstentions. Qwen patch-format failures confounded the comparison. AMD EPYC; no energy. |
+| Later 12-case run after Search/Replace and Tier 1 rules | 6/12; 0.152 s; 282.8 MiB | 4/12; 5.14 GiB | 3/12; 4.52 GiB | AIR repaired E0382, E0502, E0277 and correctly abstained on the three traps. Same-author development set; AMD EPYC; no energy. |
+| Neuro-symbolic `.airw` v2 report | 6/12; 183.9 ms; 279.4 MiB | Not rerun | Not rerun | Reported 41,096-byte archive, 16 nodes/15 edges, 15 HDC prototypes, 60,024 ternary parameters, HDC+router 18,014 μs. The archive and cases are still absent. |
 
-The 12 cases were reported as: E0382 ownership; E0502 borrow conflict; E0277 trait bound; multi-file `Option`→`Result` migration; iterator refactor; shared validation trait; borrowed lifetime; RefCell/state invariant; MutexGuard/thread boundary; missing private dependency; contradictory specification; undocumented unsafe FFI. In the later Tier 1 run, cases 01–03 passed and cases 10–12 were correctly abstained; cases 04–09 were not solved.
+The reported Rust gauntlet cases were: E0382 ownership, E0502 borrow conflict, E0277 trait bound, multi-file `Option`→`Result` migration, iterator refactor, shared validation trait, borrowed lifetime, RefCell/state invariant, MutexGuard/thread boundary, missing private dependency, contradictory specification, and undocumented unsafe FFI. In the later report AIR passed cases 01–03 and abstained correctly on 10–12; it did not solve 04–09.
 
-Reported integrity identifiers (not re-verified because the corresponding files are missing):
+Reported manifest identifiers remain unverified because the source files are unavailable:
 
-- Frozen input manifest: `c8fb7bb2dcb6c48832cd47ab9193432093e7bdceb0ab4b12d69a2e6febacc445`
-- Hidden evaluator manifest: `a574c94eaa94023a0e6dcffc31a8c45a10c82c80dc6345fd41240d99e79c7128`
-- `weights/core.airw` v2: `09697b685d1bcb61c8d64d6419bd02a4d5b4679dca19b4dc85d51c16294f377b`
+- Inputs: `c8fb7bb2dcb6c48832cd47ab9193432093e7bdceb0ab4b12d69a2e6febacc445`
+- Hidden evaluators: `a574c94eaa94023a0e6dcffc31a8c45a10c82c80dc6345fd41240d99e79c7128`
+- Historical `weights/core.airw`: `09697b685d1bcb61c8d64d6419bd02a4d5b4679dca19b4dc85d51c16294f377b`
 
-## Blockers to a valid dual-mode rerun
+## Remaining blockers
 
-1. Restore the exact frozen benchmark source and hidden evaluator files, including their original manifest files.
-2. Restore the matching `air-weights`, `air-neural`, and coding-adapter implementation plus the exact `.airw` archive.
-3. Restore or implement the runner that records task outcomes, TTFT, generation throughput, process-tree RSS, cold/warm timings, and SLM invocation counts.
-4. Provide a pinned, locally available Gemma 4 E2B GGUF and llama.cpp runtime for Mode B. No API inference is permitted.
-5. Execute both modes on the Latitude 7490. Keep the existing results labeled historical and do not replace them with reconstructed values.
+The original 12-case fixture packages, 52-file input set, 12 hidden evaluators, runner, raw per-arm reports, and `.airw` archive are absent from the feature branch. No Gemma GGUF/llama.cpp model run is recorded, and no measurements were taken on the Dell Latitude 7490. Therefore there is no fresh Mode A/Mode B score, TTFT, tokens/sec, peak RSS, SLM wake count, or hardware comparison to report.
 
-Until these inputs exist on an accessible branch, there is no defensible Mode A/Mode B comparison to publish.
+Next: recover the exact frozen assets and verify their manifests; finish wiring the neural primitives and coding reducer; merge the SLM integration; then run both modes and pinned Qwen controls on the Dell with identical process boundaries. Keep CI component-test results separate from end-to-end benchmark evidence.
