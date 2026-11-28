@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/air-core", "crates/air-cli", "crates/air-bench"]
+members = ["crates/air-core", "crates/air-cli", "crates/air-bench", "crates/air-neural"]
 resolver = "2"
 
 [workspace.package]
