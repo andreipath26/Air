@@ -478,16 +478,18 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
         // SYS_vfork is denied by default and allowed only in compiler mode.
         // The posix_spawn child inherits Landlock, no_new_privs, seccomp and
         // all rlimits. Unknown and namespace/process flags are rejected.
-        if allow_vfork {
-            code.push(jump_eq(libc::SYS_clone as u32, 0, 13));
-        } else {
-            code.push(jump_eq(libc::SYS_clone as u32, 0, 8));
-        }
+        // Use calculated branch offsets for the two compiler-only spawn words;
+        // this keeps the BPF jumps correct as the strict thread filter evolves.
+        let clone_jump = code.len();
+        code.push(jump_eq(libc::SYS_clone as u32, 0, 0));
+        let mut spawn_jumps = Vec::new();
         if allow_vfork {
             code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
-            code.push(jump_eq(POSIX_SPAWN_FLAGS, 10, 0));
+            spawn_jumps.push(code.len());
+            code.push(jump_eq(POSIX_SPAWN_FLAGS, 0, 0));
             code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
-            code.push(jump_eq(POSIX_SPAWN_PARENT_TID_FLAGS, 8, 0));
+            spawn_jumps.push(code.len());
+            code.push(jump_eq(POSIX_SPAWN_PARENT_TID_FLAGS, 0, 0));
         }
         code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
         code.push(ins(BPF_ALU | BPF_AND | BPF_K, 0, 0, THREAD_FLAGS));
@@ -497,12 +499,16 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
         code.push(ins(BPF_ALU | BPF_AND | BPF_K, 0, 0, !THREAD_ALLOWED_FLAGS));
         code.push(jump_eq(0, 1, 0));
         code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
-        // A matching posix-spawn word jumps to this compiler-only allow.
-        if allow_vfork {
-            code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ALLOW));
-        }
-        // Default allow for syscalls not covered by the deny list or clone rule.
+        // Exact posix-spawn words and supported thread flags reach this allow.
+        let clone_allow = code.len();
         code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ALLOW));
+        // Default allow for syscalls not covered by the deny list or clone rule.
+        let default_allow = code.len();
+        code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ALLOW));
+        code[clone_jump].jf = (default_allow - clone_jump - 1) as u8;
+        for jump in spawn_jumps {
+            code[jump].jt = (clone_allow - jump - 1) as u8;
+        }
         code
     }
 }
