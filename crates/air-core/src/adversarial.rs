@@ -725,6 +725,27 @@ mod tests {
         std::fs::remove_file(path).unwrap();
     }
 
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn rootless_runner_compiles_and_runs_candidate_and_boundary_probes() {
+        let root = std::env::temp_dir().join(format!("air-rootless-critic-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        let runner = RootlessAdversarialRunner::new(root.join("scratch"));
+        let candidate = "pub fn clamp(value: u32) -> u32 { if value > u32::MAX { u32::MAX } else { value } }";
+        let primary = "#[test] fn primary_normal_value() { assert_eq!(clamp(42), 42); }";
+        let proof = run_adversarial_critic(
+            &runner,
+            "rust",
+            "clamp a u32 value safely",
+            "fn clamp(value: u32) -> u32",
+            candidate,
+            primary,
+        ).expect("sandboxed primary and boundary tests should pass");
+        assert!(proof.is_sandboxed());
+        assert!(proof.cases_passed() >= 2);
+        std::fs::remove_dir_all(root).unwrap();
+    }
+
     #[test]
     fn refuses_runner_that_did_not_sandbox() {
         struct NotSandboxed;
