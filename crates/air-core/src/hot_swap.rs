@@ -87,11 +87,13 @@ pub struct WarmRustVerifier {
     externs: Vec<(String, PathBuf)>,
     edition: String,
     cache_capacity: usize,
+    instance_id: u64,
     sequence: AtomicU64,
     cache: Mutex<CompileCache>,
 }
 
 static PREPARED_WORKSPACES: OnceLock<Mutex<HashSet<PathBuf>>> = OnceLock::new();
+static NEXT_VERIFIER_ID: AtomicU64 = AtomicU64::new(0);
 
 impl WarmRustVerifier {
     /// Prepare workspace rlibs once, then keep direct rustc invocations warm.
@@ -138,6 +140,7 @@ impl WarmRustVerifier {
             externs,
             edition: edition.to_owned(),
             cache_capacity: cache_capacity.max(1),
+            instance_id: NEXT_VERIFIER_ID.fetch_add(1, Ordering::Relaxed),
             sequence: AtomicU64::new(0),
             cache: Mutex::new(CompileCache::default()),
         })
@@ -171,7 +174,7 @@ impl WarmRustVerifier {
         }
 
         let id = self.sequence.fetch_add(1, Ordering::Relaxed);
-        let stem = format!("candidate-{}-{id}", std::process::id());
+        let stem = format!("candidate-{}-{}-{id}", std::process::id(), self.instance_id);
         let source_path = self.scratch.join(format!("{stem}.rs"));
         let artifact_path = self.scratch.join(format!("{stem}.rmeta"));
         fs::write(&source_path, source)?;
