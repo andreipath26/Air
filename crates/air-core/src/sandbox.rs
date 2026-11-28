@@ -877,7 +877,7 @@ mod tests {
         let parent_tid_flags = spawn_flags | 0x0010_0000u32; // + CLONE_PARENT_SETTID
         let namespace_flags = spawn_flags | 0x0002_0000u32; // + CLONE_NEWNS
         let script = format!(
-            "import ctypes, errno; libc=ctypes.CDLL(None, use_errno=True); clone={}; cases=[({}, errno.EINVAL), ({}, None), ({}, errno.EPERM)]; exec('for flags, expected in cases:\\n ctypes.set_errno(0); result=libc.syscall(clone, flags, 0, 0, 0, 0); actual=ctypes.get_errno(); print('CASE', flags, result, actual, expected, flush=True); assert result == -1; assert actual != errno.EPERM if expected is None else actual == expected'); print('SANDBOX_CLONE_FLAGS=pass')",
+            "import ctypes, errno; libc=ctypes.CDLL(None, use_errno=True); clone={}; cases=[({}, errno.EINVAL), ({}, None), ({}, errno.EPERM)]; exec('for flags, expected in cases:\\n ctypes.set_errno(0); result=libc.syscall(clone, flags, 0, 0, 0, 0); actual=ctypes.get_errno(); print(flags, result, actual, expected, flush=True); assert result == -1; assert actual != errno.EPERM if expected is None else actual == expected'); print('SANDBOX_CLONE_FLAGS=pass')",
             libc::SYS_clone,
             spawn_flags,
             parent_tid_flags,
