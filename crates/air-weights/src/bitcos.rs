@@ -183,7 +183,7 @@ pub fn encode_router_archive(
         packed.extend_from_slice(&encoding.presence);
         packed.extend_from_slice(&encoding.signs);
     }
-    let mut builder = air_weights::ArchiveBuilder::new(package);
+    let mut builder = crate::ArchiveBuilder::new(package);
     builder.add_language(language).map_err(|e| BitcosError::Router(e.to_string()))?;
     builder.add_section("router.bitcos", "ternary-bitcos-v1", &packed)
         .map_err(|e| BitcosError::Router(e.to_string()))?;
@@ -234,7 +234,7 @@ mod tests {
         let mut router = PackedTernaryRouter::new(HYPERVECTOR_BITS, 1, 0).unwrap();
         router.set_weight(0, 2, Ternary::Positive).unwrap();
         let bytes = encode_router_archive(&router, "test-router", "rust").unwrap();
-        let reader = air_weights::ArchiveReader::from_bytes(bytes).unwrap();
+        let reader = crate::ArchiveReader::from_bytes(bytes).unwrap();
         assert_eq!(reader.header_flags(), AIRW_FLAG_BITCOS_TERNARY);
         let section = reader.section("router.bitcos").unwrap();
         assert!(!section.is_empty());
