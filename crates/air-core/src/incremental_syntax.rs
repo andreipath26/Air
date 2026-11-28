@@ -74,9 +74,10 @@ impl IncrementalSyntaxDocument {
             old_end_position,
             new_end_position,
         };
-        self.tree.edit(&edit);
+        let mut edited_tree = self.tree.clone();
+        edited_tree.edit(&edit);
         let started = Instant::now();
-        let updated_tree = self.parser.parse(updated_source.as_bytes(), Some(&self.tree))
+        let updated_tree = self.parser.parse(updated_source.as_bytes(), Some(&edited_tree))
             .ok_or(SyntaxError::ParseCancelled)?;
         let elapsed = started.elapsed();
         self.source = updated_source;
