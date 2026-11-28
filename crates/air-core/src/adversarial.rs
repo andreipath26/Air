@@ -201,6 +201,9 @@ fn value_for_type(ty: &str, edge: &str) -> Option<String> {
     if compact == "String" { return Some(if edge == "empty" { "String::new()".into() } else { r#"String::from("air")"#.into() }); }
     if compact.starts_with("&[") { return Some("&[]".into()); }
     if compact.starts_with("&mut[") { return Some("&mut []".into()); }
+    if compact == "&String" { return Some("&String::new()".into()); }
+    if compact == "&mutString" { return Some("&mut String::new()".into()); }
+    if compact == "&mutVec<u8>" { return Some("&mut Vec::<u8>::new()".into()); }
     if compact.starts_with("Vec<") { return Some("Vec::new()".into()); }
     if compact.starts_with("Option<") { return Some("None".into()); }
     if compact == "bool" { return Some("false".into()); }
