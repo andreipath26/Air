@@ -5,12 +5,15 @@
 //! invoke rustc directly against the cached .rlib artifacts; no Cargo lock is
 //! taken in the per-candidate loop. This verifies compilation, not execution.
 
-use crate::compiler_repair::{parse_json_diagnostics, CompilerDiagnostic};
+use crate::{
+    compiler_repair::{parse_json_diagnostics, CompilerDiagnostic},
+    sandbox::{run_sandboxed, Enforcement, EnforcementReport, SandboxConfig},
+};
 use sha2::{Digest, Sha256};
 use std::{
     collections::{BTreeMap, HashMap, HashSet, VecDeque},
     error::Error,
-    ffi::OsStr,
+    ffi::{OsStr, OsString},
     fmt,
     fs,
     path::{Path, PathBuf},
@@ -34,6 +37,7 @@ pub enum HotSwapError {
     SourceTooLarge,
     CachePoisoned,
     RustcUnavailable(std::io::Error),
+    SandboxLaunch(std::io::Error),
 }
 
 impl fmt::Display for HotSwapError {
@@ -47,6 +51,7 @@ impl fmt::Display for HotSwapError {
             Self::SourceTooLarge => f.write_str("Rust source exceeds the 1 MiB verification limit"),
             Self::CachePoisoned => f.write_str("hot-swap cache lock is poisoned"),
             Self::RustcUnavailable(e) => write!(f, "could not start rustc: {e}"),
+            Self::SandboxLaunch(e) => write!(f, "could not start sandboxed rustc: {e}"),
         }
     }
 }
@@ -64,6 +69,9 @@ pub struct CompileOutcome {
     pub diagnostics: Vec<CompilerDiagnostic>,
     pub stdout: String,
     pub stderr: String,
+    pub timed_out: bool,
+    pub output_truncated: bool,
+    pub enforcement: EnforcementReport,
 }
 
 #[derive(Debug, Clone)]
@@ -73,6 +81,9 @@ struct CacheEntry {
     diagnostics: Vec<CompilerDiagnostic>,
     stdout: String,
     stderr: String,
+    timed_out: bool,
+    output_truncated: bool,
+    enforcement: EnforcementReport,
 }
 
 #[derive(Default)]
@@ -85,6 +96,8 @@ pub struct WarmRustVerifier {
     scratch: PathBuf,
     deps_dir: PathBuf,
     externs: Vec<(String, PathBuf)>,
+    rustc_program: PathBuf,
+    rustc_sysroot: Option<PathBuf>,
     edition: String,
     cache_capacity: usize,
     instance_id: u64,
@@ -134,10 +147,13 @@ impl WarmRustVerifier {
         let deps_dir = deps_dir.as_ref().canonicalize()?;
         let externs = discover_rlibs(&deps_dir)?;
         let scratch = select_scratch_workspace()?;
+        let toolchain = discover_rustc_toolchain()?;
         Ok(Self {
             scratch,
             deps_dir,
             externs,
+            rustc_program: toolchain.program,
+            rustc_sysroot: toolchain.sysroot,
             edition: edition.to_owned(),
             cache_capacity: cache_capacity.max(1),
             instance_id: NEXT_VERIFIER_ID.fetch_add(1, Ordering::Relaxed),
@@ -179,29 +195,58 @@ impl WarmRustVerifier {
         let artifact_path = self.scratch.join(format!("{stem}.rmeta"));
         fs::write(&source_path, source)?;
 
-        let mut command = Command::new("rustc");
-        command
-            .arg("--edition").arg(edition)
-            .arg("--crate-type=lib")
-            .arg("--crate-name").arg(format!("air_verify_{id}"))
-            .arg("--error-format=json")
-            .arg("--emit=metadata")
-            .arg("-L").arg(format!("dependency={}", self.deps_dir.display()));
-        for (name, path) in &self.externs {
-            command.arg("--extern").arg(format!("{name}={}", path.display()));
+        let mut args = vec![
+            OsString::from("--edition"), OsString::from(edition),
+            OsString::from("--crate-type=lib"),
+            OsString::from("--crate-name"), OsString::from(format!("air_verify_{}_{}", self.instance_id, id)),
+            OsString::from("--error-format=json"),
+            OsString::from("--emit=metadata"),
+            OsString::from("-L"),
+            OsString::from(format!("dependency={}", self.deps_dir.display())),
+        ];
+        if let Some(sysroot) = &self.rustc_sysroot {
+            args.push(OsString::from("--sysroot"));
+            args.push(sysroot.as_os_str().to_owned());
         }
-        command.arg("-o").arg(&artifact_path).arg(&source_path);
-        let execution = command.output().map_err(HotSwapError::RustcUnavailable)?;
+        for (name, path) in &self.externs {
+            args.push(OsString::from("--extern"));
+            args.push(OsString::from(format!("{name}={}", path.display())));
+        }
+        args.push(OsString::from("-o"));
+        args.push(artifact_path.as_os_str().to_owned());
+        args.push(source_path.as_os_str().to_owned());
+
+        let mut sandbox = SandboxConfig::new(self.scratch.clone());
+        sandbox.allow_readonly_path(self.deps_dir.clone());
+        sandbox.allow_readonly_path(self.rustc_program.clone());
+        if let Some(parent) = self.rustc_program.parent() {
+            sandbox.allow_readonly_path(parent.to_path_buf());
+        }
+        if let Some(sysroot) = &self.rustc_sysroot {
+            sandbox.allow_readonly_path(sysroot.clone());
+        }
+        sandbox.cpu_seconds = 5;
+        sandbox.address_space_bytes = 1024 * 1024 * 1024;
+        sandbox.file_size_bytes = 16 * 1024 * 1024;
+        sandbox.wall_timeout = Duration::from_secs(10);
+        sandbox.max_output_bytes = 1024 * 1024;
+        let execution = run_sandboxed(&self.rustc_program, &args, &sandbox)
+            .map_err(HotSwapError::SandboxLaunch)?;
         let _ = fs::remove_file(&source_path);
         let stdout = String::from_utf8_lossy(&execution.stdout).into_owned();
         let stderr = String::from_utf8_lossy(&execution.stderr).into_owned();
         let diagnostic_stream = format!("{stdout}\n{stderr}");
+        let success = execution.status.success() && !execution.timed_out;
+        let output_truncated = execution.stdout_truncated || execution.stderr_truncated;
         let entry = CacheEntry {
-            success: execution.status.success(),
-            artifact: execution.status.success().then_some(artifact_path.clone()),
+            success,
+            artifact: success.then_some(artifact_path.clone()),
             diagnostics: parse_json_diagnostics(&diagnostic_stream),
             stdout,
             stderr,
+            timed_out: execution.timed_out,
+            output_truncated,
+            enforcement: execution.enforcement,
         };
         let result = outcome(entry.clone(), false, started.elapsed());
         self.insert_cache(key, entry)?;
@@ -235,6 +280,9 @@ fn outcome(entry: CacheEntry, cache_hit: bool, elapsed: Duration) -> CompileOutc
         diagnostics: entry.diagnostics,
         stdout: entry.stdout,
         stderr: entry.stderr,
+        timed_out: entry.timed_out,
+        output_truncated: entry.output_truncated,
+        enforcement: entry.enforcement,
     }
 }
 
