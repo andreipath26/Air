@@ -144,7 +144,19 @@ fn http(port:u16,method:&str,path:&str,body:&str,timeout:Duration)->Result<(u16,
  let i=b.windows(4).position(|w|w==b"\r\n\r\n").ok_or_else(||SlmError::Protocol("invalid HTTP response".into()))?;
  let head=std::str::from_utf8(&b[..i]).map_err(|e|SlmError::Protocol(e.to_string()))?;
  let status=head.lines().next().and_then(|l|l.split_whitespace().nth(1)).and_then(|x|x.parse().ok()).ok_or_else(||SlmError::Protocol("invalid HTTP status".into()))?;
- let body=String::from_utf8(b[i+4..].to_vec()).map_err(|e|SlmError::Protocol(e.to_string()))?;Ok((status,body))
+ let mut bytes=b[i+4..].to_vec();
+ if head.to_ascii_lowercase().contains("transfer-encoding: chunked"){bytes=decode_chunks(&bytes)?;}
+ let body=String::from_utf8(bytes).map_err(|e|SlmError::Protocol(e.to_string()))?;Ok((status,body))
+}
+fn decode_chunks(mut rest:&[u8])->Result<Vec<u8>,SlmError>{
+ let mut out=Vec::new();loop{
+  let end=rest.windows(2).position(|w|w==b"\r\n").ok_or_else(||SlmError::Protocol("invalid chunk header".into()))?;
+  let line=std::str::from_utf8(&rest[..end]).map_err(|e|SlmError::Protocol(e.to_string()))?;
+  let size=usize::from_str_radix(line.split(';').next().unwrap_or("").trim(),16).map_err(|e|SlmError::Protocol(e.to_string()))?;
+  rest=&rest[end+2..];if size==0{return Ok(out)}
+  if rest.len()<size+2||&rest[size..size+2]!=b"\r\n"{return Err(SlmError::Protocol("truncated chunk".into()))}
+  out.extend_from_slice(&rest[..size]);rest=&rest[size+2..];
+ }
 }
 fn ioerr(e:std::io::Error)->SlmError{SlmError::Io(e.to_string())}
 
