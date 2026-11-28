@@ -389,6 +389,8 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
     // glibc posix_spawn's vfork-style clone. Match the complete flags word,
     // including SIGCHLD, so this cannot be widened by extra clone capabilities.
     const POSIX_SPAWN_FLAGS: u32 = 0x0000_4111; // CLONE_VM | CLONE_VFORK | SIGCHLD
+    // glibc may set this to return the child PID without widening process semantics.
+    const POSIX_SPAWN_PARENT_TID_FLAGS: u32 = POSIX_SPAWN_FLAGS | 0x0010_0000;
     // Rust/glibc pthread flags. Reject all bits outside this mask, especially
     // namespace, parent, vfork and pidfd flags.
     const THREAD_ALLOWED_FLAGS: u32 = 0x013d_0f00;
@@ -477,13 +479,15 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
         // The posix_spawn child inherits Landlock, no_new_privs, seccomp and
         // all rlimits. Unknown and namespace/process flags are rejected.
         if allow_vfork {
-            code.push(jump_eq(libc::SYS_clone as u32, 0, 11));
+            code.push(jump_eq(libc::SYS_clone as u32, 0, 13));
         } else {
             code.push(jump_eq(libc::SYS_clone as u32, 0, 9));
         }
-        code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
         if allow_vfork {
-            code.push(jump_eq(POSIX_SPAWN_FLAGS, 8, 0));
+            code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
+            code.push(jump_eq(POSIX_SPAWN_FLAGS, 10, 0));
+            code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
+            code.push(jump_eq(POSIX_SPAWN_PARENT_TID_FLAGS, 8, 0));
         }
         code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
         code.push(ins(BPF_ALU | BPF_AND | BPF_K, 0, 0, THREAD_FLAGS));
@@ -493,7 +497,11 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
         code.push(ins(BPF_ALU | BPF_AND | BPF_K, 0, 0, !THREAD_ALLOWED_FLAGS));
         code.push(jump_eq(0, 1, 0));
         code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
-        code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ALLOW));
+        code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
+        // A matching posix-spawn word jumps to this compiler-only allow.
+        if allow_vfork {
+            code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ALLOW));
+        }
         // Default allow for syscalls not covered by the deny list or clone rule.
         code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ALLOW));
         code
@@ -842,6 +850,38 @@ mod tests {
     }
 
 
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn compiler_profile_can_spawn_cc() {
+        if !Path::new("/usr/bin/python3").exists() || !Path::new("/usr/bin/cc").exists() {
+            return;
+        }
+        let root = root();
+        let mut config = shell_config(&root);
+        config.allow_vfork_for_toolchain(true);
+        config.allow_fork_for_toolchain(true);
+        let args = [
+            OsString::from("-S"),
+            OsString::from("-c"),
+            OsString::from("import subprocess; p=subprocess.run(['/usr/bin/cc','--version'],check=True,capture_output=True,text=True); print('SANDBOX_CC_SPAWN=pass '+p.stdout.splitlines()[0])"),
+        ];
+        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
+        assert!(
+            output.status.success() && !output.timed_out,
+            "compiler-profile cc spawn failed: status={:?} stdout={} stderr={}",
+            output.status,
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr),
+        );
+        assert!(
+            String::from_utf8_lossy(&output.stdout).contains("SANDBOX_CC_SPAWN=pass"),
+            "spawn probe marker missing: {}",
+            String::from_utf8_lossy(&output.stdout),
+        );
+        let _ = std::fs::remove_dir_all(root);
+    }
+
     #[cfg(target_os = "linux")]
     #[test]
     fn strict_default_blocks_fork() {
@@ -906,6 +946,7 @@ mod tests {
             cc_probe.status,
             String::from_utf8_lossy(&cc_probe.stderr),
         );
+        println!("SANDBOX_CC_DIRECT=pass");
 
         let compile_args = [
             OsString::from("--edition=2021"),
