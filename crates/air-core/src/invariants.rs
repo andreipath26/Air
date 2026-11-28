@@ -196,7 +196,18 @@ fn walk(node: Node<'_>, source: &[u8], findings: &mut Vec<InvariantFinding>) {
             }
         }
         "binary_expression" | "compound_assignment_expr" => {
-            let operator = node.child_by_field_name("operator").map(|child| node_text(child, source)).unwrap_or("");
+            let mut operator = node.child_by_field_name("operator").map(|child| node_text(child, source)).unwrap_or("");
+            if operator.is_empty() {
+                for index in 0..node.child_count() {
+                    if let Some(child) = node.child(index) {
+                        let token = node_text(child, source).trim();
+                        if matches!(token, "+" | "-" | "*" | "/" | "%" | "<<" | ">>" | "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=") {
+                            operator = token;
+                            break;
+                        }
+                    }
+                }
+            }
             if matches!(operator.trim(), "+" | "-" | "*" | "/" | "%" | "<<" | ">>" | "+=" | "-=" | "*=" | "/=" | "%=" | "<<=" | ">>=") {
                 add_finding(findings, FindingKind::UncheckedArithmetic, node, "raw arithmetic may overflow, divide by zero, or shift out of range");
             }
