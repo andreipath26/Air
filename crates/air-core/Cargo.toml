@@ -14,3 +14,6 @@ sha2 = "0.10"
 
 flate2 = { version = "1", default-features = false, features = ["rust_backend"] }
 air-weights = { path = "../air-weights" }
+tree-sitter = "0.24"
+tree-sitter-rust = "0.23"
+tree-sitter-python = "0.23"
