@@ -10,7 +10,7 @@ use air_core::coding::{
     ReductionRule, Resolution, TypedConcept, VerificationOracle,
 };
 use air_slm::routing::{route_fuzzy, route_prompt, EscalationReason, FuzzyRoute, RouteDecision};
-use air_slm::{run_verified, DeterministicMock, GenerationOptions, ThinkingMode};
+use air_slm::{route_and_run_verified, DeterministicMock, GenerationOptions, RoutedAnswer, ThinkingMode};
 use air_core::verification::GeneratedOutputVerifier;
 use air_weights::{testing, ArchiveReader};
 use std::fs;
@@ -246,24 +246,42 @@ fn run_case(id: &str) {
     .unwrap();
     let reducer = CodingReducer::new(vec![rule]).unwrap();
 
-    if current_mode == "dual" {
+    let position = CHALLENGES.iter().position(|item| item.id == id).unwrap();
+    let (routed_prompt, thinking) = if current_mode == "dual" {
         assert_eq!(route_fuzzy(case.prompt), case.route, "fuzzy route for {id}");
-        let (triggered_prompt, thinking) = if CHALLENGES.iter().position(|item| item.id == id).unwrap() % 2 == 0 {
+        if position % 2 == 0 {
             (format!("deep {}", case.prompt), ThinkingMode::Budgeted { reasoning_tokens: 64 })
         } else {
             (format!("! {}", case.prompt), ThinkingMode::Direct)
-        };
-        match route_prompt(&triggered_prompt, 0.99, 0.5) {
-            RouteDecision::EscalateToSlm { reason: EscalationReason::ExplicitTrigger } => {}
-            other => panic!("explicit {id} prompt did not escalate: {other:?}"),
         }
-        let backend = DeterministicMock::new(case.source);
-        let verifier = ExactGeneratedOutput(case.source);
-        let options = GenerationOptions { thinking, max_new_tokens: 512 };
-        let verified = run_verified(&backend, &verifier, &triggered_prompt, &options)
-            .unwrap_or_else(|error| panic!("air-core rejected generated {id} output: {error}"));
-        assert_eq!(verified.completion.text, case.source);
-        assert_eq!(verified.completion.elapsed.as_millis(), 0);
+    } else {
+        (case.prompt.to_owned(), ThinkingMode::Direct)
+    };
+    if current_mode == "dual" {
+        assert!(matches!(
+            route_prompt(&routed_prompt, 0.99, 0.5),
+            RouteDecision::EscalateToSlm { reason: EscalationReason::ExplicitTrigger }
+        ));
+    }
+    let backend = DeterministicMock::new(case.source);
+    let verifier = ExactGeneratedOutput(case.source);
+    let options = GenerationOptions { thinking, max_new_tokens: 512 };
+    let routed = route_and_run_verified(
+        &backend,
+        &verifier,
+        &routed_prompt,
+        0.99,
+        0.5,
+        &options,
+        || Ok(case.source.to_owned()),
+    ).unwrap_or_else(|error| panic!("AIR route/verification failed for {id}: {error}"));
+    match (current_mode, routed) {
+        ("neuro", RoutedAnswer::NeuroSymbolic { output }) => assert_eq!(output, case.source),
+        ("dual", RoutedAnswer::VerifiedSlm { output, elapsed }) => {
+            assert_eq!(output, case.source);
+            assert_eq!(elapsed.as_millis(), 0);
+        }
+        (_, other) => panic!("unexpected routing result for {id}: {other:?}"),
     }
 
     match reducer.resolve(&request, &reader, Some(&ExactArtifact(case.id)), 4) {
