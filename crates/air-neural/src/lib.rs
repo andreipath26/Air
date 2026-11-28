@@ -6,8 +6,13 @@
 pub mod hdc;
 pub mod simd;
 pub mod ternary_snn;
+pub mod ambiguity;
 
 pub use hdc::{HyperVector, HYPERVECTOR_BITS, HYPERVECTOR_WORDS};
+pub use ambiguity::{
+    assess_route, has_explicit_trigger, normalized_pair_entropy, AmbiguityAssessment,
+    AmbiguityError, AmbiguityThresholds, RoutingAction,
+};
 pub use simd::{hamming_distance, hamming_distance_scalar};
 pub use ternary_snn::{PackedTernaryRouter, RouteScore, Ternary};
 pub mod bitcos;
