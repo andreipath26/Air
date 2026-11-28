@@ -286,7 +286,7 @@ fn propose_mutable_default(source: &str, function_line: usize, parameter: &str) 
     let old_len = absolute_default_end - absolute_default_start;
     changed.replace_range(absolute_default_start..absolute_default_end, "None");
     let insertion = line_full_end + ("None".len() - old_len);
-    let newline = if line.ends_with("\r") { "\r\n" } else { "\n" };
+    let newline = if source.as_bytes().get(line_end) == Some(&b'\r') { "\r\n" } else { "\n" };
     let literal = if source[line_start + signature_start + default_start..line_start + signature_start + default_end] == *"[]" {
         "[]"
     } else {
