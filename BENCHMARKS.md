@@ -1,10 +1,27 @@
 # AIR Coding Benchmarks
 
-**Status: A fresh deterministic GitHub Actions Rust gauntlet is recorded below. Historical model and frozen-dataset baselines remain unreproduced.**
+**Status: GitHub Actions verifies the current Rust workspace and deterministic pipeline smoke. Historical model results remain unverified, and the original frozen gauntlet remains unavailable.**
 
-This report separates the current CI path-correctness benchmark from historical pre-loss model results. The CI run used generated AIRW fixtures and a deterministic mock SLM; it did not run Gemma/SmolLM inference or the Dell Latitude 7490.
+This report separates current CI checks and a deterministic pipeline smoke from historical pre-loss model results. The smoke uses static snippets and generated AIRW fixtures; Mode B uses `DeterministicMock` with no model. It did not run Gemma, SmolLM, Qwen, or any model on the Dell Latitude 7490.
 
-## Fresh GitHub Actions session — 2026-11-28
+## Latest CI verification — 2026-11-28
+
+- CI workflow [run #243](https://github.com/andreipath26/Air/actions/runs/46096786108) completed successfully for head `77c185253b21d37cfadd9f70e88be9e95f5c42c5` (PR merge-ref checkout `da486ae1865e7a31223faf1cdbb518b5d4c74710`). The run summary reports **116 passed, 0 failed**; fuzzy routing passed **6/6**.
+- This validates the tested PR merge ref and its included workspace checks; it does not establish a 12-case hidden-gauntlet score or a combined `>=82/92` acceptance threshold for other branch states.
+
+## Pipeline smoke — 2026-11-28
+
+- Workflow [Rust Coding Pipeline Smoke run #3](https://github.com/andreipath26/Air/actions/runs/46096786107) completed successfully on head `77c185253b21d37cfadd9f70e88be9e95f5c42c5` (PR merge-ref checkout `da486ae1865e7a31223faf1cdbb518b5d4c74710`).
+- The 12 entries are fixed static smoke snippets. They exercise the pipeline path and Rust metadata compilation; they are not the missing original 12-case benchmark or its hidden evaluators. Mode B uses `DeterministicMock` (**no model inference**).
+
+| Mode | Smoke cases passed | Failed | Mean case time (ms) | CI command wall time (ms) | Peak process RSS (MB) |
+|---|---:|---:|---:|---:|---:|
+| A: neuro-symbolic pipeline smoke | 12/12 | 0 | 2.443 | 80 | 196.67 |
+| B: dual pipeline with `DeterministicMock` (no model) | 12/12 | 0 | 2.451 | 70 | 196.73 |
+
+These timing and RSS values come from a GitHub-hosted Actions runner. They are not Dell Latitude 7490 measurements, do not measure real inference, and provide no TTFT or tokens/second. They do not establish coding quality against Qwen, Gemma, or SmolLM.
+
+## Earlier GitHub Actions session — 2026-11-28
 
 - Workflow: [Rust Dual Gauntlet Benchmark run 13](https://github.com/andreipath26/Air/actions/runs/46096546657), successful on `feat/neuro-symbolic-dual-gauntlet` at `89102418c3ea42d8a91bb2f44426b2d9e38ed3aa`.
 - Workspace tests: **110 passed, 0 failed** across 11 libtest summaries; fuzzy routing: **6/6 passed**.
