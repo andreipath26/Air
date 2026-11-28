@@ -5,7 +5,7 @@
 //! The persistent worker is launched under prlimit, uses mmap and Q8_0 KV,
 //! and requires a caller-provided local GGUF. No model is downloaded.
 use crate::grammar::OutputGrammar;
-use crate::prompt::{StablePrompt, StablePromptBuilder, STABLE_SYSTEM_PROMPT};
+use crate::prompt::{StablePrompt, StablePromptBuilder};
 use crate::runner::{Completion, CompletionBackend, GenerationOptions, ModelFamily, ResourceLimits, ThinkingMode};
 use std::{
     fs, io::{BufReader, Read, Write}, path::Path, process::{Child, ChildStdin, ChildStdout, Command, Stdio},
