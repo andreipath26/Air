@@ -64,7 +64,8 @@ fn prlimit_command_args(executable:&Path,model:&Path,port:u16,limits:ResourceLim
         OsString::from("--no-webui"),
     ]
 }
-\n/// Owns a CPU-only llama.cpp loopback server loading a local GGUF file.
+
+/// Owns a CPU-only llama.cpp loopback server loading a local GGUF file.
 /// An RSS watchdog polls every 10ms and terminates the server when it crosses
 /// the configured cap; context and generation are also bounded per request.
 pub struct LlamaCppRunner {
