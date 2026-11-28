@@ -13,6 +13,19 @@ The scan uses the existing tree-sitter Rust grammar and is capped at 256 KiB per
 
 Raw arithmetic is blocked by default because this scanner has no type analysis or proof that a guard condition makes an operation safe. Prefer checked/saturating operations or have a human review the candidate. Findings can be conservative false positives.
 
+### Known heuristic error modes
+
+| Check | Likely false positive | Likely false negative |
+|---|---|---|
+| `unwrap` / `expect` methods | A custom type may define a method with one of these names that cannot panic. | A helper or dependency may panic internally; macro expansion is not inspected. |
+| Panic-style macros | `assert!` and related macros may be intentional in test-only code. | A panic hidden behind a helper function or an unexpanded procedural macro is not visible in the syntax tree. |
+| Raw arithmetic | String concatenation, overloaded operators, or arithmetic guarded by a proven range condition is still flagged. | Overflow implemented inside a called helper, cast, or dependency is not visible at this call site. |
+| `RefCell` borrow methods | A custom `borrow` / `borrow_mut` method may be harmless; type resolution is not performed. | Aliasing through helper calls or separate objects may cause a dynamic borrow panic without an obvious local method call. |
+| `MutexGuard` plus `.await` | The heuristic scans the whole candidate, so unrelated occurrences can be reported together. | A lock guard may be hidden behind a type alias or helper and still live across suspension. |
+| Unsafe blocks | Correctly justified unsafe code is still flagged for review. | Unsafe operations in an unsafe function or external helper may not be reported by the current block-only check. |
+
+Treat a clear report as “none of these patterns were found,” not as a safety proof. Treat each finding as a review prompt; the compiler and tests remain necessary and do not establish that these static heuristics are complete.
+
 ## Gate contract
 
 `gate_candidate` returns an opaque `PromotionProof` only when all three caller-supplied verification facts are true:
