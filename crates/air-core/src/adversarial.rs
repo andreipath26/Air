@@ -420,6 +420,226 @@ pub fn run_adversarial_critic<R: SandboxedAdversarialRunner>(
     })
 }
 
+/// Linux-backed adversarial runner. Every rustc compile and test executable
+/// is launched as a separate child under Landlock, seccomp, and rlimits.
+pub struct RootlessAdversarialRunner {
+    scratch_root: std::path::PathBuf,
+    wall_timeout: std::time::Duration,
+}
+
+impl RootlessAdversarialRunner {
+    pub fn new(scratch_root: impl Into<std::path::PathBuf>) -> Self {
+        Self {
+            scratch_root: scratch_root.into(),
+            wall_timeout: std::time::Duration::from_secs(12),
+        }
+    }
+
+    pub fn with_wall_timeout(mut self, timeout: std::time::Duration) -> Self {
+        self.wall_timeout = timeout;
+        self
+    }
+
+    fn allocate_workspace(&self) -> std::io::Result<std::path::PathBuf> {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        std::fs::create_dir_all(&self.scratch_root)?;
+        for _ in 0..32 {
+            let suffix = NEXT.fetch_add(1, Ordering::Relaxed);
+            let path = self.scratch_root.join(format!(
+                "critic-{}-{suffix}",
+                std::process::id()
+            ));
+            match std::fs::create_dir(&path) {
+                Ok(()) => return Ok(path),
+                Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+                Err(error) => return Err(error),
+            }
+        }
+        Err(std::io::Error::new(
+            std::io::ErrorKind::AlreadyExists,
+            "could not allocate a critic scratch directory",
+        ))
+    }
+
+    fn rustc_paths() -> std::io::Result<(std::path::PathBuf, std::path::PathBuf)> {
+        use std::io;
+        use std::path::{Path, PathBuf};
+        let requested = std::env::var_os("RUSTC").unwrap_or_else(|| "rustc".into());
+        let requested_path = PathBuf::from(&requested);
+        let rustc = if requested_path.components().count() > 1 || requested_path.is_absolute() {
+            requested_path
+        } else {
+            let mut found = None;
+            for directory in std::env::split_paths(&std::env::var_os("PATH").unwrap_or_default()) {
+                let candidate = directory.join(&requested_path);
+                if candidate.is_file() {
+                    found = Some(candidate);
+                    break;
+                }
+            }
+            found.ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "rustc is not on PATH"))?
+        };
+        let rustc = std::fs::canonicalize(rustc)?;
+        let output = std::process::Command::new(&rustc)
+            .args(["--print", "sysroot"])
+            .output()?;
+        if !output.status.success() {
+            return Err(io::Error::new(io::ErrorKind::Other, "rustc --print sysroot failed"));
+        }
+        let sysroot_text = String::from_utf8_lossy(&output.stdout);
+        let sysroot = Path::new(sysroot_text.trim());
+        let sysroot = std::fs::canonicalize(sysroot)?;
+        Ok((rustc, sysroot))
+    }
+
+    fn run_sandboxed_command(
+        &self,
+        workspace: &std::path::Path,
+        program: &std::path::Path,
+        args: &[std::ffi::OsString],
+        rustc: &std::path::Path,
+        sysroot: &std::path::Path,
+    ) -> std::io::Result<crate::sandbox::SandboxOutput> {
+        use crate::sandbox::{run_sandboxed, Enforcement, SandboxConfig};
+        use std::io;
+        let mut config = SandboxConfig::new(workspace);
+        config.require_landlock(true);
+        config.cpu_seconds = 8;
+        config.address_space_bytes = 1536 * 1024 * 1024;
+        config.file_size_bytes = 32 * 1024 * 1024;
+        config.wall_timeout = self.wall_timeout;
+        config.max_output_bytes = 2 * 1024 * 1024;
+        if let Some(parent) = rustc.parent() {
+            config.allow_readonly_path(parent);
+        }
+        config.allow_readonly_path(rustc);
+        config.allow_readonly_path(sysroot);
+        let output = run_sandboxed(program, args, &config)?;
+        if output.enforcement.landlock != Enforcement::Enforced
+            || output.enforcement.seccomp != Enforcement::Enforced
+            || output.enforcement.resource_limits != Enforcement::Enforced
+        {
+            return Err(io::Error::new(
+                io::ErrorKind::Unsupported,
+                "critic proof requires Landlock, seccomp, and rlimits",
+            ));
+        }
+        Ok(output)
+    }
+
+    fn compile_test_harness(
+        &self,
+        source: &str,
+        run_binary: bool,
+        expect_borrow_rejection: bool,
+    ) -> std::io::Result<bool> {
+        use crate::compiler_repair::parse_json_diagnostics;
+        use std::ffi::OsString;
+        use std::io;
+        let (rustc, sysroot) = Self::rustc_paths()?;
+        let workspace = self.allocate_workspace()?;
+        let result = (|| {
+            let source_path = workspace.join("critic.rs");
+            let executable = workspace.join("critic-tests");
+            std::fs::write(&source_path, source)?;
+            let args = vec![
+                OsString::from("--edition=2021"),
+                OsString::from("--error-format=json"),
+                OsString::from("--test"),
+                OsString::from("--crate-name=air_adversarial_critic"),
+                source_path.as_os_str().to_owned(),
+                OsString::from("-o"),
+                executable.as_os_str().to_owned(),
+            ];
+            let compile = self.run_sandboxed_command(
+                &workspace,
+                &rustc,
+                &args,
+                &rustc,
+                &sysroot,
+            )?;
+            if compile.timed_out || compile.stdout_truncated || compile.stderr_truncated {
+                return Ok(false);
+            }
+            if expect_borrow_rejection {
+                if compile.status.success() { return Ok(false); }
+                let stderr = String::from_utf8_lossy(&compile.stderr);
+                let diagnostics = parse_json_diagnostics(&stderr);
+                return Ok(diagnostics.iter().any(|diagnostic| diagnostic.code.as_deref() == Some("E0502")));
+            }
+            if !compile.status.success() || !run_binary { return Ok(false); }
+            let run = self.run_sandboxed_command(
+                &workspace,
+                &executable,
+                &[],
+                &rustc,
+                &sysroot,
+            )?;
+            Ok(run.status.success() && !run.timed_out && !run.stdout_truncated && !run.stderr_truncated)
+        })();
+        let _ = std::fs::remove_dir_all(&workspace);
+        result
+    }
+}
+
+impl sealed::Sealed for RootlessAdversarialRunner {}
+
+impl SandboxedAdversarialRunner for RootlessAdversarialRunner {
+    type Error = std::io::Error;
+
+    fn run_primary_and_adversarial(
+        &self,
+        language: &str,
+        candidate: &str,
+        primary_tests: &str,
+        probes: &[AdversarialProbe],
+    ) -> Result<CriticExecution, Self::Error> {
+        use std::io::{Error, ErrorKind};
+        if language != "rust" {
+            return Err(Error::new(ErrorKind::InvalidInput, "rootless runner currently supports Rust only"));
+        }
+        if candidate.is_empty() || !primary_tests.contains("#[test]") {
+            return Err(Error::new(ErrorKind::InvalidInput, "candidate and at least one primary #[test] are required"));
+        }
+        let primary_source = format!("{candidate}\n{primary_tests}");
+        let primary_passed = self.compile_test_harness(&primary_source, true, false)?;
+        if !primary_passed {
+            return Ok(CriticExecution {
+                sandboxed: true,
+                primary_passed: false,
+                adversarial_passed: 0,
+                adversarial_total: probes.len(),
+            });
+        }
+
+        let mut adversarial_passed = 0usize;
+        for (index, probe) in probes.iter().enumerate() {
+            let probe_source = if probe.expected == ExpectedOutcome::CompileRejected {
+                format!(
+                    "{candidate}\n#[test] fn air_generated_probe_{index}() {{ {} }}",
+                    probe.source
+                )
+            } else {
+                format!(
+                    "{candidate}\n#[test] fn air_generated_probe_{index}() {{ {} }}",
+                    probe.source
+                )
+            };
+            let expect_borrow_rejection = probe.expected == ExpectedOutcome::CompileRejected;
+            if self.compile_test_harness(&probe_source, true, expect_borrow_rejection)? {
+                adversarial_passed += 1;
+            }
+        }
+        Ok(CriticExecution {
+            sandboxed: true,
+            primary_passed: true,
+            adversarial_passed,
+            adversarial_total: probes.len(),
+        })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
