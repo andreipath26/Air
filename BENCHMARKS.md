@@ -4,6 +4,13 @@
 
 This report separates current CI checks and a deterministic pipeline smoke from historical pre-loss model results. The smoke uses static snippets and generated AIRW fixtures; Mode B uses `DeterministicMock` with no model. It did not run Gemma, SmolLM, Qwen, or any model on the Dell Latitude 7490.
 
+## Local SLM capability boundary — Qwen family
+
+The local `air-slm` adapter now identifies caller-provided local GGUFs as Gemma 4 E2B, SmolLM3 3B, or Qwen2.5-Coder 7B. For the Dell CPU-first profile, Qwen requests are clamped to a **2,048-token hard context ceiling**, with generation budget reduced to fit. This records a model-family/configuration path only: no Qwen, Gemma, or SmolLM weights were downloaded or run.
+
+- The Qwen integration's [CI workflow run #252](https://github.com/andreipath26/Air/actions/runs/46097252808) and [Rust Coding Pipeline Smoke run #7](https://github.com/andreipath26/Air/actions/runs/46097252832) both passed on PR head `28666737b13a080fcf6233e908e787914d559e5e`.
+- These checks verify the code path, context-clamp assertions, and deterministic test pipeline only. They do not validate model loading/inference, model output quality, or Dell runtime performance.
+
 ## Latest CI verification — 2026-11-28
 
 - CI workflow [run #243](https://github.com/andreipath26/Air/actions/runs/46096786108) completed successfully for head `77c185253b21d37cfadd9f70e88be9e95f5c42c5` (PR merge-ref checkout `da486ae1865e7a31223faf1cdbb518b5d4c74710`). The run summary reports **116 passed, 0 failed**; fuzzy routing passed **6/6**.
