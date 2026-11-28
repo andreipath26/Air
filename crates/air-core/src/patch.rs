@@ -106,8 +106,27 @@ fn locate_unique(source: &str, search: &str) -> Result<std::ops::Range<usize>, P
     locate_whitespace_tolerant(source, search)
 }
 
+fn canonical_whitespace(line: &str) -> String {
+    fn punctuation(ch: char) -> bool { ".,;:()[]{}<>+-*/%=&|!?".contains(ch) }
+    let mut output = String::new();
+    let mut pending_space = false;
+    for ch in line.chars() {
+        if ch.is_whitespace() {
+            pending_space = true;
+            continue;
+        }
+        if pending_space && !output.is_empty() {
+            let previous = output.chars().next_back().unwrap();
+            if !punctuation(previous) && !punctuation(ch) { output.push(' '); }
+        }
+        pending_space = false;
+        output.push(ch);
+    }
+    output
+}
+
 fn locate_whitespace_tolerant(source: &str, search: &str) -> Result<std::ops::Range<usize>, PatchError> {
-    let wanted: Vec<&str> = search.lines().map(str::trim).collect();
+    let wanted: Vec<String> = search.lines().map(canonical_whitespace).collect();
     if wanted.is_empty() || wanted.iter().all(|line| line.is_empty()) {
         return Err(PatchError::InvalidFormat("SEARCH block contains no code"));
     }
@@ -122,7 +141,7 @@ fn locate_whitespace_tolerant(source: &str, search: &str) -> Result<std::ops::Ra
     for start in 0..source_lines.len() {
         let end = start + wanted.len();
         if end > source_lines.len() { break; }
-        if (0..wanted.len()).all(|index| source_lines[start + index].2.trim() == wanted[index]) {
+        if (0..wanted.len()).all(|index| canonical_whitespace(source_lines[start + index].2) == wanted[index]) {
             if found.is_some() { return Err(PatchError::AmbiguousSearch); }
             found = Some(source_lines[start].0..source_lines[end - 1].1);
         }
