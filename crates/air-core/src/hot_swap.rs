@@ -367,14 +367,32 @@ fn select_scratch_workspace() -> Result<PathBuf, HotSwapError> {
 mod tests {
     use super::*;
 
-    fn verifier() -> WarmRustVerifier {
+    fn artifact_dir_for_test() -> PathBuf {
+        fn has_rlib(path: &Path) -> bool {
+            fs::read_dir(path).ok().into_iter().flatten().flatten()
+                .any(|entry| entry.path().extension() == Some(OsStr::new("rlib")))
+        }
         let executable = std::env::current_exe().unwrap();
-        let deps_dir = executable.parent().unwrap();
+        if let Some(path) = executable.ancestors()
+            .find(|path| path.file_name() == Some(OsStr::new("deps")) && has_rlib(path))
+        {
+            return path.to_path_buf();
+        }
+        let workspace = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap().parent().unwrap();
+        let target = std::env::var_os("CARGO_TARGET_DIR").map(PathBuf::from)
+            .unwrap_or_else(|| workspace.join("target"));
+        let target = if target.is_absolute() { target } else { workspace.join(target) };
+        let candidates = [target.join("debug/deps"), target.join("release/deps")];
+        candidates.into_iter().find(|path| has_rlib(path))
+            .expect("Cargo should have built .rlib dependencies for workspace tests")
+    }
+
+    fn verifier() -> WarmRustVerifier {
         let workspace_root = Path::new(env!("CARGO_MANIFEST_DIR"))
             .parent().unwrap().parent().unwrap();
         WarmRustVerifier::from_prebuilt_artifacts(
             workspace_root,
-            deps_dir,
+            artifact_dir_for_test(),
             DEFAULT_EDITION,
             8,
         ).expect("use Cargo's already built dependency artifacts")
