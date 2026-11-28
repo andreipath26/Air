@@ -4,6 +4,13 @@ use std::{env, fmt, io::{Read, Write}, net::{SocketAddr, TcpListener, TcpStream}
           process::{Child, Command, Stdio}, thread, time::{Duration, Instant}};
 
 const MAX_HTTP_RESPONSE_BYTES: usize = 8 * 1024 * 1024;
+const MAX_PROMPT_BYTES: usize = 32 * 1024;
+const MAX_SYSTEM_BYTES: usize = 8 * 1024;
+const MAX_CANDIDATES: usize = 16;
+const MAX_CANDIDATE_BYTES: usize = 2 * 1024;
+const MAX_REQUEST_BYTES: usize = 512 * 1024;
+const MAX_FAST_TOKENS: u32 = 512;
+const MAX_DEEP_TOKENS: u32 = 2048;
 
 fn bounded_value(value:u32,min:u32,max:u32)->u32{value.clamp(min,max)}
 fn bounded_setting(name:&str,raw:Option<&str>,default:u32,min:u32,max:u32)->Result<u32,SlmError>{
@@ -30,7 +37,7 @@ impl std::error::Error for SlmError {}
 
 #[derive(Debug,Clone,Copy,PartialEq,Eq)]
 pub enum ThinkingMode { Off{max_tokens:u32}, Bounded{max_tokens:u32} }
-impl ThinkingMode { fn limit(self)->u32 { match self {Self::Off{max_tokens}|Self::Bounded{max_tokens}=>max_tokens} } }
+impl ThinkingMode { fn limit(self)->u32 { match self {Self::Off{max_tokens}|Self::Bounded{max_tokens}=>max_tokens.clamp(1,MAX_DEEP_TOKENS)} } }
 #[derive(Debug,Clone,PartialEq,Eq)]
 pub struct SlmRequest { pub system:String, pub prompt:String, pub mode:ThinkingMode, pub template_thinking_key:Option<String> }
 #[derive(Debug,Clone,Copy,PartialEq,Eq)]
@@ -110,7 +117,8 @@ impl LlamaServerBackend {
 impl SlmBackend for LlamaServerBackend {
  fn complete(&mut self,r:&SlmRequest)->Result<String,SlmError>{
   let p=self.start()?;let mut req=r.clone();if req.template_thinking_key.is_none(){req.template_thinking_key=self.cfg.thinking_template_key.clone();}
-  let (status,body)=http(p,"POST","/v1/chat/completions",&request_json(&req),self.cfg.request_timeout)?;
+  let body=request_json(&req)?;
+  let (status,body)=http(p,"POST","/v1/chat/completions",&body,self.cfg.request_timeout)?;
   if !(200..300).contains(&status){return Err(SlmError::Http(status,body))}
   Ok(strip_thought_blocks(&extract_content(&body)?))
  }
@@ -121,15 +129,18 @@ impl Drop for LlamaServerBackend{fn drop(&mut self){let _=self.shutdown();}}
 pub struct RoleOrchestrator<B>{backend:B,fast:u32,deep:u32}
 impl<B:SlmBackend> RoleOrchestrator<B>{
  pub fn new(backend:B)->Self{Self{backend,fast:256,deep:1024}}
- pub fn with_budgets(mut self,fast:u32,deep:u32)->Self{self.fast=fast.max(1);self.deep=deep.max(1);self}
+ pub fn with_budgets(mut self,fast:u32,deep:u32)->Self{self.fast=fast.clamp(1,MAX_FAST_TOKENS);self.deep=deep.clamp(1,MAX_DEEP_TOKENS);self}
  /// Caller supplies AIR confidence and candidates; this crate does not decide AIR routing.
  pub fn route(&mut self,prompt:&str,low_confidence:bool,ambiguous:bool,candidates:&[String])->Result<Option<RoleReply>,SlmError>{
+  if prompt.len()>MAX_PROMPT_BYTES{return Err(SlmError::Config("prompt exceeds 32 KiB limit".into()))}
   let p=parse_escalation(prompt);
   let (role,system,task,mode)=if p.explicit_deep{
    (SlmRole::PatchFallback,"Propose a minimal patch or ABSTAIN. Do not claim verification.",p.text,ThinkingMode::Bounded{max_tokens:self.deep})
   }else if ambiguous{
    (SlmRole::Translator,"Translate into a concise canonical coding specification; ask or abstain if essential details are missing.",p.text,ThinkingMode::Off{max_tokens:self.fast})
   }else if low_confidence&&!candidates.is_empty(){
+   if candidates.len()>MAX_CANDIDATES{return Err(SlmError::Config("too many tie-break candidates".into()))}
+   if candidates.iter().any(|c|c.len()>MAX_CANDIDATE_BYTES){return Err(SlmError::Config("candidate exceeds 2 KiB limit".into()))}
    let options=candidates.iter().enumerate().map(|(i,c)|format!("{}. {}",i+1,c)).collect::<Vec<_>>().join("\n");
    (SlmRole::TieBreaker,"Choose only from supplied candidates or ABSTAIN.",format!("Task: {}\nCandidates:\n{}",p.text,options),ThinkingMode::Off{max_tokens:self.fast})
   }else if low_confidence {
@@ -142,9 +153,14 @@ impl<B:SlmBackend> RoleOrchestrator<B>{
  pub fn backend_mut(&mut self)->&mut B{&mut self.backend}
 }
 
-fn request_json(r:&SlmRequest)->String{
+fn request_json(r:&SlmRequest)->Result<String,SlmError>{
+ if r.system.len()>MAX_SYSTEM_BYTES{return Err(SlmError::Config("system prompt exceeds 8 KiB limit".into()))}
+ if r.prompt.len()>MAX_PROMPT_BYTES{return Err(SlmError::Config("prompt exceeds 32 KiB limit".into()))}
+ if r.template_thinking_key.as_ref().map(|k|k.len()>128).unwrap_or(false){return Err(SlmError::Config("template key exceeds 128 byte limit".into()))}
  let kw=r.template_thinking_key.as_deref().map(|k|format!(",\"chat_template_kwargs\":{{{}:{}}}",json_str(k),matches!(r.mode,ThinkingMode::Bounded{..}))).unwrap_or_default();
- format!("{{\"model\":\"local\",\"messages\":[{{\"role\":\"system\",\"content\":{}}},{{\"role\":\"user\",\"content\":{}}}],\"temperature\":0,\"max_tokens\":{}{} }}",json_str(&r.system),json_str(&r.prompt),r.mode.limit(),kw)
+ let body=format!("{{\"model\":\"local\",\"messages\":[{{\"role\":\"system\",\"content\":{}}},{{\"role\":\"user\",\"content\":{}}}],\"temperature\":0,\"max_tokens\":{}{} }}",json_str(&r.system),json_str(&r.prompt),r.mode.limit(),kw);
+ if body.len()>MAX_REQUEST_BYTES{return Err(SlmError::Config("serialized request exceeds 512 KiB limit".into()))}
+ Ok(body)
 }
 fn json_str(s:&str)->String{let mut o=String::from("\"");for c in s.chars(){match c{'"'=>o.push_str("\\\""),'\\'=>o.push_str("\\\\"),'\n'=>o.push_str("\\n"),'\r'=>o.push_str("\\r"),'\t'=>o.push_str("\\t"),c if c<' '=>o.push_str(&format!("\\u{:04x}",c as u32)),c=>o.push(c)}}o.push('"');o}
 fn extract_content(s:&str)->Result<String,SlmError>{
@@ -204,8 +220,9 @@ fn decode_chunks(mut rest:&[u8])->Result<Vec<u8>,SlmError>{
   let line=std::str::from_utf8(&rest[..end]).map_err(|e|SlmError::Protocol(e.to_string()))?;
   let size=usize::from_str_radix(line.split(';').next().unwrap_or("").trim(),16).map_err(|e|SlmError::Protocol(e.to_string()))?;
   rest=&rest[end+2..];if size==0{return Ok(out)}
-  if rest.len()<size+2||&rest[size..size+2]!=b"\r\n"{return Err(SlmError::Protocol("truncated chunk".into()))}
-  out.extend_from_slice(&rest[..size]);rest=&rest[size+2..];
+  let required=size.checked_add(2).ok_or_else(||SlmError::Protocol("chunk size overflow".into()))?;
+  if rest.len()<required||&rest[size..required]!=b"\r\n"{return Err(SlmError::Protocol("truncated chunk".into()))}
+  out.extend_from_slice(&rest[..size]);rest=&rest[required..];
  }
 }
 fn ioerr(e:std::io::Error)->SlmError{SlmError::Io(e.to_string())}
@@ -258,6 +275,23 @@ fn ioerr(e:std::io::Error)->SlmError{SlmError::Io(e.to_string())}
   assert_eq!(bounded_setting("threads",Some("100"),4,1,8).unwrap(),8);
   assert_eq!(bounded_setting("context",None,4096,256,8192).unwrap(),4096);
   assert!(bounded_setting("context",Some("not-a-number"),4096,256,8192).is_err());
+  let mut mock=Mock::default();let mut roles=RoleOrchestrator::new(&mut mock).with_budgets(u32::MAX,u32::MAX);
+  assert_eq!(roles.fast,MAX_FAST_TOKENS);assert_eq!(roles.deep,MAX_DEEP_TOKENS);
+ }
+ #[test]fn prompt_and_candidate_sizes_are_bounded(){
+  let mut mock=Mock::default();let mut roles=RoleOrchestrator::new(&mut mock);
+  assert!(roles.route(&"x".repeat(MAX_PROMPT_BYTES+1),false,true,&[]).is_err());
+  let candidates=vec!["ok".to_owned();MAX_CANDIDATES+1];
+  assert!(roles.route("task",true,false,&candidates).is_err());
+  let too_large=vec!["x".repeat(MAX_CANDIDATE_BYTES+1)];
+  assert!(roles.route("task",true,false,&too_large).is_err());
+  assert!(request_json(&SlmRequest{system:"x".repeat(MAX_SYSTEM_BYTES+1),prompt:"p".into(),mode:ThinkingMode::Off{max_tokens:10},template_thinking_key:None}).is_err());
+ }
+ #[test]fn malformed_chunk_sizes_fail_without_overflow(){
+  assert_eq!(decode_chunks(b"3\\r\\nabc\\r\\n0\\r\\n\\r\\n").unwrap(),b"abc");
+  assert!(decode_chunks(b"Z\\r\\n").is_err());
+  let huge=format!("{:x}\\r\\n",usize::MAX);
+  assert!(decode_chunks(huge.as_bytes()).is_err());
  }
  #[test]fn extracts_chat_content_and_unicode_surrogates(){
   assert_eq!(extract_content(r#"{"choices":[{"message":{"content":"caf\u00e9 \uD83D\uDE00"}}]}"#).unwrap(),"café 😀");
