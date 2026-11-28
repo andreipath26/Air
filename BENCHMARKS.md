@@ -1,19 +1,34 @@
 # AIR Coding Benchmarks
 
-**Status: blocked — historical benchmark assets are not recoverable from the checked repository branches.**
+**Status: A fresh deterministic GitHub Actions Rust gauntlet is recorded below. Historical model and frozen-dataset baselines remain unreproduced.**
 
-This report is a GitHub-API-only audit of `andreipath26/Air` as of 2026-11-28. No benchmark was run in this task. No local shell, `git`, compiler, or model process was used.
+This report separates the current CI path-correctness benchmark from historical pre-loss model results. The CI run used generated AIRW fixtures and a deterministic mock SLM; it did not run Gemma/SmolLM inference or the Dell Latitude 7490.
 
-## Asset audit
+## Fresh GitHub Actions session — 2026-11-28
 
-Checked `main` and the coordinator branch `feat/neuro-symbolic-dual-gauntlet`, searched the repository for the historical archive and gauntlet paths, and attempted direct reads of the expected files. The following are absent from both inspected branches:
+- Workflow: [Rust Dual Gauntlet Benchmark run 8](https://github.com/andreipath26/Air/actions/runs/46095894059), successful on `feat/neuro-symbolic-dual-gauntlet` at `9a5cfac634e79b0e3e35d7e698e73c7e58dd76fa`.
+- Workspace tests: **109 passed, 0 failed** across 11 libtest summaries; fuzzy routing: **6/6 passed**.
+- The same 12 Rust challenges passed through AIR core verification and `rustc --emit=metadata` in both modes. Cases: ownership, borrowing, lifetime, trait, generic, display, async, concurrency, result, option, macro, iterator.
+- Mode B uses explicit `deep`/`!` triggers, `DeterministicMock`, and `GeneratedOutputVerifier`; it does not measure real model inference.
+- [Actions artifact rust-dual-gauntlet-46095894059](https://api.github.com/repos/andreipath26/Air/actions/artifacts/15243516969) contains raw logs, per-case tables, resource files, and the job summary. The job log was fetched from GitHub Actions API job `140827025177`.
 
-- `air-weights` crate and `weights/core.airw`
-- `air-neural` and `air-slm` crates
+| Mode | Cases passed | Cases failed | Mean case latency (ms) | Wall latency (ms) | Peak Rust test-process RSS (MB) | Peak cargo-invocation RSS (MB) |
+|---|---:|---:|---:|---:|---:|---:|
+| A: neuro-symbolic only | 12/12 | 0 | 2.361 | 70.0 | 4.00 | 196.77 |
+| B: dual + mock SLM escalation | 12/12 | 0 | 2.373 | 80.0 | 4.00 | 196.72 |
+
+RSS boundaries: per-case values read `VmHWM` for the Rust test process and round up to MB. Cargo-invocation values are `/usr/bin/time` maximum RSS (`%M`) converted from KiB to MiB. These are GitHub-hosted runner measurements and do not establish Tier 0 hardware performance or native-model memory use.
+
+## Pre-loss asset audit snapshot
+
+The following inventory records the earlier pre-loss audit, before the current `air-slm` crate and gauntlet implementation were added. It describes missing historical benchmark inputs, not the current workspace state. Checked `main` and `feat/neuro-symbolic-dual-gauntlet` at that earlier point; the original frozen archive and evaluator assets were not present:
+
+- `weights/core.airw` and the original frozen benchmark archive
+- `air-neural` and `air-slm` implementations (now added separately; they do not recreate the old frozen benchmark inputs)
 - `benchmarks/g01-code-gauntlet/` case packages and runner
 - the reported 52 frozen input files, 12 hidden evaluator files, and per-arm raw benchmark outputs
 
-The workspace manifest lists only `crates/air-core`, `crates/air-cli`, and `crates/air-bench`. Searches for the reported `.airw` and gauntlet names returned no indexed files; direct file reads returned 404. The historical feature branch names described in the conversation are not currently present in the audited branch list. Other workstream branches may be created during this task, but they do not restore the missing historical assets unless those exact files appear there.
+At that time the workspace manifest listed only `crates/air-core`, `crates/air-cli`, and `crates/air-bench`. Searches for the historical `.airw` and gauntlet paths returned no indexed files; direct reads returned 404. The current runtime-generated fixture suite is new work and does not restore those original artifacts.
 
 Because the input packages, hidden graders, executable runner, archive, and Gemma GGUF are missing, this task cannot truthfully report fresh Mode A/Mode B pass rates, TTFT, tokens/second, peak RSS, or model wake counts. Reconstructing new fixtures would create a new benchmark, not recover or rerun the frozen benchmark, so none were fabricated.
 
@@ -36,12 +51,10 @@ Reported integrity identifiers (not re-verified because the corresponding files 
 - Hidden evaluator manifest: `a574c94eaa94023a0e6dcffc31a8c45a10c82c80dc6345fd41240d99e79c7128`
 - `weights/core.airw` v2: `09697b685d1bcb61c8d64d6419bd02a4d5b4679dca19b4dc85d51c16294f377b`
 
-## Blockers to a valid dual-mode rerun
+## Remaining work for reproducing historical model benchmarks
 
-1. Restore the exact frozen benchmark source and hidden evaluator files, including their original manifest files.
-2. Restore the matching `air-weights`, `air-neural`, and coding-adapter implementation plus the exact `.airw` archive.
-3. Restore or implement the runner that records task outcomes, TTFT, generation throughput, process-tree RSS, cold/warm timings, and SLM invocation counts.
-4. Provide a pinned, locally available Gemma 4 E2B GGUF and llama.cpp runtime for Mode B. No API inference is permitted.
-5. Execute both modes on the Latitude 7490. Keep the existing results labeled historical and do not replace them with reconstructed values.
+1. Restore the exact frozen benchmark source, hidden evaluator files, and original manifests if the goal is to compare directly with the pre-loss reports.
+2. Provide pinned Gemma 4 E2B and/or SmolLM3 3B GGUF files plus the llama.cpp runtime for native Mode B. The CI mock intentionally downloads no model.
+3. Run the real-model paths on the Latitude 7490 and capture task outcomes, TTFT, generation throughput, process-tree RSS, cold/warm timings, and SLM invocation counts.
 
-Until these inputs exist on an accessible branch, there is no defensible Mode A/Mode B comparison to publish.
+The new CI comparison above is valid for deterministic routing, verification, compilation, and fixture-path behavior. It is not comparable to the historical real-model runs.
