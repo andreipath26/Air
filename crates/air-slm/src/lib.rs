@@ -1,6 +1,7 @@
 //! Resource-bounded local SLM inference and escalation for AIR.
 pub mod grammar;
 pub mod runner;
+pub mod patch_protocol;
 pub mod repair_adapter;
 pub mod routing;
 pub mod prompt;

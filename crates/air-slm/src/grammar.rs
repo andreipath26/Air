@@ -9,6 +9,7 @@ pub enum OutputGrammar {
     Rust,
     Python,
     UnifiedDiff,
+    SearchReplace,
 }
 
 impl OutputGrammar {
@@ -18,6 +19,7 @@ impl OutputGrammar {
             Self::Rust => RUST_GBNF,
             Self::Python => PYTHON_GBNF,
             Self::UnifiedDiff => UNIFIED_DIFF_GBNF,
+            Self::SearchReplace => crate::patch_protocol::SEARCH_REPLACE_GBNF,
         }
     }
 
@@ -53,6 +55,7 @@ impl OutputGrammar {
             Self::UnifiedDiff => {
                 first.starts_with("--- ") || first.starts_with("diff --git ")
             }
+            Self::SearchReplace => crate::patch_protocol::filter_search_replace(output).is_ok(),
         };
         if !valid {
             return Err(format!("output does not begin with the selected {:?} grammar", self));
@@ -119,13 +122,15 @@ mod tests {
 
     #[test]
     fn all_grammars_have_root_rules_and_structured_start() {
-        for grammar in [OutputGrammar::Rust, OutputGrammar::Python, OutputGrammar::UnifiedDiff] {
+        for grammar in [OutputGrammar::Rust, OutputGrammar::Python, OutputGrammar::UnifiedDiff, OutputGrammar::SearchReplace] {
             assert!(grammar.gbnf().starts_with("root ::= "));
             assert!(grammar.gbnf().contains("\n"));
         }
         assert!(OutputGrammar::Rust.filter_output("pub fn answer() -> u32 { 42 }").is_ok());
         assert!(OutputGrammar::Python.filter_output("def answer():\n    return 42").is_ok());
         assert!(OutputGrammar::UnifiedDiff.filter_output("--- a/src.rs\n+++ b/src.rs\n@@ -1 +1 @@\n-old\n+new").is_ok());
+        assert!(OutputGrammar::SearchReplace.gbnf().contains("<<<<<<< SEARCH"));
+        assert!(OutputGrammar::SearchReplace.filter_output("<<<<<<< SEARCH\nx\n=======\ny\n>>>>>>> REPLACE").is_ok());
     }
 
     #[test]
@@ -135,5 +140,6 @@ mod tests {
         assert!(OutputGrammar::Python.filter_output("Here you go:\ndef f(): pass").is_err());
         assert!(OutputGrammar::UnifiedDiff.filter_output("This is the patch:\n--- a\n+++ b").is_err());
         assert!(OutputGrammar::UnifiedDiff.filter_output("--- a\n@@ -1 +1 @@\n+x").is_err());
+        assert!(OutputGrammar::SearchReplace.filter_output("Here is the patch").is_err());
     }
 }
