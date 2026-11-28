@@ -850,6 +850,42 @@ mod tests {
 
 
 
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn compiler_filter_allows_only_exact_spawn_clone_flags() {
+        if !Path::new("/usr/bin/python3").exists() {
+            return;
+        }
+        let root = root();
+        let mut config = shell_config(&root);
+        config.allow_vfork_for_toolchain(true);
+        let spawn_flags = 0x0000_4111u32; // CLONE_VM | CLONE_VFORK | SIGCHLD
+        let parent_tid_flags = spawn_flags | 0x0010_0000u32; // + CLONE_PARENT_SETTID
+        let namespace_flags = spawn_flags | 0x0002_0000u32; // + CLONE_NEWNS
+        let script = format!(
+            "import ctypes, errno; libc=ctypes.CDLL(None, use_errno=True); clone={}; cases=[({}, errno.EINVAL), ({}, None), ({}, errno.EPERM)]; exec('for flags, expected in cases:\\n ctypes.set_errno(0); result=libc.syscall(clone, flags, 0, 0, 0, 0); actual=ctypes.get_errno(); assert result == -1; assert actual != errno.EPERM if expected is None else actual == expected'); print('SANDBOX_CLONE_FLAGS=pass')",
+            libc::SYS_clone,
+            spawn_flags,
+            parent_tid_flags,
+            namespace_flags,
+        );
+        let args = [
+            OsString::from("-S"),
+            OsString::from("-c"),
+            OsString::from(script),
+        ];
+        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
+        assert!(
+            output.status.success(),
+            "compiler clone policy mismatch: stdout={} stderr={}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr),
+        );
+        assert!(String::from_utf8_lossy(&output.stdout).contains("SANDBOX_CLONE_FLAGS=pass"));
+        let _ = std::fs::remove_dir_all(root);
+    }
+
     #[cfg(target_os = "linux")]
     #[test]
     fn compiler_profile_can_spawn_cc() {
