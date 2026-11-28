@@ -48,6 +48,11 @@ pub struct SandboxConfig {
     pub file_size_bytes: u64,
     pub wall_timeout: Duration,
     pub max_output_bytes: usize,
+    /// Allow the vfork syscall only for trusted compiler/linker invocations.
+    /// Generated code must run with the default strict policy.
+    pub allow_vfork_for_toolchain: bool,
+    /// Permit fork only for trusted compiler/linker invocations.
+    pub allow_fork_for_toolchain: bool,
 }
 
 impl SandboxConfig {
@@ -66,11 +71,21 @@ impl SandboxConfig {
             file_size_bytes: 16 * 1024 * 1024,
             wall_timeout: Duration::from_secs(10),
             max_output_bytes: 1024 * 1024,
+            allow_vfork_for_toolchain: false,
+            allow_fork_for_toolchain: false,
         }
     }
 
     pub fn allow_readonly_path(&mut self, path: impl Into<PathBuf>) {
         self.readonly_paths.push(path.into());
+    }
+
+    pub fn allow_vfork_for_toolchain(&mut self, allowed: bool) {
+        self.allow_vfork_for_toolchain = allowed;
+    }
+
+    pub fn allow_fork_for_toolchain(&mut self, allowed: bool) {
+        self.allow_fork_for_toolchain = allowed;
     }
 
     pub fn require_landlock(&mut self, required: bool) {
@@ -221,7 +236,10 @@ fn prepare_security(config: &SandboxConfig) -> io::Result<(PreparedSecurity, Enf
     if abi.is_none() && config.landlock_mode == LandlockMode::Required {
         return Err(io::Error::new(io::ErrorKind::Unsupported, "Landlock is unavailable on this kernel"));
     }
-    let seccomp = build_seccomp_filter();
+    let seccomp = build_seccomp_filter(
+        config.allow_vfork_for_toolchain,
+        config.allow_fork_for_toolchain,
+    );
     let report = EnforcementReport {
         landlock: if abi.is_some() { Enforcement::Enforced } else { Enforcement::Unavailable },
         landlock_abi: abi,
@@ -349,7 +367,7 @@ unsafe fn apply_landlock(security: &PreparedSecurity) -> io::Result<()> {
 }
 
 #[cfg(target_os = "linux")]
-fn build_seccomp_filter() -> Vec<libc::sock_filter> {
+fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_filter> {
     const BPF_LD: u16 = 0x00;
     const BPF_W: u16 = 0x00;
     const BPF_ABS: u16 = 0x20;
@@ -368,6 +386,16 @@ fn build_seccomp_filter() -> Vec<libc::sock_filter> {
     const OFF_NR: u32 = 0;
     const OFF_ARG0: u32 = 16;
     const THREAD_FLAGS: u32 = 0x0001_0900; // CLONE_VM | CLONE_SIGHAND | CLONE_THREAD
+    // glibc posix_spawn's vfork-style clone. Match the complete flags word,
+    // including SIGCHLD, so this cannot be widened by extra clone capabilities.
+    const POSIX_SPAWN_FLAGS: u32 = 0x0000_4111; // CLONE_VM | CLONE_VFORK | SIGCHLD
+    const CLONE_FORK_FLAGS: u32 = 0x0000_0011; // SIGCHLD, allowed only in trusted compiler mode
+    const CLONE_FORK_THREAD_FLAGS: u32 = 0x0120_0011; // SIGCHLD | CHILD_SETTID | CHILD_CLEARTID
+    // glibc may set this to return the child PID without widening process semantics.
+    const POSIX_SPAWN_PARENT_TID_FLAGS: u32 = POSIX_SPAWN_FLAGS | 0x0010_0000;
+    // Rust/glibc pthread flags. Reject all bits outside this mask, especially
+    // namespace, parent, vfork and pidfd flags.
+    const THREAD_ALLOWED_FLAGS: u32 = 0x013d_0f00;
 
     fn ins(code: u16, jt: u8, jf: u8, k: u32) -> libc::sock_filter {
         libc::sock_filter { code, jt, jf, k }
@@ -391,6 +419,20 @@ fn build_seccomp_filter() -> Vec<libc::sock_filter> {
             ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_KILL_PROCESS),
             ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_NR),
         ];
+        // Report clone3 as unavailable so libc can fall back to clone(2), where
+        // the exact posix_spawn flag word is checked below.
+        code.push(jump_eq(libc::SYS_clone3 as u32, 0, 1));
+        code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::ENOSYS as u32));
+        // fork/vfork are denied for untrusted programs. Trusted rustc/linker
+        // mode may use them for process launching; descendants inherit this filter.
+        if !allow_fork {
+            code.push(jump_eq(libc::SYS_fork as u32, 0, 1));
+            code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
+        }
+        if !allow_vfork {
+            code.push(jump_eq(libc::SYS_vfork as u32, 0, 1));
+            code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
+        }
         let denied: &[libc::c_long] = &[
             libc::SYS_socket,
             libc::SYS_socketpair,
@@ -428,28 +470,63 @@ fn build_seccomp_filter() -> Vec<libc::sock_filter> {
             libc::SYS_reboot,
             libc::SYS_bpf,
             libc::SYS_perf_event_open,
-            libc::SYS_clone3,
-            libc::SYS_fork,
-            libc::SYS_vfork,
         ];
         for syscall_nr in denied {
             code.push(jump_eq(*syscall_nr as u32, 0, 1));
             code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
         }
-        // Permit clone only for threads. The child cannot create a new process
-        // tree; normal Rust thread pools continue to work.
-        code.push(jump_eq(libc::SYS_clone as u32, 0, 4));
+        // Permit only the exact vfork-style clone used by posix_spawn, plus
+        // supported thread-only clones. fork and clone3 remain denied; raw
+        // SYS_vfork is denied by default and allowed only in compiler mode.
+        // The posix_spawn child inherits Landlock, no_new_privs, seccomp and
+        // all rlimits. Unknown and namespace/process flags are rejected.
+        let clone_deny = SECCOMP_RET_ERRNO
+            | if allow_fork { libc::E2BIG as u32 } else { libc::EPERM as u32 };
+        // Use calculated branch offsets for compiler-only spawn words;
+        // this keeps the BPF jumps correct as the strict thread filter evolves.
+        let clone_jump = code.len();
+        code.push(jump_eq(libc::SYS_clone as u32, 0, 0));
+        let mut spawn_jumps = Vec::new();
+        if allow_vfork {
+            code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
+            spawn_jumps.push(code.len());
+            code.push(jump_eq(POSIX_SPAWN_FLAGS, 0, 0));
+            code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
+            spawn_jumps.push(code.len());
+            code.push(jump_eq(POSIX_SPAWN_PARENT_TID_FLAGS, 0, 0));
+        }
+        if allow_fork {
+            code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
+            spawn_jumps.push(code.len());
+            code.push(jump_eq(CLONE_FORK_FLAGS, 0, 0));
+            code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
+            spawn_jumps.push(code.len());
+            code.push(jump_eq(CLONE_FORK_THREAD_FLAGS, 0, 0));
+        }
         code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
         code.push(ins(BPF_ALU | BPF_AND | BPF_K, 0, 0, THREAD_FLAGS));
         code.push(jump_eq(THREAD_FLAGS, 1, 0));
-        code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
+        code.push(ins(BPF_RET | BPF_K, 0, 0, clone_deny));
+        code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
+        code.push(ins(BPF_ALU | BPF_AND | BPF_K, 0, 0, !THREAD_ALLOWED_FLAGS));
+        code.push(jump_eq(0, 1, 0));
+        code.push(ins(BPF_RET | BPF_K, 0, 0, clone_deny));
+        // Exact posix-spawn words and supported thread flags reach this allow.
+        let clone_allow = code.len();
         code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ALLOW));
+        // Default allow for syscalls not covered by the deny list or clone rule.
+        let default_allow = code.len();
+        code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ALLOW));
+        code[clone_jump].jf = (default_allow - clone_jump - 1) as u8;
+        for jump in spawn_jumps {
+            code[jump].jt = (clone_allow - jump - 1) as u8;
+        }
         code
     }
 }
 
 #[cfg(not(target_os = "linux"))]
-fn build_seccomp_filter() -> Vec<libc::sock_filter> {
+fn build_seccomp_filter(_allow_vfork: bool, _allow_fork: bool) -> Vec<libc::sock_filter> {
     Vec::new()
 }
 
@@ -535,6 +612,9 @@ pub fn run_sandboxed(
     command
         .args(args)
         .current_dir(&config.scratch_dir)
+        // rustc, its linker, and many language runtimes use TMPDIR for transient files.
+        // Keep those writes inside the Landlock-authorized scratch tree.
+        .env("TMPDIR", &config.scratch_dir)
         .stdin(Stdio::null())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped());
@@ -752,6 +832,283 @@ mod tests {
         let _ = std::fs::remove_dir_all(root);
     }
 
+
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn seccomp_rejects_extra_clone_process_flags() {
+        if !Path::new("/usr/bin/python3").exists() {
+            return;
+        }
+        let root = root();
+        let config = shell_config(&root);
+        let flags = 0x0001_0900u32 | 0x0000_1000u32; // pthread flags + CLONE_PIDFD
+        let spawn_flags = 0x0000_4111u32; // CLONE_VM | CLONE_VFORK | SIGCHLD
+        let script = format!(
+            "import ctypes, errno; libc=ctypes.CDLL(None, use_errno=True); clone={}; flags=[{}, {}]; results=[]; exec('for f in flags:\\n ctypes.set_errno(0); r=libc.syscall(clone, f, 0, 0, 0, 0); e=ctypes.get_errno(); results.append(e); assert r == -1 and e == errno.EPERM'); print(*results)",
+            libc::SYS_clone,
+            flags,
+            spawn_flags,
+        );
+        let args = [
+            OsString::from("-S"),
+            OsString::from("-c"),
+            OsString::from(script),
+        ];
+        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
+        assert!(
+            output.status.success(),
+            "seccomp did not reject CLONE_PIDFD: stdout={} stderr={}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr),
+        );
+        assert!(String::from_utf8_lossy(&output.stdout).trim().ends_with(&libc::EPERM.to_string()));
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+
+
+
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn compiler_profile_rejects_unapproved_clone_flags() {
+        if !Path::new("/usr/bin/python3").exists() {
+            return;
+        }
+        let root = root();
+        let mut config = shell_config(&root);
+        config.allow_vfork_for_toolchain(true);
+        config.allow_fork_for_toolchain(true);
+        let bad_flags = 0x0000_0011u32 | 0x0000_1000u32; // SIGCHLD | CLONE_PIDFD
+        let script = format!(
+            "import ctypes, errno; libc=ctypes.CDLL(None, use_errno=True); r=libc.syscall({}, {}, 0, 0, 0, 0); e=ctypes.get_errno(); print(e); assert r == -1 and e == errno.E2BIG",
+            libc::SYS_clone,
+            bad_flags,
+        );
+        let args = [OsString::from("-S"), OsString::from("-c"), OsString::from(script)];
+        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
+        assert!(output.status.success(), "bad clone flags were not denied: {}", String::from_utf8_lossy(&output.stderr));
+        assert!(
+            String::from_utf8_lossy(&output.stdout).trim().ends_with(&libc::E2BIG.to_string()),
+            "compiler clone errno mismatch: stdout={} stderr={}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr),
+        );
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn compiler_profile_allows_exact_sigchld_clone_and_waits_for_child() {
+        if !Path::new("/usr/bin/python3").exists() {
+            return;
+        }
+        let root = root();
+        let mut config = shell_config(&root);
+        config.allow_fork_for_toolchain(true);
+        let script = format!(
+            "import ctypes, os; libc=ctypes.CDLL(None); pid=libc.syscall({}, 0x11, 0, 0, 0, 0); assert pid >= 0, 'clone(SIGCHLD) failed'; os._exit(0) if pid == 0 else None; waited, status=os.waitpid(pid, 0); assert waited == pid and status == 0; print('SANDBOX_SIGCHLD_CLONE=pass')",
+            libc::SYS_clone,
+        );
+        let args = [OsString::from("-S"), OsString::from("-c"), OsString::from(script)];
+        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
+        assert!(
+            output.status.success() && String::from_utf8_lossy(&output.stdout).contains("SANDBOX_SIGCHLD_CLONE=pass"),
+            "compiler profile failed clone(SIGCHLD): status={:?} stdout={} stderr={}",
+            output.status,
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr),
+        );
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn compiler_profile_can_spawn_cc_with_rust_std() {
+        let root = root();
+        let mut config = shell_config(&root);
+        config.allow_vfork_for_toolchain(true);
+        config.allow_fork_for_toolchain(true);
+        std::fs::create_dir_all(&config.scratch_dir).unwrap();
+
+        // A plain main binary avoids the test harness writing to sandbox pipes.
+        // This probe is compiled during test setup, then only execution/spawn is
+        // subject to the compiler-profile sandbox.
+        let source = config.scratch_dir.join("rust-command-spawn.rs");
+        let binary = config.scratch_dir.join("rust-command-spawn");
+        std::fs::write(
+            &source,
+            r#"use std::process::{Command, Stdio};
+fn main() {
+    let code = match Command::new("cc")
+        .arg("--version")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status() {
+            Ok(status) if status.success() => 0,
+            Ok(status) => 40 + status.code().unwrap_or(1),
+            Err(error) => 100 + error.raw_os_error().unwrap_or(1),
+        };
+    std::process::exit(code);
+}"#,
+        ).unwrap();
+        let rustc = std::env::var_os("RUSTC").unwrap_or_else(|| OsString::from("rustc"));
+        let compiled = Command::new(rustc)
+            .arg("--edition=2021")
+            .arg(&source)
+            .arg("-o")
+            .arg(&binary)
+            .status()
+            .expect("test setup could not launch rustc");
+        assert!(compiled.success(), "plain Rust spawn probe did not compile");
+
+        let output = run_sandboxed(&binary, &[], &config).unwrap();
+        assert!(
+            output.status.success(),
+            "Rust std cc spawn failed: exit_code={:?} (100 + raw errno on spawn failure)",
+            output.status.code(),
+        );
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn compiler_profile_can_spawn_cc() {
+        if !Path::new("/usr/bin/python3").exists() {
+            return;
+        }
+        let root = root();
+        let mut config = shell_config(&root);
+        config.allow_vfork_for_toolchain(true);
+        config.allow_fork_for_toolchain(true);
+        let args = [
+            OsString::from("-S"),
+            OsString::from("-c"),
+            OsString::from("import subprocess; p=subprocess.run(['cc','--version'],check=True,capture_output=True,text=True); print('SANDBOX_CC_SPAWN=pass '+p.stdout.splitlines()[0])"),
+        ];
+        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
+        assert!(
+            output.status.success() && !output.timed_out,
+            "compiler-profile cc spawn failed: status={:?} stdout={} stderr={}",
+            output.status,
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr),
+        );
+        assert!(
+            String::from_utf8_lossy(&output.stdout).contains("SANDBOX_CC_SPAWN=pass"),
+            "spawn probe marker missing: {}",
+            String::from_utf8_lossy(&output.stdout),
+        );
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn strict_default_blocks_fork() {
+        if !Path::new("/usr/bin/python3").exists() {
+            return;
+        }
+        let root = root();
+        let config = shell_config(&root);
+        let args = [
+            OsString::from("-S"),
+            OsString::from("-c"),
+            OsString::from("import os; os.fork()"),
+        ];
+        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
+        assert!(!output.status.success(), "strict sandbox allowed fork");
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn rustc_test_binary_compiles_and_runs_inside_scratch() {
+        use std::path::PathBuf;
+
+        let root = root();
+        let scratch = root.join("scratch");
+        let source = scratch.join("tiny.rs");
+        let binary = scratch.join("tiny-tests");
+        let mut config = SandboxConfig::new(&scratch);
+        config.cpu_seconds = 90;
+        config.address_space_bytes = 4 * 1024 * 1024 * 1024;
+        config.file_size_bytes = 128 * 1024 * 1024;
+        config.wall_timeout = Duration::from_secs(120);
+        config.allow_vfork_for_toolchain(true);
+        config.allow_fork_for_toolchain(true);
+
+        if let Some(home) = std::env::var_os("HOME") {
+            let home = PathBuf::from(home);
+            for tool_dir in [home.join(".rustup"), home.join(".cargo")] {
+                config.allow_readonly_path(tool_dir);
+            }
+        }
+        if let Some(rustup_home) = std::env::var_os("RUSTUP_HOME") {
+            config.allow_readonly_path(PathBuf::from(rustup_home));
+        }
+        if let Some(cargo_home) = std::env::var_os("CARGO_HOME") {
+            config.allow_readonly_path(PathBuf::from(cargo_home));
+        }
+        let rustc = std::env::var_os("RUSTC").unwrap_or_else(|| OsString::from("rustc"));
+        std::fs::create_dir_all(&scratch).unwrap();
+        std::fs::write(
+            &source,
+            "#[test] fn sandboxed_test_runs() { assert_eq!(2 + 2, 4); } #[test] fn sandboxed_thread_runs() { assert_eq!(std::thread::spawn(|| 7).join().unwrap(), 7); }",
+        )
+        .unwrap();
+
+        let cc_args = [OsString::from("--version")];
+        let cc_probe = run_sandboxed("cc", &cc_args, &config).unwrap();
+        assert!(
+            cc_probe.status.success() && !cc_probe.timed_out,
+            "sandboxed cc --version probe failed: status={:?} stderr={}",
+            cc_probe.status,
+            String::from_utf8_lossy(&cc_probe.stderr),
+        );
+        println!("SANDBOX_CC_DIRECT=pass");
+
+        let compile_args = [
+            OsString::from("--edition=2021"),
+            OsString::from("--test"),
+            OsString::from("--crate-name"),
+            OsString::from("air_sandbox_linker_smoke"),
+            source.as_os_str().to_owned(),
+            OsString::from("-o"),
+            binary.as_os_str().to_owned(),
+        ];
+        let compiled = run_sandboxed(&rustc, &compile_args, &config).unwrap();
+        assert!(
+            compiled.status.success() && !compiled.timed_out,
+            "sandboxed rustc/linker failed: status={:?} timed_out={} stdout={} stderr={}",
+            compiled.status,
+            compiled.timed_out,
+            String::from_utf8_lossy(&compiled.stdout),
+            String::from_utf8_lossy(&compiled.stderr),
+        );
+        assert!(binary.exists(), "rustc output was not created in scratch");
+
+        let mut runtime_config = config.clone();
+        runtime_config.allow_vfork_for_toolchain(false);
+        runtime_config.allow_fork_for_toolchain(false);
+        let ran = run_sandboxed(&binary, &[], &runtime_config).unwrap();
+        assert!(
+            ran.status.success() && !ran.timed_out,
+            "sandboxed rust test binary failed: status={:?} timed_out={} stdout={} stderr={}",
+            ran.status,
+            ran.timed_out,
+            String::from_utf8_lossy(&ran.stdout),
+            String::from_utf8_lossy(&ran.stderr),
+        );
+        assert!(
+            String::from_utf8_lossy(&ran.stdout).contains("2 passed"),
+            "expected two passing tests, got: {}",
+            String::from_utf8_lossy(&ran.stdout),
+        );
+
+        let _ = std::fs::remove_dir_all(root);
+    }
     #[test]
     fn seccomp_blocks_network_socket_creation() {
         if !Path::new("/usr/bin/python3").exists() {
