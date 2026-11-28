@@ -67,3 +67,6 @@ pub mod factual;
 
 pub mod coding;
 pub mod python_repairs;
+
+pub mod distillation;
+pub mod ast_index;
