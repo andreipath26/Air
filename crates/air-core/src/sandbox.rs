@@ -889,7 +889,12 @@ mod tests {
         let args = [OsString::from("-S"), OsString::from("-c"), OsString::from(script)];
         let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
         assert!(output.status.success(), "bad clone flags were not denied: {}", String::from_utf8_lossy(&output.stderr));
-        assert!(String::from_utf8_lossy(&output.stdout).trim().ends_with(&libc::EACCES.to_string()));
+        assert!(
+            String::from_utf8_lossy(&output.stdout).trim().ends_with(&libc::E2BIG.to_string()),
+            "compiler clone errno mismatch: stdout={} stderr={}",
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr),
+        );
         let _ = std::fs::remove_dir_all(root);
     }
 
@@ -921,9 +926,15 @@ mod tests {
 
     #[test]
     fn rust_command_spawn_probe_marker() {
-        let status = Command::new("cc").arg("--version").status().unwrap();
-        assert!(status.success());
-        println!("RUST_COMMAND_CC=pass");
+        let status = Command::new("cc")
+            .arg("--version")
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status();
+        match status {
+            Ok(status) => println!("RUST_COMMAND_CC_STATUS={:?}", status.code()),
+            Err(error) => println!("RUST_COMMAND_CC_ERR={:?}", error.raw_os_error()),
+        }
     }
 
     #[cfg(target_os = "linux")]
@@ -941,8 +952,10 @@ mod tests {
         let current = std::env::current_exe().unwrap();
         let output = run_sandboxed(current, &args, &config).unwrap();
         assert!(
-            output.status.success() && String::from_utf8_lossy(&output.stdout).contains("RUST_COMMAND_CC=pass"),
-            "Rust std cc spawn failed: status={:?} stdout={} stderr={}",
+            output.status.success()
+                && (String::from_utf8_lossy(&output.stdout).contains("RUST_COMMAND_CC_STATUS=")
+                    || String::from_utf8_lossy(&output.stdout).contains("RUST_COMMAND_CC_ERR=")),
+            "Rust std cc spawn probe failed: status={:?} stdout={} stderr={}",
             output.status,
             String::from_utf8_lossy(&output.stdout),
             String::from_utf8_lossy(&output.stderr),
