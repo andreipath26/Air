@@ -23,7 +23,7 @@ mod integration_tests {
             router.set_weight(0, bit, if input.bit(bit) { Ternary::Positive } else { Ternary::Negative }).unwrap();
             router.set_weight(1, bit, Ternary::Zero).unwrap();
         }
-        let scores = router.top_k(&input, 2).unwrap();
+        let scores = router.top_k(&input, 2);
         assert_eq!(scores[0].output, 0);
         assert!(scores[0].fired);
     }
