@@ -425,10 +425,15 @@ mod tests {
     #[test]
     fn structured_rustc_failure_is_returned() {
         let verifier = verifier();
-        let result = verifier.verify_source("pub fn broken( {").unwrap();
+        let result = verifier
+            .verify_source("pub fn broken() { let _: u32 = \"x\"; }")
+            .unwrap();
         assert!(!result.success);
-        assert!(!result.diagnostics.is_empty());
-        assert!(result.diagnostics[0].message.contains("expected"));
+        assert!(result.diagnostics.iter().any(|diagnostic| {
+            diagnostic.code.as_deref() == Some("E0308")
+                && diagnostic.primary_span().is_some()
+                && !diagnostic.message.is_empty()
+        }), "diagnostics: {:?}", result.diagnostics);
         assert!(result.stderr.contains("error"));
     }
 
