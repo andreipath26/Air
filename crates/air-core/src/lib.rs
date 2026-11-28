@@ -70,10 +70,10 @@ pub mod python_repairs;
 
 pub mod distillation;
 pub mod ast_index;
+pub mod dependency_slice;
 
 pub mod compiler_repair;
 
 pub mod patch;
 pub mod incremental_syntax;
 pub mod sandbox;
-pub mod dependency_slice;
