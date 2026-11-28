@@ -12,3 +12,7 @@ ureq = { version = "2.12", default-features = false, features = ["json"] }
 
 [dev-dependencies]
 air-weights = { path = "../air-weights" }
+
+[features]
+default = []
+llama-cpp-ffi = []
