@@ -430,6 +430,16 @@ mod tests {
         assert!(proof.cases_passed() >= 2);
         assert!(proof.matches("rust", prompt, candidate));
         assert!(!proof.matches("rust", prompt, "fn parse(input: &str) -> Result<u32, E> { /* brittle */ }"));
+        let path = std::env::temp_dir().join(format!("air-critic-{}.airw", std::process::id()));
+        let _ = std::fs::remove_file(&path);
+        let store = crate::distillation::OverlayStore::new(&path);
+        let verified = crate::distillation::Verification { compiler_clean: true, tests_passed: true };
+        assert_eq!(store.append_critically_verified("rust", prompt, candidate, verified, &proof).unwrap(), 1);
+        assert!(matches!(
+            store.append_critically_verified("rust", prompt, "fn parse(input: &str) -> Result<u32, E> { /* different */ }", verified, &proof),
+            Err(crate::distillation::DistillationError::CriticRejected)
+        ));
+        std::fs::remove_file(path).unwrap();
     }
 
     #[test]
