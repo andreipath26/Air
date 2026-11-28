@@ -4,6 +4,10 @@
 
 This report separates current CI checks and a deterministic pipeline smoke from historical pre-loss model results. The smoke uses static snippets and generated AIRW fixtures; Mode B uses `DeterministicMock` with no model. It did not run Gemma, SmolLM, Qwen, or any model on the Dell Latitude 7490.
 
+## Current repository evidence map
+
+The current tree contains the 12-case static Rust smoke suite at [`crates/air-slm/tests/pipeline_smoke.rs`](crates/air-slm/tests/pipeline_smoke.rs), its workflow at [`.github/workflows/pipeline-smoke.yml`](.github/workflows/pipeline-smoke.yml), and the Rust `air-slm` implementation under [`crates/air-slm`](crates/air-slm). The historical successful run and retained artifact are linked below. These current smoke assets are distinct from the older frozen input/evaluator package; see the [AIR evidence index](docs/research/air-evidence-index.md) for the full file/run inventory and the `llm.asm` assessment.
+
 ## Local SLM capability boundary — Qwen family
 
 The local `air-slm` adapter now identifies caller-provided local GGUFs as Gemma 4 E2B, SmolLM3 3B, or Qwen2.5-Coder 7B. For the Dell CPU-first profile, Qwen requests are clamped to a **2,048-token hard context ceiling**, with generation budget reduced to fit. This records a model-family/configuration path only: no Qwen, Gemma, or SmolLM weights were downloaded or run.
