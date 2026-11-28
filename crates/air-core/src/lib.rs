@@ -66,4 +66,5 @@ pub mod prefetch;
 pub mod factual;
 
 pub mod coding;
+pub mod compiler_repair;
 pub mod python_repairs;
