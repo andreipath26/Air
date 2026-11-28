@@ -4,7 +4,6 @@
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use memmap2::{Mmap, MmapOptions};
-pub mod bitcos;
 
 use std::{collections::BTreeSet, error::Error, fmt, fs::File, io, path::Path};
 
