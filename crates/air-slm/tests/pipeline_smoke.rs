@@ -1,9 +1,9 @@
-//! Deterministic CPU-only Rust coding gauntlet.
+//! Deterministic CPU-only Rust coding-pipeline smoke suite.
 //!
-//! The suite builds a small AIRW archive at runtime, memory maps it, resolves
-//! each candidate through AIR core's typed reducer and oracle, and invokes
-//! rustc on the 12 recovered Rust snippets. Set AIR_GAUNTLET_MODE=neuro or
-//! dual to select benchmark mode. No model downloads or checked-in blobs.
+//! Tests pass 12 static Rust snippets through AIR core's reducer/oracle and
+//! route-and-verification seam, then compile the snippets with rustc. Standard
+//! tests default to neuro-symbolic mode. AIR_PIPELINE_SMOKE_MODE=dual opts into
+//! DeterministicMock checks; it performs no model inference and is not a model benchmark.
 
 use air_core::coding::{
     CodingReducer, CodingRequest, ConceptKind, OracleDecision, RankedCandidate,
@@ -12,7 +12,7 @@ use air_core::coding::{
 use air_slm::routing::{route_fuzzy, route_prompt, EscalationReason, FuzzyRoute, RouteDecision};
 use air_slm::{route_and_run_verified, DeterministicMock, GenerationOptions, RoutedAnswer, ThinkingMode};
 use air_core::verification::GeneratedOutputVerifier;
-use air_weights::{testing, ArchiveReader};
+use air_weights::{ArchiveBuilder, ArchiveReader};
 use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
@@ -117,27 +117,25 @@ const CHALLENGES: [Challenge; 12] = [
 ];
 
 fn mode() -> &'static str {
-    match std::env::var("AIR_GAUNTLET_MODE").as_deref() {
-        Ok("neuro") => "neuro",
+    match std::env::var("AIR_PIPELINE_SMOKE_MODE").as_deref() {
+        Ok("neuro") | Err(_) => "neuro",
         Ok("dual") => "dual",
-        Err(std::env::VarError::NotPresent) => "neuro",
-        Err(std::env::VarError::NotUnicode(_)) => panic!("AIR_GAUNTLET_MODE must be valid Unicode"),
-        Ok(other) => panic!("AIR_GAUNTLET_MODE must be neuro or dual, got {other:?}"),
+        Ok(value) => panic!("unsupported AIR_PIPELINE_SMOKE_MODE={value}; use neuro or dual"),
     }
 }
-
 fn archive() -> ArchiveReader {
-    let sections: Vec<_> = CHALLENGES
-        .iter()
-        .map(|case| (case.section, "rust-source", case.source.as_bytes()))
-        .collect();
-    let bytes = testing::build_deterministic_archive("rust-gauntlet", &["rust"], &sections)
-        .expect("build deterministic AIRW challenge archive");
-    let path = temp_path("gauntlet", "airw");
+    let mut builder = ArchiveBuilder::new("rust-pipeline-smoke");
+    builder.add_language("rust").expect("add Rust language");
+    for case in &CHALLENGES {
+        builder
+            .add_section(case.section, "rust-source", case.source.as_bytes())
+            .expect("add static Rust snippet");
+    }
+    let bytes = builder.finish().expect("build deterministic AIRW smoke archive");
+    let path = temp_path("pipeline-smoke", "airw");
     fs::write(&path, bytes).expect("write generated AIRW archive");
     let reader = ArchiveReader::open(&path).expect("mmap generated AIRW archive");
     assert!(reader.is_memory_mapped());
-    // The mmap remains valid after unlinking the generated temporary file.
     fs::remove_file(path).expect("remove generated AIRW archive");
     reader
 }
@@ -193,13 +191,13 @@ fn compile_all_candidates() -> Result<(), String> {
         .map(|case| case.source)
         .collect::<Vec<_>>()
         .join("\n");
-    let input = temp_path("rust-gauntlet", "rs");
-    let output = temp_path("rust-gauntlet", "rmeta");
+    let input = temp_path("rust-pipeline_smoke", "rs");
+    let output = temp_path("rust-pipeline_smoke", "rmeta");
     fs::write(&input, source).map_err(|e| e.to_string())?;
     let result = Command::new("rustc")
         .args(["--edition=2021", "--crate-type=lib", "--emit=metadata"])
         .arg("--crate-name")
-        .arg("air_rust_gauntlet")
+        .arg("air_rust_pipeline_smoke")
         .arg(&input)
         .arg("-o")
         .arg(&output)
@@ -296,9 +294,9 @@ fn run_case(id: &str) {
     }
     let compile = COMPILE_RESULT.get_or_init(compile_all_candidates);
     assert!(compile.is_ok(), "{}", compile.as_ref().err().unwrap());
-    let latency_ms = started.elapsed().as_secs_f64() * 1000.0;
+    let smoke_elapsed_ms = started.elapsed().as_secs_f64() * 1000.0;
     println!(
-        "GAUNTLET_CASE mode={current_mode} id={id} result=pass latency_ms={latency_ms:.3} peak_rss_mb={}",
+        "PIPELINE_SMOKE_CASE mode={current_mode} id={id} result=pass smoke_elapsed_ms={smoke_elapsed_ms:.3} smoke_process_peak_rss_mb={}",
         peak_rss_mb()
     );
 }
