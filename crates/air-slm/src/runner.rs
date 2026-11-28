@@ -44,7 +44,7 @@ pub struct GenerationOptions {pub thinking:ThinkingMode,pub max_new_tokens:u32}
 impl Default for GenerationOptions {fn default()->Self{Self{thinking:ThinkingMode::Direct,max_new_tokens:256}}}
 #[derive(Debug,Clone,PartialEq,Eq)]
 pub struct Completion {pub text:String,pub elapsed:Duration}
-pub trait CompletionBackend:Send+Sync {fn complete(&self,prompt:&str,options:&GenerationOptions)->Result<Completion,String>}
+pub trait CompletionBackend:Send+Sync {fn complete(&self,prompt:&str,options:&GenerationOptions)->Result<Completion,String>;}
 
 /// Owns a CPU-only llama.cpp loopback server loading a local GGUF file.
 /// An RSS watchdog polls every 10ms and terminates the server when it crosses
@@ -62,7 +62,7 @@ impl LlamaCppRunner {
         if !file.is_file()||file.extension().and_then(|x|x.to_str())!=Some("gguf"){return Err("model must be an existing GGUF file".into())}
         let file=fs::canonicalize(file).map_err(|e|format!("GGUF path: {e}"))?;
         let threads=thread::available_parallelism().map_or(2,usize::from).min(4).to_string();
-        let child=Command::new(executable).arg("--model").arg(file).arg("--host").arg("127.0.0.1")
+        let child=Command::new(executable.as_ref()).arg("--model").arg(file).arg("--host").arg("127.0.0.1")
             .arg("--port").arg(port.to_string()).arg("--ctx-size").arg(limits.context_tokens.to_string())
             .arg("--n-gpu-layers").arg("0").arg("--threads").arg(threads).arg("--no-webui")
             .stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null()).spawn()
@@ -108,9 +108,37 @@ impl LlamaCppRunner {
                 thread::sleep(Duration::from_millis(10));
             }
         });
-        Ok(Self{child,endpoint:format!("http://127.0.0.1:{port}/v1/chat/completions"),
+        let runner=Self{child,endpoint:format!("http://127.0.0.1:{port}/v1/chat/completions"),
             model_name:family.as_str().into(),limits,watchdog_active:active,rss_exceeded:exceeded,
-            watchdog:Mutex::new(Some(watchdog))})
+            watchdog:Mutex::new(Some(watchdog))};
+        runner.wait_ready()?;
+        Ok(runner)
+    }
+    fn wait_ready(&self)->Result<(),String>{
+        let health=self.endpoint.replace("/v1/chat/completions","/health");
+        let agent=ureq::AgentBuilder::new().redirects(0).timeout_connect(Duration::from_millis(500))
+            .timeout(Duration::from_secs(1)).build();
+        let deadline=Instant::now()+Duration::from_secs(180);
+        loop {
+            if self.rss_exceeded.load(Ordering::Acquire) {
+                self.stop();
+                return Err("llama.cpp exceeded its RSS cap during startup".into());
+            }
+            let exited=match self.child.lock(){
+                Ok(mut child)=>match child.try_wait(){Ok(status)=>status.is_some(),Err(_)=>true},
+                Err(_)=>true,
+            };
+            if exited {
+                self.stop();
+                return Err("llama.cpp exited before its health endpoint became ready".into());
+            }
+            if agent.get(&health).call().is_ok(){return Ok(())}
+            if Instant::now()>=deadline {
+                self.stop();
+                return Err("timed out waiting 180 seconds for llama.cpp health endpoint".into());
+            }
+            thread::sleep(Duration::from_millis(100));
+        }
     }
     pub fn limits(&self)->ResourceLimits{self.limits}
     fn stop(&self){
