@@ -69,17 +69,44 @@ impl HyperVector {
         let shift = shift % HYPERVECTOR_BITS;
         if shift == 0 { return *self; }
         let mut out = Self::zero();
-        for dst in 0..HYPERVECTOR_BITS {
-            let src = (dst + HYPERVECTOR_BITS - shift) % HYPERVECTOR_BITS;
-            if self.bit(src) { out.set_bit(dst, true); }
+        for word_index in 0..HYPERVECTOR_WORDS {
+            let destination = word_index * 64;
+            let count = (HYPERVECTOR_BITS - destination).min(64);
+            let source = (destination + HYPERVECTOR_BITS - shift) % HYPERVECTOR_BITS;
+            out.0[word_index] = self.read_circular(source, count);
         }
+        out.mask_padding();
         out
+    }
+
+    fn read_circular(&self, start: usize, count: usize) -> u64 {
+        let first_count = count.min(HYPERVECTOR_BITS - start);
+        let mut value = self.read_linear(start, first_count);
+        if first_count < count {
+            value |= self.read_linear(0, count - first_count) << first_count;
+        }
+        value
+    }
+
+    fn read_linear(&self, start: usize, count: usize) -> u64 {
+        let word_index = start / 64;
+        let offset = start % 64;
+        let mut value = self.0[word_index] >> offset;
+        if offset != 0 && word_index + 1 < HYPERVECTOR_WORDS {
+            value |= self.0[word_index + 1] << (64 - offset);
+        }
+        if count < 64 {
+            value &= (1u64 << count) - 1;
+        }
+        value
     }
 
     /// Majority bundle. Ties deterministically resolve to zero; empty input is zero.
     pub fn bundle(vectors: &[Self]) -> Self {
         if vectors.is_empty() { return Self::zero(); }
-        let mut counts = vec![0usize; HYPERVECTOR_BITS];
+        // Fixed-size scratch keeps memory bounded and avoids one heap allocation
+        // for every bundle operation. Count only set bits in each packed word.
+        let mut counts = [0usize; HYPERVECTOR_BITS];
         for vector in vectors {
             for (word_index, word) in vector.0.iter().enumerate() {
                 let mut bits = *word;
@@ -92,7 +119,7 @@ impl HyperVector {
             }
         }
         let mut out = Self::zero();
-        for (index, count) in counts.into_iter().enumerate() {
+        for (index, count) in counts.iter().enumerate() {
             if count * 2 > vectors.len() { out.set_bit(index, true); }
         }
         out
