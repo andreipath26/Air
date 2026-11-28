@@ -116,6 +116,8 @@ impl LlamaServerBackend {
 }
 impl SlmBackend for LlamaServerBackend {
  fn complete(&mut self,r:&SlmRequest)->Result<String,SlmError>{
+  // Validate caller-owned strings before cloning them or starting the local process.
+  validate_request(r)?;
   let p=self.start()?;let mut req=r.clone();if req.template_thinking_key.is_none(){req.template_thinking_key=self.cfg.thinking_template_key.clone();}
   let body=request_json(&req)?;
   let (status,body)=http(p,"POST","/v1/chat/completions",&body,self.cfg.request_timeout)?;
@@ -153,10 +155,14 @@ impl<B:SlmBackend> RoleOrchestrator<B>{
  pub fn backend_mut(&mut self)->&mut B{&mut self.backend}
 }
 
-fn request_json(r:&SlmRequest)->Result<String,SlmError>{
+fn validate_request(r:&SlmRequest)->Result<(),SlmError>{
  if r.system.len()>MAX_SYSTEM_BYTES{return Err(SlmError::Config("system prompt exceeds 8 KiB limit".into()))}
  if r.prompt.len()>MAX_PROMPT_BYTES{return Err(SlmError::Config("prompt exceeds 32 KiB limit".into()))}
  if r.template_thinking_key.as_ref().map(|k|k.len()>128).unwrap_or(false){return Err(SlmError::Config("template key exceeds 128 byte limit".into()))}
+ Ok(())
+}
+fn request_json(r:&SlmRequest)->Result<String,SlmError>{
+ validate_request(r)?;
  let kw=r.template_thinking_key.as_deref().map(|k|format!(",\"chat_template_kwargs\":{{{}:{}}}",json_str(k),matches!(r.mode,ThinkingMode::Bounded{..}))).unwrap_or_default();
  let body=format!("{{\"model\":\"local\",\"messages\":[{{\"role\":\"system\",\"content\":{}}},{{\"role\":\"user\",\"content\":{}}}],\"temperature\":0,\"max_tokens\":{}{} }}",json_str(&r.system),json_str(&r.prompt),r.mode.limit(),kw);
  if body.len()>MAX_REQUEST_BYTES{return Err(SlmError::Config("serialized request exceeds 512 KiB limit".into()))}
@@ -286,6 +292,13 @@ fn ioerr(e:std::io::Error)->SlmError{SlmError::Io(e.to_string())}
   let too_large=vec!["x".repeat(MAX_CANDIDATE_BYTES+1)];
   assert!(roles.route("task",true,false,&too_large).is_err());
   assert!(request_json(&SlmRequest{system:"x".repeat(MAX_SYSTEM_BYTES+1),prompt:"p".into(),mode:ThinkingMode::Off{max_tokens:10},template_thinking_key:None}).is_err());
+ }
+ #[test]fn direct_backend_rejects_oversized_request_before_starting_server(){
+  let cfg=LlamaServerConfig{server_bin:"missing-llama-server".into(),model_path:"missing-model.gguf".into(),context_tokens:4096,threads:2,startup_timeout:Duration::from_millis(1),request_timeout:Duration::from_millis(1),thinking_template_key:None};
+  let mut backend=LlamaServerBackend::new(cfg);
+  let request=SlmRequest{system:String::new(),prompt:"x".repeat(MAX_PROMPT_BYTES+1),mode:ThinkingMode::Off{max_tokens:1},template_thinking_key:None};
+  assert!(matches!(backend.complete(&request),Err(SlmError::Config(_))));
+  assert!(backend.child.is_none());
  }
  #[test]fn malformed_chunk_sizes_fail_without_overflow(){
   assert_eq!(decode_chunks(b"3\r\nabc\r\n0\r\n\r\n").unwrap(),b"abc");
