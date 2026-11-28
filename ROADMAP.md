@@ -29,6 +29,22 @@ A compiled AIR capability must encode reusable behavior that can be applied to h
 
 Tree-sitter, LSP servers, static analysis tools, compilers, and databases can be used as common development infrastructure, data sources, parsers, or test oracles. They are not the active research deliverable and their capabilities cannot be credited to AIR. A Tree-sitter/LSP lookup that returns a symbol is a tool result; an AIR-learned capability that generalizes and composes to generate a correct held-out patch is evidence toward weight replacement.
 
+### AIR-native learned representation hypothesis (recovered design; implementation status varies)
+
+AIR's intended replacement for conventional dense model weights is a learned, compiled **symbolic-neural capability structure**, inspired by A.L.I.C.E./AIML Graphmaster. This is an architecture hypothesis, not a claim that the current `main` branch contains or validates the full system. AIR must learn and generalize behavior; SQLite, indexes, Tree-sitter, LSP, compilers, and test runners may support it but do not constitute AIR intelligence.
+
+- **Graphmaster-style reduction:** map varied language onto typed concepts (language, operation, data structure, diagnostic, constraint); reduce a request compositionally into canonical subproblems; scope rules to language and live repository context. Replace string-only response leaves with parameterized AST/code transformations and structured bindings.
+- **Branching rather than greedy matching:** retain top-K candidate reductions. Explore e-graphs/equality saturation or equivalent shared search structures so alternatives can be ranked and backtracked after compiler/test feedback. Compact integer priorities may reflect verified outcomes; scores are routing signals, not proof of correctness.
+- **AIR weights:** the proposed `.airw` package is a versioned, content-addressed representation of concepts, reduction nodes/edges, language manifests, structured templates, optional HDC prototypes, and compact router parameters. The on-disk package is the model representation; a database can store or index it but is not the model.
+- **HDC/VSA candidate:** encode prompt, diagnostics, and AST features into packed binary hypervectors (the prototype used 10,000 logical bits in `[u64; 157]`), with deterministic item memory, XOR binding, permutation, majority bundling, and Hamming similarity. Test whether this improves paraphrase and structural generalization over lexical/Graphmaster routing.
+- **Ternary/event-driven router candidate:** compact `{-1,0,+1}` parameters and integer/spiking inference can score candidate reductions without floating-point matrix multiplication. Learn/update only from verified feedback; compare discrete updates against fixed routing and other small representations. The prototype report described 60,024 packed parameters; this is not evidence that ternary routing generalizes.
+- **Learning and composition:** an offline teacher may organize examples and propose concepts/rules; anti-unification or library learning can generalize multiple verified examples into reusable procedures. At runtime AIR selects, composes, verifies, and updates versioned representations from outcomes. Candidate outputs must be tested before staging; preserve provenance, license, hashes, confidence, validation traces, rollback, and rejected candidates.
+- **Polyglot design:** keep the reduction/search/runtime core language-agnostic; provide swappable language packages for grammars, AST patterns, diagnostics, templates, and compiler/test oracles. Rust is the first reported gauntlet only, not the product's language scope.
+- **SLM roles (optional, lazy-loaded):** (1) offline teacher/organizer proposes taxonomy, reductions, examples, and templates; (2) online translator turns unclear requests into a canonical spec for AIR to process; (3) tie-breaker ranks top candidates or proposes a novel patch after AIR abstains. Verify every proposal, unload the model after cold-path use, and distill only verified, generalized behavior. Report AIR-only, AIR+SLM, and conventional-model baselines separately. Gemma 4 E2B was selected in the conversation for an integration trial, but no live Gemma coding-gauntlet result was reported.
+- **Research alternatives to compare:** Graphmaster/rewrite systems, HDC/VSA, ternary or Tsetlin-style discrete learning, e-graphs/equality saturation, Datalog/code-as-data, anti-unification/library learning, and syntax-guided or counterexample-guided synthesis. Keep each as a candidate mechanism with a baseline, held-out test, resource measure, and failure criterion; do not assume any one is the answer.
+
+AIR must not become a static snippet/API database or a compiler/tool wrapper. Evidence of AIR capability requires learned/compiled representations to handle held-out paraphrases, varied identifiers, unseen combinations, and behavior tests—not merely return a stored symbol or call an external tool. Compiler/test oracles must be made equally available to comparison systems and separately account for the work they perform.
+
 ### Active execution lanes
 
 | Lane | Active v1.0 priorities | Exit evidence |
@@ -144,6 +160,51 @@ The completed 1.5B run from the same matrix (artifact `15190766881`, teacher rev
 **Pre-pivot factual-lane next target (deferred under v0.6):** improve factual-store coverage without relaxing reference checks. The saved 0.5B trace contains four SI-symbol answers in verbose but recoverable formats; relation-aware extraction now normalizes these and admits a candidate only when it matches the reviewed reference. Offline replay raises its accepted draft facts from 117/200 to 121/200. Analysis of the eight misses in the 192-fact teacher union found two geography answers that differed only by diacritics and six genuinely incorrect model answers. Geography matching now accepts accent variants while preserving canonical stored values; scientific notation stays case-sensitive. Replaying the two saved teacher traces raises the reference-matched union to 194/200, recovering Iceland and Colombia. This is an extraction replay, not a new model run or AIR accuracy measurement. The end-to-end retrieval benchmark remains to be rerun; this workspace lacks `target/release/air-cli` and Cargo. Continue coverage and failure reporting by relation/domain, keeping teacher knowledge gaps distinct from router failures.
 
 Historical small pilot 45974698319: 0.5B facts 3/6, 1.5B facts 6/6; weightless classifier 3/6 and 5/6, reference-trained lexical baseline 6/6 for both; no arithmetic candidate. Coordinate ablation changed top predictions on 5/6 and 4/6 prompts, respectively; fixed disjoint controls 0/6, but not magnitude-matched. No scientific acceptance gate passed. Prioritize factual extraction with real natural-language routing and a direct reference-fed retrieval comparator. Retain weightless and procedural work as hypotheses, not presumed winners. Preserve all negative results.
+
+## Recovered coding architecture and benchmark record — attached conversation export (2026-11-27)
+
+**Evidence status:** The figures below were recovered from the user-provided `Gemini - direct access to Google AI.mht` export. They are historical development reports, not independently re-executed measurements. The benchmark source packages, hidden evaluators, raw traces, and `.airw` artifacts described in the export are not present on current public `main`; their hashes are transcribed for recovery and must be re-verified from the recovered files. None of these results passes G01-Code/G02-Code or substitutes for Dell Latitude 7490 measurements. Keep coding results separate from the preserved factual G01/G02 record.
+
+### Reported benchmark progression
+
+| Run | AIR result | Qwen comparison | Measurements and limits |
+|---|---|---|---|
+| Early 8-case mechanical Rust repair set | 8/8; 0.062 s median per case | Qwen2.5-Coder 7B Q4_K_M: 7/8, 16.45 s; 3B Q4_K_M: 6/8, 8.65 s | Synthetic, supported lint/repair cases without hidden tests or held-out repositories. Shared AMD EPYC host, not the Dell; energy unavailable and process-memory boundaries differed. This is a plumbing smoke test, not capability-transfer evidence. |
+| First 12-case complex Rust gauntlet, unified-diff interface | AIR: 3/12 overall, all three were correct Tier 4 abstentions (0/9 repairs); median 0.13 s, 0.27 GiB peak process-tree RSS. Qwen 7B: 3/12, 33.99 s, 5.22 GiB. Qwen 3B: 3/12, 9.74 s, 4.46 GiB. | Qwen 7B attempted six in-scope tasks; one failed compilation and five patches were malformed/unapplied. Qwen 3B attempted one and failed compilation; both correctly abstained on all three traps. | Revealed a baseline-format bottleneck. Shared AMD EPYC host, not the Dell; no RAPL/perf energy. Do not interpret this as a fair measure of Qwen coding ability. |
+| Same gauntlet after Search/Replace patching and Tier 1 repair work | AIR repaired E0382, E0502, E0277 (3/3 Tier 1), abstained correctly on all Tier 4 traps: 6/12 total; 0.152 s median; 282.8 MiB peak RSS. Workspace: 62/62 tests. | Qwen 7B: one Tier 1 repair plus 3/3 abstentions = 4/12; 5.14 GiB. Qwen 3B: 0/3 Tier 1 plus 3/3 abstentions = 3/12; 4.52 GiB. | All 52 frozen case-file hashes were reported verified unchanged. Same-author development set on shared AMD EPYC, not the Dell; energy unavailable. This demonstrates three bounded transformations on these fixtures, not generalization. |
+| Neuro-symbolic `.airw` v2 run | 6/12 (Tier 1 3/3, Tier 2 0/3, Tier 3 0/3, Tier 4 abstention 3/3); 183.9 ms median end-to-end; 279.4 MiB peak process-tree RSS. | Qwen baselines were not rerun. | 41,096-byte archive; 16 nodes, 15 edges, 15 HDC prototypes (150,000 logical bits), 60,024 ternary router parameters. HDC+router median 18,014 μs; mmap/hash/validation open median 2,504 μs. Six of six targeted paraphrase-routing examples passed, but these were not held-out generalization cases. Shared AMD EPYC, not Dell; no energy. Report says 52 case inputs and 12 evaluator files verified; hashes recorded below. |
+| Later optimization/SLM integration reports | A release microfixture reported 36 μs (8 μs HDC + 28 μs router); another reported 34 μs (7 + 27). | Gemma 4 E2B was not run on the gauntlet. | These synthetic microfixtures are not comparable to the 18,014 μs archive run. A later branch report said 92 tests passed and JSON rule specs could be staged, but the coding Graphmaster and `.airw` sink were not wired. Do not claim these changes or results exist on current `main`. |
+
+### Complex gauntlet case inventory and reported AIR outcomes
+
+The 12-case set was Rust-only development evidence, despite AIR's multi-language goal. Its design was: Tier 1 ownership/borrow/type repair; Tier 2 multi-file refactor and API migration; Tier 3 lifetimes, concurrency, and runtime invariants; Tier 4 unsupported or unsafe requests requiring abstention.
+
+| Case | Task | AIR after Tier 1 work |
+|---|---|---|
+| 01 | E0382 moved ownership | Pass |
+| 02 | E0502 conflicting borrow | Pass |
+| 03 | E0277 missing generic/Send bound | Pass |
+| 04 | Multi-file `Option<T>` to `Result<T, ParseError>` migration | Fail: compiler errors |
+| 05 | Stateful indexed loop to iterator refactor | Fail: hidden-test behavior |
+| 06 | Extract shared validation trait preserving error variants | Fail: hidden-test behavior |
+| 07 | Borrowed lifetime repair | Fail: compiler error |
+| 08 | RefCell/state-machine invariant | Fail: hidden-test behavior |
+| 09 | MutexGuard/thread-boundary repair | Fail: compiler error |
+| 10 | Missing private dependency | Correct abstention |
+| 11 | Contradictory specification | Correct abstention |
+| 12 | Undocumented unsafe FFI request | Correct abstention |
+
+No timeout, anti-cheat rejection, or post-patch hidden-test pass/fail was reported in the later Tier 1 comparison; AIR abstained on cases 04–09. The earlier initial run used a different AIR state and patch protocol; retain both records rather than overwriting the earlier result.
+
+**Reported integrity identifiers:** frozen-input manifest SHA-256 `c8fb7bb2dcb6c48832cd47ab9193432093e7bdceb0ab4b12d69a2e6febacc445`; hidden-evaluator manifest SHA-256 `a574c94eaa94023a0e6dcffc31a8c45a10c82c80dc6345fd41240d99e79c7128`; reported `weights/core.airw` v2 SHA-256 `09697b685d1bcb61c8d64d6419bd02a4d5b4679dca19b4dc85d51c16294f377b`. These identify the claimed artifacts but cannot be checked until those files are recovered.
+
+### Required recovery and next benchmark work
+
+1. Recover the branch/archive containing `air-weights`, `weights/core.airw`, `benchmarks/g01-code-gauntlet/`, raw per-arm reports, and hidden evaluator files; restore them to an accessible repository branch and verify every manifest/hash before treating the record as reproducible.
+2. Preserve the 12-case results as development evidence. Do not tune against frozen cases. Add independently authored, held-out multi-language tasks and keep acquisition, tuning, and final evaluation data disjoint.
+3. Re-run the fixed AIR-only and AIR+SLM arms plus pinned Qwen 7B/3B controls on the Dell under identical process boundaries. Record task-level pass/fail and abstention, cold/warm latency, whole-process-tree RAM, energy with meter boundary, archive/model size, and full compilation/distillation lifecycle cost.
+4. For SLM integration, first verify that the lazy-loaded model is absent in AIR-only. In hybrid mode record every translator, tie-breaker, and novel-patch invocation; run compiler/tests before any rule is staged; report online quality separately from AIR-only capability.
+5. Replace the 12-case Rust gauntlet as a gate with the roadmap's frozen independent 240+ coding workload; retain the gauntlet only as a regression suite after its exact files and hashes are restored.
 
 ## Hypotheses
 - H01 **Generative intelligence encoding:** Compact reusable instructions may replace independently stored numerical relationships. Foundations: Genetics, linguistics, program synthesis.
