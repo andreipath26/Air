@@ -192,6 +192,61 @@ pub fn encode_router_archive(
     builder.finish().map_err(|e| BitcosError::Router(e.to_string()))
 }
 
+/// Decodes a BITCOS router section directly from an AIRW reader.
+///
+/// The section bytes are borrowed from the reader (and therefore from its
+/// mmap when opened with `ArchiveReader::open`). The threshold is supplied by
+/// the caller because the legacy router format does not serialize it.
+pub fn decode_router_archive(
+    reader: &air_weights::ArchiveReader,
+    threshold: i32,
+) -> Result<PackedTernaryRouter, BitcosError> {
+    if reader.header_flags() & AIRW_FLAG_BITCOS_TERNARY == 0 {
+        return Err(BitcosError::InvalidEncoding);
+    }
+    let bytes = reader.section("router.bitcos").ok_or(BitcosError::InvalidEncoding)?;
+    let mut cursor = 0usize;
+    fn take_u32(bytes: &[u8], cursor: &mut usize) -> Result<u32, BitcosError> {
+        let end = cursor.checked_add(4).ok_or(BitcosError::InvalidEncoding)?;
+        let raw = bytes.get(*cursor..end).ok_or(BitcosError::InvalidEncoding)?;
+        *cursor = end;
+        Ok(u32::from_le_bytes(raw.try_into().map_err(|_| BitcosError::InvalidEncoding)?))
+    }
+
+    let input_bits = take_u32(bytes, &mut cursor)? as usize;
+    let outputs = take_u32(bytes, &mut cursor)? as usize;
+    if input_bits != HYPERVECTOR_BITS || outputs == 0 {
+        return Err(BitcosError::InvalidDimensions);
+    }
+    let mut router = PackedTernaryRouter::new(input_bits, outputs, threshold)
+        .map_err(|error| BitcosError::Router(format!("{error:?}")))?;
+    let presence_len = input_bits.div_ceil(8);
+    for output in 0..outputs {
+        let active = take_u32(bytes, &mut cursor)? as usize;
+        let encoded_presence_len = take_u32(bytes, &mut cursor)? as usize;
+        let encoded_sign_len = take_u32(bytes, &mut cursor)? as usize;
+        if encoded_presence_len != presence_len || active > input_bits
+            || encoded_sign_len != active.div_ceil(8) {
+            return Err(BitcosError::InvalidEncoding);
+        }
+        let presence_end = cursor.checked_add(encoded_presence_len).ok_or(BitcosError::InvalidEncoding)?;
+        let presence = bytes.get(cursor..presence_end).ok_or(BitcosError::InvalidEncoding)?;
+        cursor = presence_end;
+        let signs_end = cursor.checked_add(encoded_sign_len).ok_or(BitcosError::InvalidEncoding)?;
+        let signs = bytes.get(cursor..signs_end).ok_or(BitcosError::InvalidEncoding)?;
+        cursor = signs_end;
+        let view = BorrowedBitcos::from_parts(input_bits, active, presence, signs)?;
+        let mut weights = vec![Ternary::Zero; input_bits];
+        view.decode_into(&mut weights)?;
+        for (input, weight) in weights.into_iter().enumerate() {
+            router.set_weight(output, input, weight)
+                .map_err(|error| BitcosError::Router(format!("{error:?}")))?;
+        }
+    }
+    if cursor != bytes.len() { return Err(BitcosError::InvalidEncoding); }
+    Ok(router)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -240,6 +295,33 @@ mod tests {
         assert!(!section.is_empty());
         assert_eq!(reader.encoding_flag(), AIRW_FLAG_BITCOS_TERNARY);
     }
+    #[test]
+    fn bitcos_airw_router_round_trips_through_mmap_reader() {
+        use std::sync::atomic::{AtomicU64, Ordering};
+        static NEXT: AtomicU64 = AtomicU64::new(0);
+        let path = std::env::temp_dir().join(format!(
+            "airw-bitcos-router-{}-{}.airw",
+            std::process::id(),
+            NEXT.fetch_add(1, Ordering::Relaxed)
+        ));
+        let mut router = PackedTernaryRouter::new(HYPERVECTOR_BITS, 2, 17).unwrap();
+        router.set_weight(0, 3, Ternary::Positive).unwrap();
+        router.set_weight(0, 9, Ternary::Negative).unwrap();
+        router.set_weight(1, 1, Ternary::Negative).unwrap();
+        let bytes = encode_router_archive(&router, "roundtrip-router", "rust").unwrap();
+        std::fs::write(&path, bytes).unwrap();
+        let reader = air_weights::ArchiveReader::open(&path).unwrap();
+        let decoded = decode_router_archive(&reader, 17).unwrap();
+        assert!(reader.is_memory_mapped());
+        for output in 0..router.outputs() {
+            for input in 0..router.input_bits() {
+                assert_eq!(decoded.weight(output, input), router.weight(output, input));
+            }
+        }
+        drop(reader);
+        std::fs::remove_file(path).unwrap();
+    }
+
     #[test]
     fn memory_mapped_bitcos_sections_are_borrowed_without_copy_or_alignment_assumption() {
         use std::sync::atomic::{AtomicU64, Ordering};
