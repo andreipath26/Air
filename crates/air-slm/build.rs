@@ -16,7 +16,7 @@ fn main() {
     let exe=out.join("air-llama-cpp-worker");
     let status=Command::new(cxx).args(["-std=c++17","-O2","-pthread"])
         .arg("-I").arg(include).arg("-I").arg(ggml)
-        .arg("src/llama_cpp_worker.cpp").arg("-L").arg(&lib).arg("-Wl,-rpath").arg(&lib)
+        .arg("src/llama_cpp_worker.cpp").arg("-L").arg(&lib).arg(format!("-Wl,-rpath,{}",lib))
         .arg("-llama").arg("-o").arg(&exe).status()
         .expect("failed to invoke C++ compiler for llama.cpp worker");
     assert!(status.success(),"failed to compile llama.cpp FFI worker against the supplied local headers/library");
