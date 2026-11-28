@@ -32,6 +32,7 @@ pub mod probability;
 pub mod packages;
 
 pub mod plan;
+pub mod htn;
 pub mod temporal;
 pub mod compact;
 pub mod verification;
