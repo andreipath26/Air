@@ -4,6 +4,15 @@
 
 This report separates current CI checks and a deterministic pipeline smoke from historical pre-loss model results. The smoke uses static snippets and generated AIRW fixtures; Mode B uses `DeterministicMock` with no model. It did not run Gemma, SmolLM, Qwen, or any model on the Dell Latitude 7490.
 
+## Latest main-targeted workflow verification — 2026-11-28
+
+- [Workspace CI run 270](https://github.com/andreipath26/Air/actions/runs/46129032054) completed successfully; all six jobs passed.
+- [Rust Coding Pipeline Smoke run 13](https://github.com/andreipath26/Air/actions/runs/46129032014) passed: 117 workspace tests, 0 failures; fuzzy routing 6/6; 12/12 static cases in both modes.
+- Mode A: 2.380 ms mean case smoke time, 80 ms CI command wall time, 196.69 MB process peak RSS.
+- Mode B: 2.324 ms mean case smoke time, 70 ms CI command wall time, 196.79 MB process peak RSS. Mode B uses `DeterministicMock`, not a model.
+- [Smoke artifact](https://github.com/andreipath26/Air/actions/runs/46129032014/artifacts/15256852798) records raw logs and case tables; SHA-256: `949dcdf063b489b008b89bbe73360921474139a316d810841726f7b0f5e741ff`; expires 2027-02-26.
+- The workflow now runs for pushes to main and pull requests targeting main. These remain CI-hosted smoke measurements, not Latitude 7490 or real-model measurements.
+
 ## Current repository evidence map
 
 The current tree contains the 12-case static Rust smoke suite at [`crates/air-slm/tests/pipeline_smoke.rs`](crates/air-slm/tests/pipeline_smoke.rs), its workflow at [`.github/workflows/pipeline-smoke.yml`](.github/workflows/pipeline-smoke.yml), and the Rust `air-slm` implementation under [`crates/air-slm`](crates/air-slm). The historical successful run and retained artifact are linked below. These current smoke assets are distinct from the older frozen input/evaluator package; see the [AIR evidence index](docs/research/air-evidence-index.md) for the full file/run inventory and the `llm.asm` assessment.
