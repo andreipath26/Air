@@ -508,6 +508,7 @@ impl RootlessAdversarialRunner {
         config.max_output_bytes = 2 * 1024 * 1024;
         if toolchain_spawn {
             config.allow_vfork_for_toolchain(true);
+            config.allow_fork_for_toolchain(true);
         }
         if let Some(parent) = rustc.parent() {
             config.allow_readonly_path(parent);
