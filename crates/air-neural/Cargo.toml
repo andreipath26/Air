@@ -9,3 +9,7 @@ description = "CPU-native hyperdimensional and packed ternary routing primitives
 path = "src/lib.rs"
 
 [dependencies]
+
+[[bench]]
+name = "neural_primitives"
+harness = false
