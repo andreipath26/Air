@@ -100,6 +100,8 @@ pub fn route_prompt(prompt: &str) -> PythonRoute {
         (PythonRepairKind::NarrowBareExcept, bare, mutable)
     } else if mutable > bare {
         (PythonRepairKind::FreshMutableDefault, mutable, bare)
+    } else if bare == 0 {
+        return PythonRoute::Abstained { reason: RouteAbstainReason::NoMatch };
     } else {
         return PythonRoute::Abstained { reason: RouteAbstainReason::Ambiguous };
     };
