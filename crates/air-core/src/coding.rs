@@ -304,14 +304,20 @@ mod tests {
     }
     #[test]
     fn missing_oracle_abstains_by_default() {
-        let result = reducer().resolve(&request(), &archive(), None, 8);
+        let r = reducer();
+        let q = request();
+        let a = archive();
+        let result = r.resolve(&q, &a, None, 8);
         assert_eq!(result, Resolution::Abstained {
             reason: AbstainReason::NoOracle, considered: 0
         });
     }
     #[test]
     fn oracle_uncertainty_abstains_without_falling_through() {
-        let result = reducer().resolve(&request(), &archive(), Some(&Withhold), 8);
+        let r = reducer();
+        let q = request();
+        let a = archive();
+        let result = r.resolve(&q, &a, Some(&Withhold), 8);
         assert_eq!(result, Resolution::Abstained {
             reason: AbstainReason::OracleWithheld, considered: 1
         });
