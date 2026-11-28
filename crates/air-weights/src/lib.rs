@@ -7,6 +7,12 @@ use memmap2::{Mmap, MmapOptions};
 
 use std::{collections::BTreeSet, error::Error, fmt, fs::File, io, path::Path};
 
+pub mod dependency;
+pub use dependency::{
+    DependencyEdge, DependencyEdgeKind, DependencyGraph, DEPENDENCY_GRAPH_KIND,
+    DEPENDENCY_GRAPH_SECTION,
+};
+
 pub const MAGIC: [u8; 4] = *b"AIRW";
 pub const FORMAT_VERSION: u16 = 1;
 /// Known v1 feature bit: one or more sections use BITCOS sparse ternary encoding.
