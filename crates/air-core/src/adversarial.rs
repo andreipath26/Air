@@ -225,6 +225,37 @@ fn test_source(function: &FunctionSignature, args: &[String], assert_error: bool
     }
 }
 
+fn synthesize_borrow_contention(
+    function: &FunctionSignature,
+    baseline: &[String],
+) -> Option<AdversarialProbe> {
+    for (shared_index, shared_type) in function.params.iter().enumerate() {
+        let shared = canonical_type(shared_type);
+        let shared_base = if shared == "&str" { "String" } else { shared.strip_prefix('&')? };
+        for (mutable_index, mutable_type) in function.params.iter().enumerate() {
+            if shared_index == mutable_index { continue; }
+            let mutable = canonical_type(mutable_type);
+            let mutable_base = mutable.strip_prefix("&mut")?;
+            if shared_base != mutable_base { continue; }
+            if !matches!(mutable_base, "String" | "i32" | "u32" | "i64" | "u64") { continue; }
+            let mut args = baseline.to_vec();
+            args[shared_index] = if shared == "&str" { "&_air_value".into() } else { "&_air_value".into() };
+            args[mutable_index] = "&mut _air_value".into();
+            let call = format!("{}({})", function.name, args.join(", "));
+            let source = format!(
+                r#"{{ let mut _air_value: {mutable_base} = Default::default(); let _air_shared = &_air_value; let _air_mutable = &mut _air_value; let _ = {call}; let _ = _air_shared; }}"#
+            );
+            return Some(AdversarialProbe {
+                name: "shared_and_mutable_alias_is_rejected".into(),
+                kind: ProbeKind::BorrowContention,
+                source,
+                expected: ExpectedOutcome::CompileRejected,
+            });
+        }
+    }
+    None
+}
+
 /// Generate deterministic probes from a Rust free-function signature.
 /// For Result-returning parse/decode/read-style functions, empty string input
 /// also becomes an expected error-path case. Unknown parameter types are not
@@ -346,6 +377,9 @@ pub fn synthesize_signature_probes(
         }
     }
 
+    if let Some(probe) = synthesize_borrow_contention(&function, &baseline) {
+        probes.push(probe);
+    }
     if probes.is_empty() { return Err(CriticError::NoApplicableProbes); }
     Ok(probes)
 }
@@ -414,6 +448,19 @@ mod tests {
         assert!(probes.iter().any(|p| p.kind == ProbeKind::MaxBoundary));
         assert!(probes.iter().any(|p| p.kind == ProbeKind::BorrowContention));
         assert!(probes.iter().any(|p| p.kind == ProbeKind::ResultErrorPath));
+    }
+
+    #[test]
+    fn borrow_contention_probe_expects_rustc_rejection_for_shared_mut_alias() {
+        let probes = synthesize_signature_probes(
+            "rust",
+            "fn update_and_read(input: &str, buffer: &mut String) -> usize",
+        ).unwrap();
+        assert!(probes.iter().any(|probe| {
+            probe.name == "shared_and_mutable_alias_is_rejected"
+                && probe.expected == ExpectedOutcome::CompileRejected
+                && probe.source.contains("update_and_read(&_air_value, &mut _air_value)")
+        }));
     }
 
     #[test]
