@@ -372,7 +372,7 @@ mod tests {
 
     #[test]
     fn tier1_imports_only_allowlisted_std_modules() {
-        let source = "fn f() { let _ = fs::read("x"); }";
+        let source = r#"fn f() { let _ = fs::read("x"); }"#;
         let diag = diagnostic("E0433", "failed to resolve: use of undeclared crate or module `fs`", Value::Array(vec![]));
         let patched = tier1_symbolic_patch(source, &diag).unwrap();
         assert!(patched.source.starts_with("use std::fs;\n"));
