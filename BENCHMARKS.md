@@ -6,19 +6,19 @@ This report separates current CI checks and a deterministic pipeline smoke from 
 
 ## Current engine-upgrade validation — 2026-11-28
 
-This fresh GitHub Actions session tested the merged AVX2/BITCOS, grammar/speculative decoding, compiler-repair, and AIRW distillation/AST-index changes on source commit `34a9a4d2295ec992197f7036d36f844133fa245c`.
+This fresh GitHub Actions session tested the merged AVX2/BITCOS, grammar/speculative decoding, compiler-repair, and AIRW distillation/AST-index changes on source commit `0ab2ad9fdd1a3da8646348108c38de84577e79f4`.
 
-- Full CI: [run 46131287082](https://github.com/andreipath26/Air/actions/runs/46131287082) — all six CI jobs passed.
-- Workspace and pipeline benchmark: [Rust Coding Pipeline Smoke run 46131287077](https://github.com/andreipath26/Air/actions/runs/46131287077) — **150 passed, 0 failed** across 11 libtest summaries; fuzzy routing **6/6**.
+- Full CI: [run 46131736305](https://github.com/andreipath26/Air/actions/runs/46131736305) — all six CI jobs passed.
+- Workspace and pipeline benchmark: [Rust Coding Pipeline Smoke run 46131736271](https://github.com/andreipath26/Air/actions/runs/46131736271) — **150 passed, 0 failed** across 11 libtest summaries; fuzzy routing **6/6**.
 - The Mode B step also ran the focused `air-core` compiler-repair tests and `air-slm` repair-adapter tests successfully.
-- Raw logs, per-case tables, resource measurements, and summaries: [artifact rust-pipeline-smoke-46131287077](https://github.com/andreipath26/Air/actions/runs/46131287077/artifacts/15258301118).
+- Raw logs, per-case tables, resource measurements, and summaries: [artifact rust-pipeline-smoke-46131736271](https://github.com/andreipath26/Air/actions/runs/46131736271/artifacts/15258451615).
 
 | Mode | Cases passed | Failed | Mean case latency (ms) | CI smoke elapsed (ms) | Peak process RSS (MB) |
 |---|---:|---:|---:|---:|---:|
-| A: neuro-symbolic pipeline smoke | 12/12 | 0 | 2.603 | 90.0 | 196.71 |
-| B: dual + diagnostic repair + DeterministicMock SLM | 12/12 | 0 | 2.718 | 90.0 | 196.66 |
+| A: neuro-symbolic pipeline smoke | 12/12 | 0 | 2.094 | 60.0 | 196.70 |
+| B: dual + diagnostic repair + DeterministicMock SLM | 12/12 | 0 | 2.070 | 60.0 | 196.79 |
 
-Mode B was **0.115 ms (4.4%) slower per case** than Mode A in this run; this session showed no latency improvement from escalation. The reported RSS is effectively unchanged (0.05 MB lower in Mode B). These are GitHub-hosted runner smoke measurements. The SLM backend was deterministic mock output; no live llama.cpp model inference or Dell Latitude 7490 measurement was performed.
+Mode B was **0.024 ms (1.1%) faster per case** than Mode A in this run. The measured RSS differed by 0.09 MB (Mode B higher). This small difference is a GitHub-runner smoke result, not evidence of a stable performance gain. These are GitHub-hosted runner smoke measurements. The SLM backend was deterministic mock output; no live llama.cpp model inference or Dell Latitude 7490 measurement was performed.
 
 Merged engine PRs into `feat/neuro-symbolic-dual-gauntlet`:
 
