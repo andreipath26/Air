@@ -161,6 +161,20 @@ mod tests {
         let vector = HyperVector::from_seed(42);
         assert_eq!(vector.0[156] >> 16, 0);
     }
+    #[test] fn packed_permutation_matches_logical_bit_reference() {
+        let input = HyperVector::from_seed(0xdeadbeef);
+        for shift in [1, 63, 64, 9999, 10_001] {
+            let actual = input.permute(shift);
+            let shift = shift % HYPERVECTOR_BITS;
+            let mut expected = HyperVector::zero();
+            for destination in 0..HYPERVECTOR_BITS {
+                let source = (destination + HYPERVECTOR_BITS - shift) % HYPERVECTOR_BITS;
+                if input.bit(source) { expected.set_bit(destination, true); }
+            }
+            assert_eq!(actual, expected);
+        }
+    }
+
     #[test] fn item_memory_is_deterministic_and_token_sensitive() {
         assert_eq!(HyperVector::item("borrow"), HyperVector::item("borrow"));
         assert_ne!(HyperVector::item("borrow"), HyperVector::item("move"));
