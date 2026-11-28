@@ -4,6 +4,31 @@
 
 This report separates current CI checks and a deterministic pipeline smoke from historical pre-loss model results. The smoke uses static snippets and generated AIRW fixtures; Mode B uses `DeterministicMock` with no model. It did not run Gemma, SmolLM, Qwen, or any model on the Dell Latitude 7490.
 
+## Current engine-upgrade validation — 2026-11-28
+
+This fresh GitHub Actions session tested the merged AVX2/BITCOS, grammar/speculative decoding, compiler-repair, and AIRW distillation/AST-index changes on source commit `34a9a4d2295ec992197f7036d36f844133fa245c`.
+
+- Full CI: [run 46131287082](https://github.com/andreipath26/Air/actions/runs/46131287082) — all six CI jobs passed.
+- Workspace and pipeline benchmark: [Rust Coding Pipeline Smoke run 46131287077](https://github.com/andreipath26/Air/actions/runs/46131287077) — **150 passed, 0 failed** across 11 libtest summaries; fuzzy routing **6/6**.
+- The Mode B step also ran the focused `air-core` compiler-repair tests and `air-slm` repair-adapter tests successfully.
+- Raw logs, per-case tables, resource measurements, and summaries: [artifact rust-pipeline-smoke-46131287077](https://github.com/andreipath26/Air/actions/runs/46131287077/artifacts/15258301118).
+
+| Mode | Cases passed | Failed | Mean case latency (ms) | CI smoke elapsed (ms) | Peak process RSS (MB) |
+|---|---:|---:|---:|---:|---:|
+| A: neuro-symbolic pipeline smoke | 12/12 | 0 | 2.603 | 90.0 | 196.71 |
+| B: dual + diagnostic repair + DeterministicMock SLM | 12/12 | 0 | 2.718 | 90.0 | 196.66 |
+
+Mode B was **0.115 ms (4.4%) slower per case** than Mode A in this run; this session showed no latency improvement from escalation. The reported RSS is effectively unchanged (0.05 MB lower in Mode B). These are GitHub-hosted runner smoke measurements. The SLM backend was deterministic mock output; no live llama.cpp model inference or Dell Latitude 7490 measurement was performed.
+
+Merged engine PRs into `feat/neuro-symbolic-dual-gauntlet`:
+
+| PR | Merge commit |
+|---|---|
+| [#30 Grammar-constrained and n-gram speculative SLM decoding](https://github.com/andreipath26/Air/pull/30) | `9f74903bb9ac1a9a3a59edcf877bee752cf48ec1` |
+| [#28 Online distillation and AST symbol indexing](https://github.com/andreipath26/Air/pull/28) | `3bb1edd9f01f9a3c1ab2fe50f5d14728faaaa099` |
+| [#31 AVX2 HDC and BITCOS sparse ternary packing](https://github.com/andreipath26/Air/pull/31) | `f00496abe9c5bb5c5c5fb5c0262d45c5c1b6fb00` |
+| [#29 Compiler-in-the-loop diagnostic repair](https://github.com/andreipath26/Air/pull/29) | `4e49c604dc5d1656257890d377614b814dca90ac` |
+
 ## Local SLM capability boundary — Qwen family
 
 The local `air-slm` adapter now identifies caller-provided local GGUFs as Gemma 4 E2B, SmolLM3 3B, or Qwen2.5-Coder 7B. For the Dell CPU-first profile, Qwen requests are clamped to a **2,048-token hard context ceiling**, with generation budget reduced to fit. This records a model-family/configuration path only: no Qwen, Gemma, or SmolLM weights were downloaded or run.
