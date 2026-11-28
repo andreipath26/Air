@@ -168,7 +168,7 @@ mod tests {
         assert_eq!(a, hdc_signature("borrow a value safely"));
         assert_eq!(a.len(), 157);
         assert_eq!(a[156] >> 16, 0);
-        assert_eq!(hdc_signature("different"), a.into_iter().zip(hdc_signature("different")).map(|(x, _)| x).collect::<Vec<_>>());
+        assert_ne!(hdc_signature("different"), a);
         assert_eq!(hamming_distance(&hdc_signature("x"), &hdc_signature("x")), Some(0));
     }
 
