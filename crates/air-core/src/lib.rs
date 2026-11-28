@@ -70,3 +70,5 @@ pub mod python_repairs;
 
 pub mod distillation;
 pub mod ast_index;
+
+pub mod compiler_repair;
