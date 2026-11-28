@@ -69,7 +69,7 @@ impl OutputGrammar {
 
 // A structured source subset covering declarations, function signatures, and
 // balanced code blocks. The block rule is recursive so nested Rust blocks work.
-const RUST_GBNF: &str = r#"root ::= ws item (ws item)*
+const RUST_GBNF: &str = r##"root ::= ws item (ws item)*
 item ::= function | struct_decl | enum_decl | trait_decl | use_decl | type_decl | const_decl | impl_decl | comment
 function ::= visibility "async "? "fn " identifier generics? "(" text ")" return_type? ws block
 struct_decl ::= visibility "struct " identifier generics? ws (";" | "{" text "}")
@@ -88,9 +88,9 @@ block ::= "{" (block | block_char)* "}"
 block_char ::= [^{}]
 text ::= [^;{}()]+
 ws ::= [ \t\r\n]*
-"#;
+"##;
 
-const PYTHON_GBNF: &str = r#"root ::= statement (newline statement)*
+const PYTHON_GBNF: &str = r##"root ::= statement (newline statement)*
 statement ::= function | async_function | class | import | assignment | control | comment
 function ::= indent? "def " identifier "(" text ")" text? ":"
 async_function ::= indent? "async def " identifier "(" text ")" text? ":"
@@ -103,15 +103,15 @@ identifier ::= [A-Za-z_][A-Za-z0-9_]*
 indent ::= " "*
 text ::= [^\r\n]+
 newline ::= "\r"? "\n"
-"#;
+"##;
 
-const UNIFIED_DIFF_GBNF: &str = r#"root ::= file_header hunk+
+const UNIFIED_DIFF_GBNF: &str = r##"root ::= file_header hunk+
 file_header ::= "--- " line newline "+++ " line newline
 hunk ::= "@@ " line "@@" newline diff_line*
 diff_line ::= ("+" | "-" | " ") line newline | "\\ No newline at end of file" newline
 line ::= [^\r\n]*
 newline ::= "\r"? "\n"
-"#;
+"##;
 
 #[cfg(test)]
 mod tests {
