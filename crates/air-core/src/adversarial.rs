@@ -69,7 +69,13 @@ impl From<crate::distillation::DistillationError> for CriticError {
 /// Implemented by a runner that compiles and executes all supplied probe code
 /// inside an OS sandbox. A runner must not set sandboxed=true unless all
 /// primary and adversarial checks actually ran under that sandbox.
-pub trait SandboxedAdversarialRunner {
+/// Private implementation gate: only in-crate adapters backed by the
+/// configured OS sandbox may mint CriticProof values.
+pub(crate) mod sealed {
+    pub trait Sealed {}
+}
+
+pub trait SandboxedAdversarialRunner: sealed::Sealed {
     type Error: fmt::Display;
     fn run_primary_and_adversarial(
         &self,
@@ -376,6 +382,7 @@ mod tests {
     use super::*;
 
     struct MockRunner { fail_probe: Option<String> }
+    impl sealed::Sealed for MockRunner {}
     impl SandboxedAdversarialRunner for MockRunner {
         type Error = &'static str;
         fn run_primary_and_adversarial(
@@ -445,6 +452,7 @@ mod tests {
     #[test]
     fn refuses_runner_that_did_not_sandbox() {
         struct NotSandboxed;
+        impl sealed::Sealed for NotSandboxed {}
         impl SandboxedAdversarialRunner for NotSandboxed {
             type Error = &'static str;
             fn run_primary_and_adversarial(&self, _l: &str, _c: &str, _p: &str, probes: &[AdversarialProbe]) -> Result<CriticExecution, Self::Error> {
