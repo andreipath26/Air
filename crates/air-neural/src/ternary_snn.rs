@@ -242,7 +242,9 @@ mod tests {
         router.update_from_feedback(&input, 0, 1).unwrap();
         assert_eq!(router.weight(0, 4), Ok(Ternary::Positive));
         assert_eq!(router.weight(1, 4), Ok(Ternary::Negative));
-        assert_eq!(router.score(&input)[0].score, 1);
+        let scores = router.score(&input);
+        assert_eq!(scores[0].score, HYPERVECTOR_BITS as i32);
+        assert_eq!(scores[1].score, -(HYPERVECTOR_BITS as i32));
     }
 
     #[test] fn packed_scores_match_reference_bitwise_dot() {
