@@ -32,8 +32,8 @@ jobs:
           summaries = re.findall(r"test result: (?:ok|FAILED)\.\s*(\d+) passed;\s*(\d+) failed;", output)
           passed = sum(int(ok) for ok, _ in summaries)
           failed = sum(int(bad) for _, bad in summaries)
-          fuzzy_pass = len(re.findall(r"^FUZZY_ROUTE result=pass case=\S+\s*$", output, re.M))
-          fuzzy_fail = len(re.findall(r"^FUZZY_ROUTE result=fail case=\S+\s*$", output, re.M))
+          fuzzy_pass = len(re.findall(r"FUZZY_ROUTE result=pass case=\S+", output, re.M))
+          fuzzy_fail = len(re.findall(r"FUZZY_ROUTE result=fail case=\S+", output, re.M))
           print(f"WORKSPACE_TESTS passed={passed} failed={failed} libtest_summaries={len(summaries)}")
           print(f"FUZZY_ROUTING passed={fuzzy_pass} failed={fuzzy_fail}")
           assert summaries, "No libtest summaries found"
