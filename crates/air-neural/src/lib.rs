@@ -10,7 +10,7 @@ pub mod ternary_snn;
 pub use hdc::{HyperVector, HYPERVECTOR_BITS, HYPERVECTOR_WORDS};
 pub use simd::{hamming_distance, hamming_distance_scalar};
 pub use ternary_snn::{PackedTernaryRouter, RouteScore, Ternary};
-pub use air_weights::bitcos;
+pub mod bitcos;
 
 #[cfg(test)]
 mod integration_tests {
