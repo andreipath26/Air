@@ -29,6 +29,10 @@ A compiled AIR capability must encode reusable behavior that can be applied to h
 
 Tree-sitter, LSP servers, static analysis tools, compilers, and databases can be used as common development infrastructure, data sources, parsers, or test oracles. They are not the active research deliverable and their capabilities cannot be credited to AIR. A Tree-sitter/LSP lookup that returns a symbol is a tool result; an AIR-learned capability that generalizes and composes to generate a correct held-out patch is evidence toward weight replacement.
 
+### External CPU-inference reference: `llm.asm`
+
+The [AIR evidence index](docs/research/air-evidence-index.md#external-reference-alesha-prollmasm) records the `alesha-pro/llm.asm` bare-metal Qwen3-0.6B project, its author-reported hardware results, and its limits as a comparison. Study its packed kernels, memory layout, SIMD, threading, model loading, parity checks, and fair baseline method where relevant. It remains conventional-model inference because it loads Qwen weights; it is not evidence that AIR has replaced model weights. Server/virtualized throughput figures must not be projected onto the Dell Latitude 7490. Any reproduction belongs in a separate CPU-inference baseline experiment and cannot count toward the AIR-only coding gate.
+
 ### AIR-native learned representation hypothesis (recovered design; implementation status varies)
 
 AIR's intended replacement for conventional dense model weights is a learned, compiled **symbolic-neural capability structure**, inspired by A.L.I.C.E./AIML Graphmaster. This is an architecture hypothesis, not a claim that the current `main` branch contains or validates the full system. AIR must learn and generalize behavior; SQLite, indexes, Tree-sitter, LSP, compilers, and test runners may support it but do not constitute AIR intelligence.
