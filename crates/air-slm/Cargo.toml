@@ -1,0 +1,9 @@
+[package]
+name = "air-slm"
+version = "0.1.0"
+edition = "2021"
+description = "Optional local SLM client and role orchestration for AIR"
+license = "MIT OR Apache-2.0"
+
+[lib]
+path = "src/lib.rs"
