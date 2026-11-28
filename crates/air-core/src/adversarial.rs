@@ -246,6 +246,31 @@ pub fn synthesize_signature_probes(
                 source: test_source(&function, &args, false),
                 expected: ExpectedOutcome::Completes,
             });
+            let element_type = if compact.starts_with("&[") {
+                compact.strip_prefix("&[").and_then(|value| value.strip_suffix(']'))
+            } else if compact.starts_with("Vec<") {
+                compact.strip_prefix("Vec<").and_then(|value| value.strip_suffix('>'))
+            } else { None };
+            if let Some(integer) = element_type.and_then(identifier_type) {
+                args[index] = if compact.starts_with("Vec<") {
+                    format!("vec![0{integer}]")
+                } else { format!("&[0{integer}]") };
+                probes.push(AdversarialProbe {
+                    name: format!("zero_boundary_element_{index}"),
+                    kind: ProbeKind::ZeroBoundary,
+                    source: test_source(&function, &args, false),
+                    expected: ExpectedOutcome::Completes,
+                });
+                args[index] = if compact.starts_with("Vec<") {
+                    format!("vec![{integer}::MAX]")
+                } else { format!("&[{integer}::MAX]") };
+                probes.push(AdversarialProbe {
+                    name: format!("max_boundary_element_{index}"),
+                    kind: ProbeKind::MaxBoundary,
+                    source: test_source(&function, &args, false),
+                    expected: ExpectedOutcome::Completes,
+                });
+            }
         } else if compact == "&str" || compact == "String" {
             args[index] = value_for_type(ty, "empty").ok_or(CriticError::InvalidSignature)?;
             probes.push(AdversarialProbe {
