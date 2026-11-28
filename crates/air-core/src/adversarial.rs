@@ -217,10 +217,10 @@ fn value_for_type(ty: &str, edge: &str) -> Option<String> {
 fn test_source(function: &FunctionSignature, args: &[String], assert_error: bool) -> String {
     let invocation = format!("{}({})", function.name, args.join(", "));
     if assert_error {
-        format!("assert!({invocation}.is_err(), "empty input should exercise the error path");")
+        format!(r#"assert!({invocation}.is_err(), "empty input should exercise the error path");"#)
     } else {
         format!(
-            "assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {{ let _ = {invocation}; }})).is_ok(), "adversarial input panicked");"
+            r#"assert!(std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {{ let _ = {invocation}; }})).is_ok(), "adversarial input panicked");"#
         )
     }
 }
@@ -326,11 +326,11 @@ pub fn synthesize_signature_probes(
                 name: format!("borrowed_input_scope_param_{index}"),
                 kind: ProbeKind::BorrowContention,
                 source: format!(
-                    "{{ let _owned = String::from("air"); let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {{ let _ = {}({}); }})); }}",
+                    r#"{{ let _owned = String::from("air"); let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {{ let _ = {}({}); }})); }}"#,
                     function.name,
                     function.params.iter().enumerate().map(|(i, ty)| {
                         if i == index {
-                            if canonical_type(ty) == "&str" { ""air"".to_owned() }
+                            if canonical_type(ty) == "&str" { "&_owned".to_owned() }
                             else if canonical_type(ty) == "&[u8]" { "&[0u8]".to_owned() }
                             else if canonical_type(ty) == "&[i32]" { "&[0i32]".to_owned() }
                             else if canonical_type(ty) == "&i32" { "&0i32".to_owned() }
