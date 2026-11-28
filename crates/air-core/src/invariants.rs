@@ -182,7 +182,7 @@ fn walk(node: Node<'_>, source: &[u8], findings: &mut Vec<InvariantFinding>) {
                 } else if method == "expect" && name.contains('.') {
                     add_finding(findings, FindingKind::UncheckedExpect, node, "expect may panic on an unhandled error");
                 }
-                if (method == "borrow" || method == "borrow_mut") && name.contains("RefCell") {
+                if (method == "borrow" || method == "borrow_mut") && name.contains(".") {
                     add_finding(findings, FindingKind::DynamicBorrowRisk, node, "RefCell dynamic borrow can panic when borrow rules are violated");
                 }
             }
