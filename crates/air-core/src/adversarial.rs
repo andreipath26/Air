@@ -172,15 +172,25 @@ fn parse_signature(signature: &str) -> Option<FunctionSignature> {
     Some(FunctionSignature { name, params, returns: returns.trim_end_matches('{').trim().to_owned() })
 }
 
+fn canonical_type(ty: &str) -> String {
+    let trimmed = ty.trim();
+    if let Some(rest) = trimmed.strip_prefix("&'") {
+        if let Some(space) = rest.find(char::is_whitespace) {
+            return format!("&{}", rest[space..].trim().replace(' ', ""));
+        }
+    }
+    trimmed.replace(' ', "")
+}
+
 fn identifier_type(ty: &str) -> Option<&str> {
-    let compact = ty.replace(' ', "");
+    let compact = canonical_type(ty);
     let name = compact.rsplit("::").next().unwrap_or(&compact);
     ["u8", "u16", "u32", "u64", "u128", "usize", "i8", "i16", "i32", "i64", "i128", "isize"]
         .iter().copied().find(|primitive| name == *primitive)
 }
 
 fn value_for_type(ty: &str, edge: &str) -> Option<String> {
-    let compact = ty.replace(' ', "");
+    let compact = canonical_type(ty);
     if compact == "&str" { return Some(if edge == "empty" { """".into() } else { ""air"".into() }); }
     if compact == "String" { return Some(if edge == "empty" { "String::new()".into() } else { "String::from("air")".into() }); }
     if compact.starts_with("&[") { return Some("&[]".into()); }
@@ -226,7 +236,7 @@ pub fn synthesize_signature_probes(
 
     let mut probes = Vec::new();
     for (index, ty) in function.params.iter().enumerate() {
-        let compact = ty.replace(' ', "");
+        let compact = canonical_type(ty);
         let mut args = baseline.clone();
         if compact.starts_with("&[") || compact.starts_with("&mut[") || compact.starts_with("Vec<") {
             args[index] = value_for_type(ty, "empty").ok_or(CriticError::InvalidSignature)?;
@@ -289,13 +299,13 @@ pub fn synthesize_signature_probes(
                     function.name,
                     function.params.iter().enumerate().map(|(i, ty)| {
                         if i == index {
-                            if ty.replace(' ', "") == "&str" { ""air"".to_owned() }
-                            else if ty.replace(' ', "") == "&[u8]" { "&[0u8]".to_owned() }
-                            else if ty.replace(' ', "") == "&[i32]" { "&[0i32]".to_owned() }
-                            else if ty.replace(' ', "") == "&i32" { "&0i32".to_owned() }
-                            else if ty.replace(' ', "") == "&u32" { "&0u32".to_owned() }
-                            else if ty.replace(' ', "") == "&muti32" { "&mut 0i32".to_owned() }
-                            else if ty.replace(' ', "") == "&mutu32" { "&mut 0u32".to_owned() }
+                            if canonical_type(ty) == "&str" { ""air"".to_owned() }
+                            else if canonical_type(ty) == "&[u8]" { "&[0u8]".to_owned() }
+                            else if canonical_type(ty) == "&[i32]" { "&[0i32]".to_owned() }
+                            else if canonical_type(ty) == "&i32" { "&0i32".to_owned() }
+                            else if canonical_type(ty) == "&u32" { "&0u32".to_owned() }
+                            else if canonical_type(ty) == "&muti32" { "&mut 0i32".to_owned() }
+                            else if canonical_type(ty) == "&mutu32" { "&mut 0u32".to_owned() }
                             else { baseline[i].clone() }
                         } else { baseline[i].clone() }
                     }).collect::<Vec<_>>().join(", ")
@@ -309,16 +319,6 @@ pub fn synthesize_signature_probes(
     Ok(probes)
 }
 
-pub trait SandboxedAdversarialRunner {
-    type Error: fmt::Display;
-    fn run_primary_and_adversarial(
-        &self,
-        language: &str,
-        candidate: &str,
-        primary_tests: &str,
-        probes: &[AdversarialProbe],
-    ) -> Result<CriticExecution, Self::Error>;
-}
 
 /// Run the primary prompt tests and generated probes. A successful proof is
 /// bound to exactly these bytes so it cannot authorize another candidate.
