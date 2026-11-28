@@ -281,13 +281,13 @@ fn propose_mutable_default(source: &str, function_line: usize, parameter: &str) 
     if unit.bytes().any(|b| b != b' ' && b != b'\t') { return None; }
 
     let mut changed = source.to_owned();
-    let absolute_default_start = line_start + default_start;
-    let absolute_default_end = line_start + default_end;
+    let absolute_default_start = line_start + signature_start + default_start;
+    let absolute_default_end = line_start + signature_start + default_end;
     let old_len = absolute_default_end - absolute_default_start;
     changed.replace_range(absolute_default_start..absolute_default_end, "None");
     let insertion = line_full_end + ("None".len() - old_len);
     let newline = if line.ends_with("\r") { "\r\n" } else { "\n" };
-    let literal = if source[line_start + default_start..line_start + default_end] == *"[]" {
+    let literal = if source[line_start + signature_start + default_start..line_start + signature_start + default_end] == *"[]" {
         "[]"
     } else {
         "{}"
@@ -459,7 +459,7 @@ mod tests {
     fn unsupported_or_ambiguous_shapes_abstain() {
         let annotated = "def append_item(items: list = []):\n    return items\n";
         let two_mutable = "def f(items=[], cache={}):\n    return items\n";
-        let docstring = "def f(items=[]):\n    \"\"\"docstring\""\"\n    return items\n";
+        let docstring = "def f(items=[]):\n    \"\"\"docstring\"\"\"\n    return items\n";
         for source in [annotated, two_mutable, docstring] {
             assert_eq!(
                 repair(
