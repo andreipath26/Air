@@ -126,35 +126,25 @@ fn parse_spans(value: Option<&Value>, output: &mut Vec<SourceSpan>, suggestions_
 }
 
 fn collect_suggestions(value: &Value, output: &mut Vec<SuggestedEdit>) {
+    if let Some(items) = value.get("spans").and_then(Value::as_array) {
+        for item in items {
+            let Some(replacement) = item.get("suggested_replacement").and_then(Value::as_str) else { continue };
+            let applicability = item.get("suggestion_applicability")
+                .and_then(Value::as_str).unwrap_or("Unspecified");
+            if applicability != "MachineApplicable" { continue; }
+            let mut one = Vec::new();
+            parse_spans(Some(&Value::Array(vec![item.clone()])), &mut one, true);
+            if let Some(span) = one.pop() {
+                output.push(SuggestedEdit {
+                    span,
+                    replacement: replacement.to_owned(),
+                    applicability: applicability.to_owned(),
+                });
+            }
+        }
+    }
     if let Some(children) = value.get("children").and_then(Value::as_array) {
         for child in children {
-            let applicability = child.get("children")
-                .and_then(Value::as_array)
-                .into_iter().flatten()
-                .filter_map(|_| None::<String>)
-                .next();
-            let _ = applicability;
-            let child_applicability = child.get("spans").and_then(Value::as_array)
-                .and_then(|spans| spans.iter().find_map(|span| span.get("suggested_replacement")
-                    .and_then(Value::as_str).map(|_| span.get("suggestion_applicability")
-                        .and_then(Value::as_str).unwrap_or("Unspecified"))))
-                .unwrap_or("Unspecified");
-            if child_applicability == "MachineApplicable" {
-                if let Some(items) = child.get("spans").and_then(Value::as_array) {
-                    for item in items {
-                        let Some(replacement) = item.get("suggested_replacement").and_then(Value::as_str) else { continue };
-                        let mut one = Vec::new();
-                        parse_spans(Some(&Value::Array(vec![item.clone()])), &mut one, true);
-                        if let Some(span) = one.pop() {
-                            output.push(SuggestedEdit {
-                                span,
-                                replacement: replacement.to_owned(),
-                                applicability: child_applicability.to_owned(),
-                            });
-                        }
-                    }
-                }
-            }
             collect_suggestions(child, output);
         }
     }
@@ -322,14 +312,16 @@ pub fn repair_diagnostic<B: TargetedRepairBackend>(
     }
     if !diagnostic.is_structural_borrow_or_lifetime_error() { return RepairResult::Unchanged; }
     let Some(backend) = backend else { return RepairResult::Unchanged };
-    let Some((mut request, range)) = targeted_request(source, diagnostic) else { return RepairResult::Unchanged };
+    let Some((mut request, mut range)) = targeted_request(source, diagnostic) else { return RepairResult::Unchanged };
     let mut whole = source.to_owned();
     let mut turns = 0;
     while turns < MAX_TARGETED_REPAIR_TURNS {
         turns += 1;
         let Ok(replacement) = backend.repair_span(&request) else { break };
-        if replacement.is_empty() || replacement.len() > MAX_REPAIR_CONTEXT_BYTES { break; }
+        if replacement.is_empty() || replacement.len() > MAX_REPAIR_CONTEXT_BYTES
+            || replacement == request.code_span { break; }
         whole.replace_range(range.clone(), &replacement);
+        range.end = range.start + replacement.len();
         request.code_span = replacement;
         if request.code_span.len() > MAX_REPAIR_CONTEXT_BYTES { break; }
         // This is a targeted proposal loop; the caller must re-run rustc and
