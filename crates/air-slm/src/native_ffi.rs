@@ -9,7 +9,7 @@ use crate::prompt::{StablePrompt, StablePromptBuilder, STABLE_SYSTEM_PROMPT};
 use crate::runner::{Completion, CompletionBackend, GenerationOptions, ModelFamily, ResourceLimits, ThinkingMode};
 use std::{
     fs, io::{BufReader, Read, Write}, path::Path, process::{Child, ChildStdin, ChildStdout, Command, Stdio},
-    sync::Mutex, time::{Duration, Instant},
+    sync::{atomic::{AtomicU32, Ordering}, Mutex}, time::{Duration, Instant},
 };
 
 const CODE_TEMPERATURE:f32=0.2;
@@ -19,7 +19,7 @@ const MAX_SYSTEM_BYTES:usize=8*1024;
 const MAX_OUTPUT_BYTES:usize=32*1024;
 
 struct Worker { child:Child, input:ChildStdin, output:BufReader<ChildStdout> }
-pub struct NativeLlamaCppRunner { worker:Mutex<Worker>, limits:ResourceLimits, family:ModelFamily }
+pub struct NativeLlamaCppRunner { worker:Mutex<Worker>, limits:ResourceLimits, family:ModelFamily, last_tokens:AtomicU32 }
 
 impl NativeLlamaCppRunner {
     pub fn launch(model_path:impl AsRef<Path>,family:ModelFamily,limits:ResourceLimits)->Result<Self,String>{
@@ -43,11 +43,12 @@ impl NativeLlamaCppRunner {
         let mut ready=[0u8;4];
         output.read_exact(&mut ready).map_err(|e|format!("llama.cpp worker failed during model load: {e}"))?;
         if &ready!=b"AIR1" { let _=child.kill(); let _=child.wait(); return Err("llama.cpp worker returned invalid readiness marker".into()); }
-        Ok(Self{worker:Mutex::new(Worker{child,input,output}),limits,family})
+        Ok(Self{worker:Mutex::new(Worker{child,input,output}),limits,family,last_tokens:AtomicU32::new(0)})
     }
 
     pub fn family(&self)->ModelFamily { self.family }
     pub fn limits(&self)->ResourceLimits { self.limits }
+    pub fn last_generated_tokens(&self)->u32 { self.last_tokens.load(Ordering::Relaxed) }
 
     pub fn complete_with_stable_prompt(&self,prompt:&StablePrompt,options:&GenerationOptions)->Result<Completion,String>{
         let system=prompt.system_prefix();
@@ -76,7 +77,8 @@ impl NativeLlamaCppRunner {
         let status=read_u32(&mut worker.output)?;
         let length=read_u32(&mut worker.output)? as usize;
         let elapsed_us=read_u64(&mut worker.output)?;
-        let _tokens=read_u32(&mut worker.output)?;
+        let tokens=read_u32(&mut worker.output)?;
+        self.last_tokens.store(tokens,Ordering::Relaxed);
         if length>output_cap {return Err("native output exceeds byte cap".into())}
         let mut bytes=vec![0u8;length];
         worker.output.read_exact(&mut bytes).map_err(|e|e.to_string())?;
@@ -103,6 +105,24 @@ mod tests {
  use super::*;
  #[test] fn native_config_is_cpu_mmap_q8_and_four_threads(){
   let source=include_str!("llama_cpp_worker.cpp");
-  for piece in ["LLAMA_LOAD_MODE_MMAP","n_gpu_layers = 0","n_threads = 4","GGML_TYPE_Q8_0","llama_memory_seq_rm","llama_sampler_init_grammar"] {assert!(source.contains(piece),"missing native setting {piece}");}
+  for piece in ["LLAMA_LOAD_MODE_MMAP","n_gpu_layers=0","n_threads=n_threads","GGML_TYPE_Q8_0","llama_memory_seq_rm","llama_sampler_init_grammar"] {assert!(source.contains(piece),"missing native setting {piece}");}
+ }
+
+ /// Optional real-model measurement. It runs only when the feature is enabled
+ /// and AIR_GGUF_PATH points to caller-owned local weights; CI never downloads them.
+ #[test]
+ fn local_gguf_throughput_opt_in() {
+  let path=match std::env::var("AIR_GGUF_PATH") {Ok(path)=>path,Err(_)=>{eprintln!("AIR_GGUF_PATH unset; local GGUF measurement skipped");return;}};
+  let family=match std::env::var("AIR_GGUF_FAMILY").as_deref(){Ok("smollm3")=>ModelFamily::SmolLm3B,_=>ModelFamily::Gemma4E2b};
+  let limits=ResourceLimits{max_rss_bytes:6*1024*1024*1024,context_tokens:2048,max_new_tokens:128};
+  let runner=NativeLlamaCppRunner::launch(path,family,limits).expect("load caller-provided local GGUF");
+  let prompt=StablePromptBuilder::default().build("Write a Rust function that reverses a string slice.").unwrap();
+  let options=GenerationOptions{max_new_tokens:128,..GenerationOptions::default()};
+  let started=Instant::now();
+  let result=runner.complete_with_stable_prompt(&prompt,&options).unwrap();
+  let elapsed=result.elapsed.as_secs_f64().max(started.elapsed().as_secs_f64());
+  let tokens=runner.last_generated_tokens();
+  println!("AIR_GGUF_BENCH family={:?} generated_tokens={} latency_ms={:.3} tokens_per_second={:.3}",family,tokens,elapsed*1000.0,tokens as f64/elapsed.max(0.001));
+  assert!(tokens>0);
  }
 }
