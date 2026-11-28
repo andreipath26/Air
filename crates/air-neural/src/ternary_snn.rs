@@ -242,7 +242,7 @@ mod tests {
         router.update_from_feedback(&input, 0, 1).unwrap();
         assert_eq!(router.weight(0, 4), Ok(Ternary::Positive));
         assert_eq!(router.weight(1, 4), Ok(Ternary::Negative));
-        assert_eq!(router.score(&input)[0].score, 1);
+        assert_eq!(router.score(&input)[0].score, HYPERVECTOR_BITS as i32, "feedback updates all 10,000 features");
     }
 
     #[test] fn packed_scores_match_reference_bitwise_dot() {
