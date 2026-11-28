@@ -3,7 +3,7 @@
 //! Callers must provide compiler and test evidence from air-core before promotion.
 //! The archive stores only verified examples; writes rebuild the canonical archive
 //! atomically, which also compacts duplicates and stale entries.
-use air_weights::{ArchiveBuilder, ArchiveError, ArchiveReader};
+use air_weights::{overlay::{build_delta_archive, decode_delta_archive, DeltaTemplate}, ArchiveError, ArchiveReader};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{error::Error, fmt, fs, io, path::{Path, PathBuf}};
@@ -20,16 +20,7 @@ impl Verification {
     pub fn is_verified(self) -> bool { self.compiler_clean && self.tests_passed }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
-pub struct SymbolicTemplate {
-    pub language: String,
-    pub prompt: String,
-    pub template: String,
-    /// A stable 10,000-bit HDC address (the final word uses only 16 bits).
-    pub signature: Vec<u64>,
-    /// SHA-256 of language, prompt, and template; used for deterministic deduplication.
-    pub fingerprint: String,
-}
+pub type SymbolicTemplate = DeltaTemplate;
 
 #[derive(Debug)]
 pub enum DistillationError {
@@ -132,19 +123,13 @@ impl OverlayStore {
     fn read_entries(&self) -> Result<Vec<SymbolicTemplate>, DistillationError> {
         if !self.path.exists() { return Ok(Vec::new()); }
         let archive = ArchiveReader::open(&self.path)?;
-        let bytes = archive.section("templates").ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "templates section missing"))?;
-        Ok(serde_json::from_slice(bytes)?)
+        Ok(decode_delta_archive(&archive)?)
     }
 
     fn write_compacted(&self, mut entries: Vec<SymbolicTemplate>) -> Result<usize, DistillationError> {
         entries.sort_by(|a, b| a.fingerprint.cmp(&b.fingerprint));
         entries.dedup_by(|a, b| a.fingerprint == b.fingerprint);
-        let bytes = serde_json::to_vec(&entries)?;
-        let mut builder = ArchiveBuilder::new("air-delta-overlay");
-        builder.add_language("rust")?;
-        builder.add_language("python")?;
-        builder.add_section("templates", "symbolic-templates", &bytes)?;
-        let archive = builder.finish()?;
+        let archive = build_delta_archive(&entries)?;
         if let Some(parent) = self.path.parent() { fs::create_dir_all(parent)?; }
         let temp = self.path.with_extension(format!("airw.tmp-{}", std::process::id()));
         fs::write(&temp, archive)?;
