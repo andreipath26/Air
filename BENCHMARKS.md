@@ -6,16 +6,16 @@ This report separates the current CI path-correctness benchmark from historical 
 
 ## Fresh GitHub Actions session — 2026-11-28
 
-- Workflow: [Rust Dual Gauntlet Benchmark run 8](https://github.com/andreipath26/Air/actions/runs/46095894059), successful on `feat/neuro-symbolic-dual-gauntlet` at `9a5cfac634e79b0e3e35d7e698e73c7e58dd76fa`.
-- Workspace tests: **109 passed, 0 failed** across 11 libtest summaries; fuzzy routing: **6/6 passed**.
+- Workflow: [Rust Dual Gauntlet Benchmark run 13](https://github.com/andreipath26/Air/actions/runs/46096546657), successful on `feat/neuro-symbolic-dual-gauntlet` at `89102418c3ea42d8a91bb2f44426b2d9e38ed3aa`.
+- Workspace tests: **110 passed, 0 failed** across 11 libtest summaries; fuzzy routing: **6/6 passed**.
 - The same 12 Rust challenges passed through AIR core verification and `rustc --emit=metadata` in both modes. Cases: ownership, borrowing, lifetime, trait, generic, display, async, concurrency, result, option, macro, iterator.
 - Mode B uses explicit `deep`/`!` triggers, `DeterministicMock`, and `GeneratedOutputVerifier`; it does not measure real model inference.
-- [Actions artifact rust-dual-gauntlet-46095894059](https://api.github.com/repos/andreipath26/Air/actions/artifacts/15243516969) contains raw logs, per-case tables, resource files, and the job summary. The job log was fetched from GitHub Actions API job `140827025177`.
+- [Actions artifact rust-dual-gauntlet-46096546657](https://api.github.com/repos/andreipath26/Air/actions/artifacts/15243790532) contains raw logs, per-case tables, resource files, and the job summary. The job log was fetched from GitHub Actions API job `140829080436`.
 
 | Mode | Cases passed | Cases failed | Mean case latency (ms) | Wall latency (ms) | Peak Rust test-process RSS (MB) | Peak cargo-invocation RSS (MB) |
 |---|---:|---:|---:|---:|---:|---:|
-| A: neuro-symbolic only | 12/12 | 0 | 2.361 | 70.0 | 4.00 | 196.77 |
-| B: dual + mock SLM escalation | 12/12 | 0 | 2.373 | 80.0 | 4.00 | 196.72 |
+| A: neuro-symbolic only | 12/12 | 0 | 2.748 | 90.0 | 4.00 | 196.75 |
+| B: dual + mock SLM escalation | 12/12 | 0 | 2.713 | 90.0 | 4.00 | 196.72 |
 
 RSS boundaries: per-case values read `VmHWM` for the Rust test process and round up to MB. Cargo-invocation values are `/usr/bin/time` maximum RSS (`%M`) converted from KiB to MiB. These are GitHub-hosted runner measurements and do not establish Tier 0 hardware performance or native-model memory use.
 
