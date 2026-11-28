@@ -25,7 +25,11 @@ pub fn hamming_distance(a: &HyperVector, b: &HyperVector) -> u32 {
 /// Portable reference implementation used for fallback and parity testing.
 #[inline]
 pub fn hamming_distance_scalar(a: &HyperVector, b: &HyperVector) -> u32 {
-    a.0.iter().zip(b.0.iter()).map(|(x, y)| (x ^ y).count_ones()).sum()
+    let full_words = HYPERVECTOR_WORDS - 1;
+    let whole = a.0[..full_words].iter().zip(&b.0[..full_words])
+        .map(|(x, y)| (x ^ y).count_ones()).sum::<u32>();
+    let logical_tail_mask = (1u64 << (crate::hdc::HYPERVECTOR_BITS % 64)) - 1;
+    whole + ((a.0[full_words] ^ b.0[full_words]) & logical_tail_mask).count_ones()
 }
 
 #[cfg(target_arch = "x86_64")]
@@ -111,10 +115,9 @@ unsafe fn hamming_distance_avx2(a: &HyperVector, b: &HyperVector) -> u32 {
     let mut lanes = [0u64; 4];
     _mm256_storeu_si256(lanes.as_mut_ptr().cast::<__m256i>(), total_lanes);
     let mut total = lanes.iter().sum::<u64>() as u32;
-    let total_bytes = HYPERVECTOR_WORDS * std::mem::size_of::<u64>();
-    for byte_index in vector_count * 32..total_bytes {
-        total += (left.add(byte_index).read() ^ right.add(byte_index).read()).count_ones();
-    }
+    let full_words = HYPERVECTOR_WORDS - 1;
+    let logical_tail_mask = (1u64 << (crate::hdc::HYPERVECTOR_BITS % 64)) - 1;
+    total += ((a.0[full_words] ^ b.0[full_words]) & logical_tail_mask).count_ones();
     total
 }
 
@@ -155,6 +158,15 @@ mod tests {
                 assert_eq!(actual, hamming_distance_scalar(&a, &b));
             }
         }
+    }
+
+    #[test]
+    fn ignores_nonlogical_padding_bits_in_last_word() {
+        let mut a = HyperVector::zero();
+        let b = HyperVector::zero();
+        a.0[HYPERVECTOR_WORDS - 1] = u64::MAX;
+        assert_eq!(hamming_distance_scalar(&a, &b), 16);
+        assert_eq!(hamming_distance(&a, &b), 16);
     }
 
     #[test]
