@@ -120,7 +120,9 @@ fn mode() -> &'static str {
     match std::env::var("AIR_GAUNTLET_MODE").as_deref() {
         Ok("neuro") => "neuro",
         Ok("dual") => "dual",
-        _ => panic!("AIR_GAUNTLET_MODE must be set to neuro or dual"),
+        Err(std::env::VarError::NotPresent) => "neuro",
+        Err(std::env::VarError::NotUnicode(_)) => panic!("AIR_GAUNTLET_MODE must be valid Unicode"),
+        Ok(other) => panic!("AIR_GAUNTLET_MODE must be neuro or dual, got {other:?}"),
     }
 }
 
