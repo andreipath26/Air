@@ -178,6 +178,7 @@ fn landlock_access(abi: i32) -> u64 {
     const MAKE_SYM: u64 = 1 << 12;
     const REFER: u64 = 1 << 13;
     const TRUNCATE: u64 = 1 << 14;
+    const IOCTL_DEV: u64 = 1 << 15;
     let mut access = EXECUTE
         | WRITE_FILE
         | READ_FILE
@@ -196,6 +197,9 @@ fn landlock_access(abi: i32) -> u64 {
     }
     if abi >= 3 {
         access |= TRUNCATE;
+    }
+    if abi >= 5 {
+        access |= IOCTL_DEV;
     }
     access
 }
