@@ -337,14 +337,14 @@ mod tests {
             _ => Ternary::Zero,
         }).collect();
         let encoding = BitcosTernary::encode(&weights).unwrap();
-        let mut builder = crate::ArchiveBuilder::new("bitcos-mmap");
+        let mut builder = air_weights::ArchiveBuilder::new("bitcos-mmap");
         builder.add_language("rust").unwrap();
         builder.set_header_flags(AIRW_FLAG_BITCOS_TERNARY).unwrap();
         builder.add_section("presence", "bitcos-presence-v1", encoding.presence()).unwrap();
         builder.add_section("signs", "bitcos-signs-v1", encoding.signs()).unwrap();
         std::fs::write(&path, builder.finish().unwrap()).unwrap();
 
-        let reader = crate::ArchiveReader::open(&path).unwrap();
+        let reader = air_weights::ArchiveReader::open(&path).unwrap();
         assert!(reader.is_memory_mapped());
         let presence = reader.section("presence").unwrap();
         let signs = reader.section("signs").unwrap();
