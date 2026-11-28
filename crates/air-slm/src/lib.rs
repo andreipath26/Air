@@ -6,10 +6,17 @@ use std::{env, fmt, io::{Read, Write}, net::{SocketAddr, TcpListener, TcpStream}
 const MAX_HTTP_RESPONSE_BYTES: usize = 8 * 1024 * 1024;
 
 fn bounded_value(value:u32,min:u32,max:u32)->u32{value.clamp(min,max)}
-fn bounded_env(name:&str,default:u32,min:u32,max:u32)->Result<u32,SlmError>{
- let raw=match env::var(name){Ok(v)=>v,Err(env::VarError::NotPresent)=>return Ok(bounded_value(default,min,max)),Err(e)=>return Err(SlmError::Config(format!("{name}: {e}")))};
+fn bounded_setting(name:&str,raw:Option<&str>,default:u32,min:u32,max:u32)->Result<u32,SlmError>{
+ let Some(raw)=raw else{return Ok(bounded_value(default,min,max))};
  let value=raw.parse::<u32>().map_err(|e|SlmError::Config(format!("{name}: {e}")))?;
  Ok(bounded_value(value,min,max))
+}
+fn bounded_env(name:&str,default:u32,min:u32,max:u32)->Result<u32,SlmError>{
+ match env::var(name){
+  Ok(raw)=>bounded_setting(name,Some(&raw),default,min,max),
+  Err(env::VarError::NotPresent)=>bounded_setting(name,None,default,min,max),
+  Err(e)=>Err(SlmError::Config(format!("{name}: {e}"))),
+ }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -211,8 +218,11 @@ fn ioerr(e:std::io::Error)->SlmError{SlmError::Io(e.to_string())}
    (false,false,&[][..],"! repair",SlmRole::PatchFallback),
   ] {let (r,_)=run(prompt,ambiguous,low,candidates);assert_eq!(r.role,expected);assert!(!r.content.contains("hidden"));assert!(!r.content.contains("secret"));}
  }
- #[test]fn response_budget_settings_are_hard_capped(){
-  assert_eq!(bounded_value(100_000,256,8192),8192);assert_eq!(bounded_value(100,1,8),8);assert_eq!(bounded_value(0,1,8),1);
+ #[test]fn response_budget_settings_are_hard_capped_and_invalid_values_rejected(){
+  assert_eq!(bounded_setting("context",Some("100000"),4096,256,8192).unwrap(),8192);
+  assert_eq!(bounded_setting("threads",Some("100"),4,1,8).unwrap(),8);
+  assert_eq!(bounded_setting("context",None,4096,256,8192).unwrap(),4096);
+  assert!(bounded_setting("context",Some("not-a-number"),4096,256,8192).is_err());
  }
  #[test]fn extracts_chat_content(){
   assert_eq!(extract_content("{\"choices\":[{\"message\":{\"content\":\"hi\\nthere\"}}]}").unwrap(),"hi\nthere");
