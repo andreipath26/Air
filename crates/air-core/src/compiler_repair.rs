@@ -331,6 +331,75 @@ pub fn repair_diagnostic<B: TargetedRepairBackend>(
     if turns > 0 && whole != source { RepairResult::Tier2 { source: whole, turns } } else { RepairResult::Unchanged }
 }
 
+/// Result of a direct, dependency-free rustc metadata check.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct RustcCheckOutput {
+    pub success: bool,
+    pub status_code: Option<i32>,
+    pub diagnostics: Vec<CompilerDiagnostic>,
+    pub stdout: String,
+    pub stderr: String,
+}
+
+/// Compile a bounded source string with rustc's structured JSON diagnostics.
+/// This uses rustc directly (no shell and no cargo build scripts), writes only
+/// into a unique temporary directory, and removes that directory afterwards.
+/// Callers should still apply their own wall-clock/resource limits when
+/// compiling untrusted or adversarial source.
+pub fn run_rustc_json_check(source: &str, edition: &str) -> std::io::Result<RustcCheckOutput> {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static NEXT_TEMP_ID: AtomicU64 = AtomicU64::new(0);
+    const MAX_SOURCE_BYTES: usize = 1_048_576;
+
+    if source.len() > MAX_SOURCE_BYTES {
+        return Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, "source exceeds rustc check limit"));
+    }
+    if !matches!(edition, "2015" | "2018" | "2021" | "2024") {
+        return Err(std::io::Error::new(std::io::ErrorKind::InvalidInput, "unsupported Rust edition"));
+    }
+
+    let temp_dir = std::env::temp_dir();
+    let mut work_dir = None;
+    for _ in 0..16 {
+        let id = NEXT_TEMP_ID.fetch_add(1, Ordering::Relaxed);
+        let candidate = temp_dir.join(format!("air-rustc-check-{}-{id}", std::process::id()));
+        match std::fs::create_dir(&candidate) {
+            Ok(()) => { work_dir = Some(candidate); break; }
+            Err(error) if error.kind() == std::io::ErrorKind::AlreadyExists => continue,
+            Err(error) => return Err(error),
+        }
+    }
+    let work_dir = work_dir.ok_or_else(|| std::io::Error::new(
+        std::io::ErrorKind::AlreadyExists, "could not allocate a rustc check directory"
+    ))?;
+    let source_path = work_dir.join("input.rs");
+    let output_path = work_dir.join("input.rmeta");
+    let execution = (|| {
+        std::fs::write(&source_path, source)?;
+        std::process::Command::new("rustc")
+            .arg("--error-format=json")
+            .arg("--edition").arg(edition)
+            .arg("--crate-type=lib")
+            .arg("--crate-name=air_verification_input")
+            .arg("--emit=metadata")
+            .arg("-o").arg(&output_path)
+            .arg(&source_path)
+            .output()
+    })();
+    let _ = std::fs::remove_dir_all(&work_dir);
+    let output = execution?;
+    let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
+    let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
+    let diagnostics = parse_json_diagnostics(&format!("{stdout}\n{stderr}"));
+    Ok(RustcCheckOutput {
+        success: output.status.success(),
+        status_code: output.status.code(),
+        diagnostics,
+        stdout,
+        stderr,
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -416,6 +485,14 @@ mod tests {
             }
             other => panic!("expected targeted repair, got {other:?}"),
         }
+    }
+
+    #[test]
+    fn rustc_runner_returns_structured_diagnostics() {
+        let source = "fn fail() { let value = String::from(\"x\"); drop(value); println!(\"{}\", value); }";
+        let checked = run_rustc_json_check(source, "2021").expect("rustc is available in Rust CI");
+        assert!(!checked.success);
+        assert!(checked.diagnostics.iter().any(|diagnostic| diagnostic.code.as_deref() == Some("E0382")));
     }
 
     #[test]
