@@ -481,7 +481,7 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
         // The posix_spawn child inherits Landlock, no_new_privs, seccomp and
         // all rlimits. Unknown and namespace/process flags are rejected.
         let clone_deny = SECCOMP_RET_ERRNO
-            | if allow_fork { libc::EACCES as u32 } else { libc::EPERM as u32 };
+            | if allow_fork { libc::E2BIG as u32 } else { libc::EPERM as u32 };
         // Use calculated branch offsets for compiler-only spawn words;
         // this keeps the BPF jumps correct as the strict thread filter evolves.
         let clone_jump = code.len();
@@ -882,7 +882,7 @@ mod tests {
         config.allow_fork_for_toolchain(true);
         let bad_flags = 0x0000_0011u32 | 0x0000_1000u32; // SIGCHLD | CLONE_PIDFD
         let script = format!(
-            "import ctypes, errno; libc=ctypes.CDLL(None, use_errno=True); r=libc.syscall({}, {}, 0, 0, 0, 0); e=ctypes.get_errno(); print(e); assert r == -1 and e == errno.EACCES",
+            "import ctypes, errno; libc=ctypes.CDLL(None, use_errno=True); r=libc.syscall({}, {}, 0, 0, 0, 0); e=ctypes.get_errno(); print(e); assert r == -1 and e == errno.E2BIG",
             libc::SYS_clone,
             bad_flags,
         );
@@ -921,8 +921,8 @@ mod tests {
 
     #[test]
     fn rust_command_spawn_probe_marker() {
-        let output = Command::new("cc").arg("--version").output().unwrap();
-        assert!(output.status.success());
+        let status = Command::new("cc").arg("--version").status().unwrap();
+        assert!(status.success());
         println!("RUST_COMMAND_CC=pass");
     }
 
