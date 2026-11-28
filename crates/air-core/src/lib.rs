@@ -69,6 +69,7 @@ pub mod coding;
 pub mod python_repairs;
 
 pub mod distillation;
+pub mod adversarial;
 pub mod ast_index;
 pub mod dependency_slice;
 
