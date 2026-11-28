@@ -95,11 +95,8 @@ unsafe fn hamming_distance_avx2(a: &HyperVector, b: &HyperVector) -> u32 {
         let (fours_a, twos_a) = csa(twos_a, twos_b, twos_c);
         let (fours_b, twos_b) = csa(twos_d, twos_e, twos);
         let (eights_a, fours_a) = csa(fours_a, fours_b, fours);
-        let (sixteens_a, eights_a) = csa(eights_a, eights);
-        sixteens = _mm256_add_epi8(
-            sixteens,
-            _mm256_add_epi8(sixteens_a, _mm256_set1_epi8(1)),
-        );
+        let (sixteens_a, eights_a) = csa(eights_a, eights, zero);
+        sixteens = _mm256_add_epi8(sixteens, sixteens_a);
         eights = eights_a;
         fours = fours_a;
         twos = twos_a;
