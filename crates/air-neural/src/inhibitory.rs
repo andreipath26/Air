@@ -13,7 +13,7 @@ const SECTION_NAME: &str = "inhibitory-prototypes";
 const SECTION_KIND: &str = "inhibitory-hdc-v1";
 const PAYLOAD_MAGIC: [u8; 4] = *b"IHDP";
 const PAYLOAD_VERSION: u32 = 1;
-const PAYLOAD_HEADER_BYTES: usize = 12;
+const PAYLOAD_HEADER_BYTES: usize = 16;
 pub const MAX_INHIBITORY_PROTOTYPES: usize = 4096;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
