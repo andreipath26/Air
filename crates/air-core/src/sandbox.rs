@@ -390,6 +390,7 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
     // including SIGCHLD, so this cannot be widened by extra clone capabilities.
     const POSIX_SPAWN_FLAGS: u32 = 0x0000_4111; // CLONE_VM | CLONE_VFORK | SIGCHLD
     const CLONE_FORK_FLAGS: u32 = 0x0000_0011; // SIGCHLD, allowed only in trusted compiler mode
+    const CLONE_FORK_THREAD_FLAGS: u32 = 0x0120_0011; // SIGCHLD | CHILD_SETTID | CHILD_CLEARTID
     // glibc may set this to return the child PID without widening process semantics.
     const POSIX_SPAWN_PARENT_TID_FLAGS: u32 = POSIX_SPAWN_FLAGS | 0x0010_0000;
     // Rust/glibc pthread flags. Reject all bits outside this mask, especially
@@ -479,7 +480,9 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
         // SYS_vfork is denied by default and allowed only in compiler mode.
         // The posix_spawn child inherits Landlock, no_new_privs, seccomp and
         // all rlimits. Unknown and namespace/process flags are rejected.
-        // Use calculated branch offsets for the two compiler-only spawn words;
+        let clone_deny = SECCOMP_RET_ERRNO
+            | if allow_fork { libc::EACCES as u32 } else { libc::EPERM as u32 };
+        // Use calculated branch offsets for compiler-only spawn words;
         // this keeps the BPF jumps correct as the strict thread filter evolves.
         let clone_jump = code.len();
         code.push(jump_eq(libc::SYS_clone as u32, 0, 0));
@@ -496,15 +499,18 @@ fn build_seccomp_filter(allow_vfork: bool, allow_fork: bool) -> Vec<libc::sock_f
             code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
             spawn_jumps.push(code.len());
             code.push(jump_eq(CLONE_FORK_FLAGS, 0, 0));
+            code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
+            spawn_jumps.push(code.len());
+            code.push(jump_eq(CLONE_FORK_THREAD_FLAGS, 0, 0));
         }
         code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
         code.push(ins(BPF_ALU | BPF_AND | BPF_K, 0, 0, THREAD_FLAGS));
         code.push(jump_eq(THREAD_FLAGS, 1, 0));
-        code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
+        code.push(ins(BPF_RET | BPF_K, 0, 0, clone_deny));
         code.push(ins(BPF_LD | BPF_W | BPF_ABS, 0, 0, OFF_ARG0));
         code.push(ins(BPF_ALU | BPF_AND | BPF_K, 0, 0, !THREAD_ALLOWED_FLAGS));
         code.push(jump_eq(0, 1, 0));
-        code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ERRNO | libc::EPERM as u32));
+        code.push(ins(BPF_RET | BPF_K, 0, 0, clone_deny));
         // Exact posix-spawn words and supported thread flags reach this allow.
         let clone_allow = code.len();
         code.push(ins(BPF_RET | BPF_K, 0, 0, SECCOMP_RET_ALLOW));
@@ -863,42 +869,6 @@ mod tests {
 
 
 
-    #[cfg(target_os = "linux")]
-    #[test]
-    fn compiler_filter_allows_only_exact_spawn_clone_flags() {
-        if !Path::new("/usr/bin/python3").exists() {
-            return;
-        }
-        let root = root();
-        let mut config = shell_config(&root);
-        config.allow_vfork_for_toolchain(true);
-        config.allow_fork_for_toolchain(true);
-        let spawn_flags = 0x0000_4111u32; // CLONE_VM | CLONE_VFORK | SIGCHLD
-        let parent_tid_flags = spawn_flags | 0x0010_0000u32; // + CLONE_PARENT_SETTID
-        let namespace_flags = spawn_flags | 0x0002_0000u32; // + CLONE_NEWNS
-        let script = format!(
-            "import ctypes, errno; libc=ctypes.CDLL(None, use_errno=True); clone={}; cases=[({}, errno.EINVAL), ({}, None), ({}, errno.EPERM)]; exec('for flags, expected in cases:\\n ctypes.set_errno(0); result=libc.syscall(clone, flags, 0, 0, 0, 0); actual=ctypes.get_errno(); print(flags, result, actual, expected, flush=True); assert result == -1; assert actual != errno.EPERM if expected is None else actual == expected'); print('SANDBOX_CLONE_FLAGS=pass')",
-            libc::SYS_clone,
-            spawn_flags,
-            parent_tid_flags,
-            namespace_flags,
-        );
-        let args = [
-            OsString::from("-S"),
-            OsString::from("-c"),
-            OsString::from(script),
-        ];
-        let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
-        assert!(
-            output.status.success(),
-            "compiler clone policy mismatch: stdout={} stderr={}",
-            String::from_utf8_lossy(&output.stdout),
-            String::from_utf8_lossy(&output.stderr),
-        );
-        assert!(String::from_utf8_lossy(&output.stdout).contains("SANDBOX_CLONE_FLAGS=pass"));
-        let _ = std::fs::remove_dir_all(root);
-    }
-
 
     #[cfg(target_os = "linux")]
     #[test]
@@ -912,14 +882,14 @@ mod tests {
         config.allow_fork_for_toolchain(true);
         let bad_flags = 0x0000_0011u32 | 0x0000_1000u32; // SIGCHLD | CLONE_PIDFD
         let script = format!(
-            "import ctypes, errno; libc=ctypes.CDLL(None, use_errno=True); r=libc.syscall({}, {}, 0, 0, 0, 0); e=ctypes.get_errno(); print(e); assert r == -1 and e == errno.EPERM",
+            "import ctypes, errno; libc=ctypes.CDLL(None, use_errno=True); r=libc.syscall({}, {}, 0, 0, 0, 0); e=ctypes.get_errno(); print(e); assert r == -1 and e == errno.EACCES",
             libc::SYS_clone,
             bad_flags,
         );
         let args = [OsString::from("-S"), OsString::from("-c"), OsString::from(script)];
         let output = run_sandboxed("/usr/bin/python3", &args, &config).unwrap();
         assert!(output.status.success(), "bad clone flags were not denied: {}", String::from_utf8_lossy(&output.stderr));
-        assert!(String::from_utf8_lossy(&output.stdout).trim().ends_with(&libc::EPERM.to_string()));
+        assert!(String::from_utf8_lossy(&output.stdout).trim().ends_with(&libc::EACCES.to_string()));
         let _ = std::fs::remove_dir_all(root);
     }
 
@@ -941,6 +911,38 @@ mod tests {
         assert!(
             output.status.success() && String::from_utf8_lossy(&output.stdout).contains("SANDBOX_SIGCHLD_CLONE=pass"),
             "compiler profile failed clone(SIGCHLD): status={:?} stdout={} stderr={}",
+            output.status,
+            String::from_utf8_lossy(&output.stdout),
+            String::from_utf8_lossy(&output.stderr),
+        );
+        let _ = std::fs::remove_dir_all(root);
+    }
+
+
+    #[test]
+    fn rust_command_spawn_probe_marker() {
+        let output = Command::new("cc").arg("--version").output().unwrap();
+        assert!(output.status.success());
+        println!("RUST_COMMAND_CC=pass");
+    }
+
+    #[cfg(target_os = "linux")]
+    #[test]
+    fn compiler_profile_can_spawn_cc_with_rust_std() {
+        let root = root();
+        let mut config = shell_config(&root);
+        config.allow_vfork_for_toolchain(true);
+        config.allow_fork_for_toolchain(true);
+        let mut args = vec![
+            OsString::from("--exact"),
+            OsString::from("sandbox::tests::rust_command_spawn_probe_marker"),
+            OsString::from("--nocapture"),
+        ];
+        let current = std::env::current_exe().unwrap();
+        let output = run_sandboxed(current, &args, &config).unwrap();
+        assert!(
+            output.status.success() && String::from_utf8_lossy(&output.stdout).contains("RUST_COMMAND_CC=pass"),
+            "Rust std cc spawn failed: status={:?} stdout={} stderr={}",
             output.status,
             String::from_utf8_lossy(&output.stdout),
             String::from_utf8_lossy(&output.stderr),
