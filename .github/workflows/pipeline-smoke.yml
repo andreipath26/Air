@@ -54,7 +54,7 @@ jobs:
             2>&1 | tee /tmp/mode-a.log
           cat /tmp/mode-a-resource.txt
 
-      - name: Run Mode B dual with DeterministicMock (no model)
+      - name: Run Mode B dual with diagnostic repair and DeterministicMock SLM
         shell: bash
         run: |
           set -euo pipefail
@@ -62,6 +62,10 @@ jobs:
             env AIR_PIPELINE_SMOKE_MODE=dual cargo test -p air-slm --test pipeline_smoke -- --nocapture --test-threads=1 \
             2>&1 | tee /tmp/mode-b.log
           cat /tmp/mode-b-resource.txt
+          cargo test -p air-core compiler_repair::tests -- --nocapture --test-threads=1 \
+            2>&1 | tee /tmp/mode-b-diagnostics.log
+          cargo test -p air-slm repair_adapter::tests -- --nocapture --test-threads=1 \
+            2>&1 | tee /tmp/mode-b-repair-adapter.log
 
       - name: Validate pipeline smoke results and publish CI summary
         if: always()
@@ -106,7 +110,7 @@ jobs:
               "|---|---:|---:|---:|---:|---:|",
           ]
           for mode, passed, failed, mean_ms, wall_ms, peak_mb in rows:
-              label = "A: neuro-symbolic pipeline smoke (no model)" if mode == "neuro" else "B: dual with DeterministicMock (no model)"
+              label = "A: neuro-symbolic pipeline smoke (no model)" if mode == "neuro" else "B: dual + diagnostic repair + DeterministicMock SLM (no model)"
               lines.append(f"| {label} | {passed}/12 | {failed} | {mean_ms:.3f} | {wall_ms:.1f} | {peak_mb:.2f} |")
           summary = "\n".join(lines) + "\n"
           print(summary)
@@ -124,6 +128,8 @@ jobs:
             /tmp/workspace-tests.log
             /tmp/mode-a.log
             /tmp/mode-b.log
+            /tmp/mode-b-diagnostics.log
+            /tmp/mode-b-repair-adapter.log
             /tmp/mode-a-resource.txt
             /tmp/mode-b-resource.txt
             /tmp/mode-neuro-cases.tsv
