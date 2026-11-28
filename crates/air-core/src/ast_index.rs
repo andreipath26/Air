@@ -125,7 +125,7 @@ pub struct MappedAstSymbolIndex {
 }
 impl MappedAstSymbolIndex {
     pub fn open(path: impl AsRef<Path>) -> Result<Self, AstIndexError> {
-        let archive = ArchiveReader::open(PathBuf::from(path))?;
+        let archive = ArchiveReader::open(path)?;
         let bytes = archive.section("symbols").ok_or_else(|| io::Error::new(io::ErrorKind::InvalidData, "symbols section missing"))?;
         let index = serde_json::from_slice(bytes)?;
         Ok(Self { archive, index })
