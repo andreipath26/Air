@@ -368,23 +368,28 @@ mod tests {
     use super::*;
 
     fn artifact_dir_for_test() -> PathBuf {
-        fn has_rlib(path: &Path) -> bool {
-            fs::read_dir(path).ok().into_iter().flatten().flatten()
-                .any(|entry| entry.path().extension() == Some(OsStr::new("rlib")))
-        }
-        let executable = std::env::current_exe().unwrap();
-        if let Some(path) = executable.ancestors()
-            .find(|path| path.file_name() == Some(OsStr::new("deps")) && has_rlib(path))
-        {
-            return path.to_path_buf();
-        }
-        let workspace = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap().parent().unwrap();
-        let target = std::env::var_os("CARGO_TARGET_DIR").map(PathBuf::from)
-            .unwrap_or_else(|| workspace.join("target"));
-        let target = if target.is_absolute() { target } else { workspace.join(target) };
-        let candidates = [target.join("debug/deps"), target.join("release/deps")];
-        candidates.into_iter().find(|path| has_rlib(path))
-            .expect("Cargo should have built .rlib dependencies for workspace tests")
+        static TEST_DEPS: OnceLock<PathBuf> = OnceLock::new();
+        TEST_DEPS.get_or_init(|| {
+            static NEXT: AtomicU64 = AtomicU64::new(0);
+            let id = NEXT.fetch_add(1, Ordering::Relaxed);
+            let dir = std::env::temp_dir().join(format!(
+                "air-verify-test-rlibs-{}-{id}",
+                std::process::id()
+            ));
+            fs::create_dir_all(&dir).unwrap();
+            let source = dir.join("dependency.rs");
+            let library = dir.join("libhot_swap_test_dep-0123456789abcdef.rlib");
+            fs::write(&source, "pub fn answer() -> u8 { 42 }").unwrap();
+            let output = Command::new("rustc")
+                .args(["--edition=2021", "--crate-type=rlib", "--crate-name=hot_swap_test_dep"])
+                .arg("--emit=link")
+                .arg("-o").arg(&library)
+                .arg(&source)
+                .output().expect("start rustc for an isolated test rlib");
+            let _ = fs::remove_file(source);
+            assert!(output.status.success(), "{}", String::from_utf8_lossy(&output.stderr));
+            dir
+        }).clone()
     }
 
     fn verifier() -> WarmRustVerifier {
@@ -401,7 +406,7 @@ mod tests {
     #[test]
     fn direct_rustc_compile_and_exact_retry_cache() {
         let verifier = verifier();
-        let source = "pub fn answer() -> u8 { 42 }";
+        let source = "pub fn answer() -> u8 { hot_swap_test_dep::answer() }";
         let first = verifier.verify_source(source).unwrap();
         assert!(first.success, "{}", first.stderr);
         assert!(!first.cache_hit);
