@@ -191,8 +191,8 @@ fn identifier_type(ty: &str) -> Option<&str> {
 
 fn value_for_type(ty: &str, edge: &str) -> Option<String> {
     let compact = canonical_type(ty);
-    if compact == "&str" { return Some(if edge == "empty" { """".into() } else { ""air"".into() }); }
-    if compact == "String" { return Some(if edge == "empty" { "String::new()".into() } else { "String::from("air")".into() }); }
+    if compact == "&str" { return Some(if edge == "empty" { r#""""#.into() } else { r#""air""#.into() }); }
+    if compact == "String" { return Some(if edge == "empty" { "String::new()".into() } else { r#"String::from("air")"#.into() }); }
     if compact.starts_with("&[") { return Some("&[]".into()); }
     if compact.starts_with("&mut[") { return Some("&mut []".into()); }
     if compact.starts_with("Vec<") { return Some("Vec::new()".into()); }
