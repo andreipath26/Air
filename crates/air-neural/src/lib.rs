@@ -11,6 +11,11 @@ pub use hdc::{HyperVector, HYPERVECTOR_BITS, HYPERVECTOR_WORDS};
 pub use simd::{hamming_distance, hamming_distance_scalar};
 pub use ternary_snn::{PackedTernaryRouter, RouteScore, Ternary};
 pub mod bitcos;
+pub mod multiscale;
+pub mod inhibitory;
+
+pub use multiscale::encode_multiscale;
+pub use inhibitory::{InhibitoryDecision, InhibitoryMemory, InhibitionReason, MappedInhibitoryMemory};
 
 #[cfg(test)]
 mod integration_tests {
