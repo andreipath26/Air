@@ -46,7 +46,25 @@ impl Default for GenerationOptions {fn default()->Self{Self{thinking:ThinkingMod
 pub struct Completion {pub text:String,pub elapsed:Duration}
 pub trait CompletionBackend:Send+Sync {fn complete(&self,prompt:&str,options:&GenerationOptions)->Result<Completion,String>;}
 
-/// Owns a CPU-only llama.cpp loopback server loading a local GGUF file.
+
+/// Construct the Linux prlimit invocation. RLIMIT_AS is applied before llama.cpp
+/// executes or maps the GGUF; the RSS watchdog remains a secondary guard.
+fn prlimit_command_args(executable:&Path,model:&Path,port:u16,limits:ResourceLimits,threads:usize)->Vec<std::ffi::OsString>{
+    use std::ffi::OsString;
+    vec![
+        OsString::from(format!("--as={}",limits.max_rss_bytes)),
+        OsString::from("--"),
+        executable.as_os_str().to_owned(),
+        OsString::from("--model"),model.as_os_str().to_owned(),
+        OsString::from("--host"),OsString::from("127.0.0.1"),
+        OsString::from("--port"),OsString::from(port.to_string()),
+        OsString::from("--ctx-size"),OsString::from(limits.context_tokens.to_string()),
+        OsString::from("--n-gpu-layers"),OsString::from("0"),
+        OsString::from("--threads"),OsString::from(threads.to_string()),
+        OsString::from("--no-webui"),
+    ]
+}
+\n/// Owns a CPU-only llama.cpp loopback server loading a local GGUF file.
 /// An RSS watchdog polls every 10ms and terminates the server when it crosses
 /// the configured cap; context and generation are also bounded per request.
 pub struct LlamaCppRunner {
@@ -61,12 +79,10 @@ impl LlamaCppRunner {
         let file=gguf.as_ref();
         if !file.is_file()||file.extension().and_then(|x|x.to_str())!=Some("gguf"){return Err("model must be an existing GGUF file".into())}
         let file=fs::canonicalize(file).map_err(|e|format!("GGUF path: {e}"))?;
-        let threads=thread::available_parallelism().map_or(2,usize::from).min(4).to_string();
-        let child=Command::new(executable.as_ref()).arg("--model").arg(file).arg("--host").arg("127.0.0.1")
-            .arg("--port").arg(port.to_string()).arg("--ctx-size").arg(limits.context_tokens.to_string())
-            .arg("--n-gpu-layers").arg("0").arg("--threads").arg(threads).arg("--no-webui")
-            .stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null()).spawn()
-            .map_err(|e|format!("starting llama.cpp server: {e}"))?;
+        let threads=thread::available_parallelism().map_or(2,usize::from).min(4);
+        let args=prlimit_command_args(executable.as_ref(),&file,port,limits,threads);
+        let child=Command::new("prlimit").args(args).stdin(Stdio::null()).stdout(Stdio::null()).stderr(Stdio::null()).spawn()
+            .map_err(|e|format!("prlimit is required to enforce the AIR SLM address-space cap: {e}"))?;
         let child=Arc::new(Mutex::new(child));
         let active=Arc::new(AtomicBool::new(true));
         let exceeded=Arc::new(AtomicBool::new(false));
@@ -246,4 +262,17 @@ mod behavior_tests {
  #[test] fn explicit_deep_uses_verified_slm_path(){let a=route_and_run_verified(&DeterministicMock::new("answer"),&Accept,"deep task",0.9,0.3,&GenerationOptions::default(),||panic!("should escalate")).unwrap();assert_eq!(a,RoutedAnswer::VerifiedSlm{output:"answer".into(),elapsed:Duration::ZERO});}
  #[test] fn bang_trigger_strips_prefix_and_checks_output(){let a=route_and_run_verified(&DeterministicMock::new("answer"),&Accept,"! task",0.9,0.3,&GenerationOptions::default(),||panic!("should escalate")).unwrap();assert!(matches!(a,RoutedAnswer::VerifiedSlm{output,..} if output=="answer"));}
  #[test] fn uncertain_request_escalates_and_rejected_slm_never_returns(){let a=route_and_run_verified(&DeterministicMock::new("answer"),&Accept,"task",0.1,0.3,&GenerationOptions::default(),||panic!("should escalate")).unwrap();assert!(matches!(a,RoutedAnswer::VerifiedSlm{..}));assert!(route_and_run_verified(&DeterministicMock::new("answer"),&Reject,"deep task",0.9,0.3,&GenerationOptions::default(),||Ok("unused".into())).is_err());}
+}
+
+#[cfg(test)]
+mod prlimit_tests {
+ use super::*;
+ #[test] fn prlimit_precedes_server_and_applies_configured_address_cap(){
+  let limits=ResourceLimits{max_rss_bytes:5*1024*1024*1024,context_tokens:3072,max_new_tokens:256};
+  let args=prlimit_command_args(Path::new("/usr/bin/llama-server"),Path::new("/models/local.gguf"),8080,limits,4);
+  let text:Vec<_>=args.iter().map(|arg|arg.to_string_lossy().into_owned()).collect();
+  assert_eq!(text[0],"--as=5368709120");assert_eq!(text[1],"--");assert_eq!(text[2],"/usr/bin/llama-server");
+  assert!(text.windows(2).any(|pair|pair[0]=="--ctx-size"&&pair[1]=="3072"));
+  assert!(text.windows(2).any(|pair|pair[0]=="--n-gpu-layers"&&pair[1]=="0"));
+ }
 }
