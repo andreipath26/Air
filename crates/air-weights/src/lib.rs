@@ -482,4 +482,7 @@ mod tests {
 }
 
 
+pub mod compaction;
+pub use compaction::{compact_archives, CompactionError, CompactionPolicy, CompactionResult, CompactionStats, HitCountedRuleRecord, HDC_PROTOTYPE_KIND, HIT_COUNTED_RULE_KIND};
+
 pub mod overlay;
