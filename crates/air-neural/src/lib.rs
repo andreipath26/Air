@@ -1,14 +1,15 @@
-//! CPU-native, dependency-free representation experiments for AIR.
+//! CPU-native hyperdimensional routing primitives and packed ternary representations.
 //!
-//! This crate is a standalone prototype. It does not load conventional model
-//! weights and is not yet wired into air-core or the .airw archive. HDC and
-//! ternary routing are candidates that require held-out quality and target
-//! hardware measurements before they can be treated as useful AIR learning.
+//! The AVX2 Hamming path is runtime-dispatched and retains a portable scalar
+//! fallback. Ternary and sparse BITCOS scoring use integer arithmetic.
 
 pub mod hdc;
+pub mod simd;
 pub mod ternary_snn;
+pub mod bitcos;
 
 pub use hdc::{HyperVector, HYPERVECTOR_BITS, HYPERVECTOR_WORDS};
+pub use simd::{hamming_distance, hamming_distance_scalar};
 pub use ternary_snn::{PackedTernaryRouter, RouteScore, Ternary};
 
 #[cfg(test)]
