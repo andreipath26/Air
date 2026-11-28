@@ -33,9 +33,6 @@ pub fn hamming_distance_scalar(a: &HyperVector, b: &HyperVector) -> u32 {
 unsafe fn hamming_distance_avx2(a: &HyperVector, b: &HyperVector) -> u32 {
     use std::arch::x86_64::*;
 
-    // Harley-Seal: each carry-save operation reduces three bit planes into a
-    // sum plane (weight 1) and carry plane (weight 2). The population of the
-    // planes is accumulated using a byte-nibble lookup.
     #[inline]
     unsafe fn csa(a: __m256i, b: __m256i, c: __m256i) -> (__m256i, __m256i) {
         let u = _mm256_xor_si256(a, b);
@@ -48,7 +45,7 @@ unsafe fn hamming_distance_avx2(a: &HyperVector, b: &HyperVector) -> u32 {
     }
 
     #[inline]
-    unsafe fn popcount_bytes(value: __m256i, lut: __m256i, low_mask: __m256i) -> __m256i {
+    unsafe fn popcount_lanes(value: __m256i, lut: __m256i, low_mask: __m256i) -> __m256i {
         let low = _mm256_and_si256(value, low_mask);
         let high = _mm256_and_si256(_mm256_srli_epi16(value, 4), low_mask);
         let counts = _mm256_add_epi8(
@@ -58,80 +55,65 @@ unsafe fn hamming_distance_avx2(a: &HyperVector, b: &HyperVector) -> u32 {
         _mm256_sad_epu8(counts, _mm256_setzero_si256())
     }
 
-    let base = a.0.as_ptr().cast::<u8>();
-    let other = b.0.as_ptr().cast::<u8>();
-    let bytes = HYPERVECTOR_WORDS * std::mem::size_of::<u64>();
-    let groups = bytes / 32;
-    let mut total = 0u32;
+    let left = a.0.as_ptr().cast::<u8>();
+    let right = b.0.as_ptr().cast::<u8>();
+    let vector_count = (HYPERVECTOR_WORDS * std::mem::size_of::<u64>()) / 32;
+    let triplets = vector_count / 3;
     let lut = _mm256_setr_epi8(
         0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
         0, 1, 1, 2, 1, 2, 2, 3, 1, 2, 2, 3, 2, 3, 3, 4,
     );
-    let mask = _mm256_set1_epi8(0x0f);
+    let nibble_mask = _mm256_set1_epi8(0x0f);
     let zero = _mm256_setzero_si256();
-    let mut ones = zero;
-    let mut twos = zero;
-    let mut fours = zero;
-    let mut eights = zero;
-    let mut sixteens = zero;
-    let mut index = 0usize;
+    let mut total_lanes = zero;
 
-    // Process fifteen vectors per superblock. Remainders use the same SIMD
-    // byte popcount without carry-save compression.
-    while index + 15 <= groups {
-        let mut block = [zero; 15];
-        for slot in 0..15 {
-            let offset = (index + slot) * 32;
-            let av = _mm256_loadu_si256(base.add(offset).cast::<__m256i>());
-            let bv = _mm256_loadu_si256(other.add(offset).cast::<__m256i>());
-            block[slot] = _mm256_xor_si256(av, bv);
-        }
-        let (twos_a, ones_a) = csa(block[0], block[1], block[2]);
-        let (twos_b, ones_b) = csa(block[3], block[4], block[5]);
-        let (twos_c, ones_c) = csa(block[6], block[7], block[8]);
-        let (twos_d, ones_d) = csa(block[9], block[10], block[11]);
-        let (twos_e, ones_e) = csa(block[12], block[13], block[14]);
-
-        let (fours_a, twos_a) = csa(twos_a, twos_b, twos_c);
-        let (fours_b, twos_b) = csa(twos_d, twos_e, twos);
-        let (eights_a, fours_a) = csa(fours_a, fours_b, fours);
-        let (sixteens_a, eights_a) = csa(eights_a, eights, zero);
-        sixteens = _mm256_add_epi8(sixteens, sixteens_a);
-        eights = eights_a;
-        fours = fours_a;
-        twos = twos_a;
-        ones = _mm256_add_epi8(
-            ones,
-            _mm256_add_epi8(
-                _mm256_add_epi8(ones_a, ones_b),
-                _mm256_add_epi8(_mm256_add_epi8(ones_c, ones_d), ones_e),
-            ),
+    // Carry-save reduction: each three input vectors become a sum plane and a
+    // carry plane. Popcounting those two planes requires fewer lookup passes
+    // than popcounting all three source vectors independently.
+    for group in 0..triplets {
+        let offset = group * 96;
+        let x0 = _mm256_xor_si256(
+            _mm256_loadu_si256(left.add(offset).cast::<__m256i>()),
+            _mm256_loadu_si256(right.add(offset).cast::<__m256i>()),
         );
-        index += 15;
+        let x1 = _mm256_xor_si256(
+            _mm256_loadu_si256(left.add(offset + 32).cast::<__m256i>()),
+            _mm256_loadu_si256(right.add(offset + 32).cast::<__m256i>()),
+        );
+        let x2 = _mm256_xor_si256(
+            _mm256_loadu_si256(left.add(offset + 64).cast::<__m256i>()),
+            _mm256_loadu_si256(right.add(offset + 64).cast::<__m256i>()),
+        );
+        let (twos, ones) = csa(x0, x1, x2);
+        total_lanes = _mm256_add_epi64(
+            total_lanes,
+            popcount_lanes(ones, lut, nibble_mask),
+        );
+        total_lanes = _mm256_add_epi64(
+            total_lanes,
+            _mm256_slli_epi64(popcount_lanes(twos, lut, nibble_mask), 1),
+        );
     }
 
-    let mut sums = _mm256_setzero_si256();
-    sums = _mm256_add_epi64(sums, popcount_bytes(ones, lut, mask));
-    sums = _mm256_add_epi64(sums, _mm256_slli_epi64(popcount_bytes(twos, lut, mask), 1));
-    sums = _mm256_add_epi64(sums, _mm256_slli_epi64(popcount_bytes(fours, lut, mask), 2));
-    sums = _mm256_add_epi64(sums, _mm256_slli_epi64(popcount_bytes(eights, lut, mask), 3));
-    sums = _mm256_add_epi64(sums, _mm256_slli_epi64(popcount_bytes(sixteens, lut, mask), 4));
-
-    while index < groups {
-        let offset = index * 32;
-        let av = _mm256_loadu_si256(base.add(offset).cast::<__m256i>());
-        let bv = _mm256_loadu_si256(other.add(offset).cast::<__m256i>());
-        sums = _mm256_add_epi64(sums, popcount_bytes(_mm256_xor_si256(av, bv), lut, mask));
-        index += 1;
+    // Remaining complete vectors are counted directly.
+    for vector in triplets * 3..vector_count {
+        let offset = vector * 32;
+        let diff = _mm256_xor_si256(
+            _mm256_loadu_si256(left.add(offset).cast::<__m256i>()),
+            _mm256_loadu_si256(right.add(offset).cast::<__m256i>()),
+        );
+        total_lanes = _mm256_add_epi64(
+            total_lanes,
+            popcount_lanes(diff, lut, nibble_mask),
+        );
     }
 
     let mut lanes = [0u64; 4];
-    _mm256_storeu_si256(lanes.as_mut_ptr().cast::<__m256i>(), sums);
-    total += lanes.iter().sum::<u64>() as u32;
-
-    // 157 words leave eight bytes after the 39 complete AVX2 vectors.
-    for byte_index in groups * 32..bytes {
-        total += (base.add(byte_index).read() ^ other.add(byte_index).read()).count_ones();
+    _mm256_storeu_si256(lanes.as_mut_ptr().cast::<__m256i>(), total_lanes);
+    let mut total = lanes.iter().sum::<u64>() as u32;
+    let total_bytes = HYPERVECTOR_WORDS * std::mem::size_of::<u64>();
+    for byte_index in vector_count * 32..total_bytes {
+        total += (left.add(byte_index).read() ^ right.add(byte_index).read()).count_ones();
     }
     total
 }
