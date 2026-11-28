@@ -133,7 +133,7 @@ fn collect_suggestions(value: &Value, output: &mut Vec<SuggestedEdit>) {
                 .and_then(Value::as_str).unwrap_or("Unspecified");
             if applicability != "MachineApplicable" { continue; }
             let mut one = Vec::new();
-            parse_spans(Some(&Value::Array(vec![item.clone()])), &mut one, true);
+            parse_spans(Some(&Value::Array(vec![item.clone()])), &mut one, false);
             if let Some(span) = one.pop() {
                 output.push(SuggestedEdit {
                     span,
