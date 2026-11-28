@@ -929,6 +929,7 @@ mod tests {
 
         let mut runtime_config = config.clone();
         runtime_config.allow_vfork_for_toolchain(false);
+        runtime_config.allow_fork_for_toolchain(false);
         let ran = run_sandboxed(&binary, &[], &runtime_config).unwrap();
         assert!(
             ran.status.success() && !ran.timed_out,
