@@ -288,9 +288,9 @@ fn ioerr(e:std::io::Error)->SlmError{SlmError::Io(e.to_string())}
   assert!(request_json(&SlmRequest{system:"x".repeat(MAX_SYSTEM_BYTES+1),prompt:"p".into(),mode:ThinkingMode::Off{max_tokens:10},template_thinking_key:None}).is_err());
  }
  #[test]fn malformed_chunk_sizes_fail_without_overflow(){
-  assert_eq!(decode_chunks(b"3\\r\\nabc\\r\\n0\\r\\n\\r\\n").unwrap(),b"abc");
-  assert!(decode_chunks(b"Z\\r\\n").is_err());
-  let huge=format!("{:x}\\r\\n",usize::MAX);
+  assert_eq!(decode_chunks(b"3\r\nabc\r\n0\r\n\r\n").unwrap(),b"abc");
+  assert!(decode_chunks(b"Z\r\n").is_err());
+  let huge=format!("{:x}\r\n",usize::MAX);
   assert!(decode_chunks(huge.as_bytes()).is_err());
  }
  #[test]fn extracts_chat_content_and_unicode_surrogates(){
