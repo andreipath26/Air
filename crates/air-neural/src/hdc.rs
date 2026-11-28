@@ -125,8 +125,11 @@ impl HyperVector {
         out
     }
 
+    /// Runtime-dispatched Hamming distance (AVX2 on supporting x86_64 CPUs,
+    /// portable scalar fallback elsewhere). Use hamming_distance_scalar when
+    /// an explicit reference kernel is required.
     pub fn hamming_distance(&self, other: &Self) -> u32 {
-        self.0.iter().zip(other.0.iter()).map(|(a, b)| (a ^ b).count_ones()).sum()
+        crate::simd::hamming_distance(self, other)
     }
 
     /// Similarity in integer basis points from 0 (different) through 10,000 (equal).
